@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #111;
+      color: #fff;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+    .container { max-width: 480px; margin: 0 auto; }
+    h1 { font-size: 18px; margin-bottom: 24px; color: #aaa; }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; }
+    input, textarea {
+      width: 100%;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus { border-color: #555; }
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: #fff;
+      color: #111;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+    }
+    .status.ok { background: #1a3a1a; color: #6f6; display: block; }
+    .status.err { background: #3a1a1a; color: #f66; display: block; }
+    .divider { border: none; border-top: 1px solid #222; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin</h1>
+    <div id="lastUpdated" style="font-size:12px;color:#555;margin-bottom:20px;display:none;">最終更新: <span></span></div>
+
+    <div class="field">
+      <label>GitHub Token</label>
+      <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label>タイトル（OGP・ページ名）</label>
+      <input type="text" id="title" placeholder="【速報】衝撃映像が話題に">
+    </div>
+
+    <div class="field">
+      <label>メタ用画像（SNSカード） → card.jpg で保存</label>
+      <input type="file" id="metaImage" accept="image/*">
+      <div id="metaPreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
+    </div>
+
+    <div class="field">
+      <label>サイト用画像（ランディングページ） → thumb.jpg で保存</label>
+      <input type="file" id="siteImage" accept="image/*">
+      <div id="sitePreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
+    </div>
+
+    <div class="field">
+      <label>アカウント名</label>
+      <input type="text" id="name" placeholder="速報ニュース">
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const OWNER = 'inofo3';
+    const REPO  = 'info2';
+    const BRANCH = 'main';
+
+    // Token をローカルに保存・復元
+    const tokenInput = document.getElementById('token');
+    const saved = localStorage.getItem('gh_token');
+    if (saved) tokenInput.value = saved;
+    tokenInput.addEventListener('change', () => {
+      localStorage.setItem('gh_token', tokenInput.value);
+    });
+
+    // index.html の最終コミット日時を GitHub API から取得して表示
+    async function showLastUpdated() {
+      const el = document.getElementById('lastUpdated');
+      try {
+        const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/commits?path=index.html&per_page=1`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data[0]) {
+          const date = new Date(data[0].commit.committer.date);
+          el.querySelector('span').textContent = date.toLocaleString('ja-JP');
+          el.style.display = 'block';
+        }
+      } catch(e) {}
+    }
+    showLastUpdated();
+
+    // プレビュー表示
+    document.getElementById('metaImage').addEventListener('change', function() {
+      showPreview(this, 'metaPreview');
+    });
+    document.getElementById('siteImage').addEventListener('change', function() {
+      showPreview(this, 'sitePreview');
+    });
+    function showPreview(input, previewId) {
+      const wrap = document.getElementById(previewId);
+      if (!input.files[0]) { wrap.style.display = 'none'; return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        wrap.querySelector('img').src = e.target.result;
+        wrap.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // OGP用に 1200x630 にセンタークロップして base64 で返す
+    function cropToOgp(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const OGP_W = 1200, OGP_H = 630;
+            const canvas = document.createElement('canvas');
+            canvas.width = OGP_W; canvas.height = OGP_H;
+            const ctx = canvas.getContext('2d');
+            const srcRatio = img.width / img.height;
+            const dstRatio = OGP_W / OGP_H;
+            let sx, sy, sw, sh;
+            if (srcRatio > dstRatio) {
+              sh = img.height; sw = sh * dstRatio;
+              sx = (img.width - sw) / 2; sy = 0;
+            } else {
+              sw = img.width; sh = sw / dstRatio;
+              sx = 0; sy = (img.height - sh) / 2;
+            }
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, OGP_W, OGP_H);
+            resolve(canvas.toDataURL('image/jpeg', 0.9).split(',')[1]);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function getFileSha(token, path) {
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`, {
+        headers: { Authorization: `token ${token}` }
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.sha;
+    }
+
+    async function uploadImage(token, path, file, ogp = false) {
+      const base64 = ogp ? await cropToOgp(file) : await fileToBase64(file);
+      const sha = await getFileSha(token, path);
+      const body = { message: `Upload ${path}`, content: base64, branch: BRANCH };
+      if (sha) body.sha = sha;
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`${path} のアップロード失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
+      }
+      return true;
+    }
+
+    async function updateFile(token, path, content, message) {
+      const sha = await getFileSha(token, path);
+      const body = {
+        message,
+        content: btoa(unescape(encodeURIComponent(content))),
+        branch: BRANCH
+      };
+      if (sha) body.sha = sha;
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      return res.ok;
+    }
+
+    function buildIndex(title, image) {
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="${title}">
+  <meta property="og:image" content="${image}">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:image" content="${image}">
+  <title>${title}</title>
+</head>
+<body>
+  <script>
+    window.location.replace('./news.html');
+  <\/script>
+</body>
+</html>`;
+    }
+
+    function buildNews(title, image, name, yturl) {
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      cursor: pointer;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 100px 20px 40px;
+    }
+    .profile-name {
+      font-size: 19px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 32px;
+      letter-spacing: 0.5px;
+    }
+    .video-wrap {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      background: #111;
+      aspect-ratio: 16/9;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    }
+    .video-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+</head>
+<body onclick="window.location.href='${yturl}'">
+  <div class="container">
+    <div class="profile-name">${name}</div>
+    <div class="video-wrap">
+      <img src="${image}" alt="">
+    </div>
+  </div>
+</body>
+</html>`;
+    }
+
+    async function generate() {
+      const token         = document.getElementById('token').value.trim();
+      const title         = document.getElementById('title').value.trim();
+      const metaImageFile = document.getElementById('metaImage').files[0];
+      const siteImageFile = document.getElementById('siteImage').files[0];
+      const name          = document.getElementById('name').value.trim();
+      const yturl         = 'https://lite.tiktok.com/t/ZS9NgoFA3mW4d-bFvV6/';
+      const status        = document.getElementById('status');
+      const btn           = document.getElementById('submitBtn');
+
+      if (!token || !title || !metaImageFile || !siteImageFile || !name) {
+        status.className = 'status err';
+        status.textContent = 'Token・タイトル・画像・名前は必須です';
+        return;
+      }
+
+      btn.disabled = true;
+      status.className = 'status';
+      status.textContent = '画像をアップロード中...';
+      status.style.display = 'block';
+
+      const metaImageUrl = `https://inofo3.github.io/info2/card.jpg`;
+      const siteImageUrl = `https://inofo3.github.io/info2/thumb.jpg`;
+
+      try {
+        // 画像を先にアップロード
+        const [imgR1, imgR2] = await Promise.all([
+          uploadImage(token, 'card.jpg',  metaImageFile, true),
+          uploadImage(token, 'thumb.jpg', siteImageFile, false)
+        ]);
+
+        // uploadImage は失敗時に throw するので、ここには到達しない
+
+        status.textContent = 'HTMLを更新中...';
+
+        const [r1, r2] = await Promise.all([
+          updateFile(token, 'index.html', buildIndex(title, metaImageUrl), 'Update index.html'),
+          updateFile(token, 'news.html',  buildNews(title, siteImageUrl, name, yturl), 'Update news.html')
+        ]);
+
+        if (r1 && r2) {
+          status.className = 'status ok';
+          showLastUpdated();
+          status.textContent = '✓ 画像・index.html・news.html を更新しました';
+        } else {
+          status.className = 'status err';
+          status.textContent = 'HTMLの更新に失敗しました。Tokenを確認してください';
+        }
+      } catch(e) {
+        status.className = 'status err';
+        status.textContent = 'エラー: ' + e.message;
+      }
+
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
