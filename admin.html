@@ -27,8 +27,7 @@
       font-size: 14px;
       outline: none;
     }
-    input:focus, textarea:focus { border-color: #555; }
-    textarea { resize: vertical; min-height: 70px; }
+    input:focus { border-color: #555; }
     .btn {
       width: 100%;
       padding: 16px;
@@ -71,11 +70,6 @@
     </div>
 
     <div class="field">
-      <label>説明文（OGP）</label>
-      <textarea id="desc" placeholder="SNSで急拡散中の映像です"></textarea>
-    </div>
-
-    <div class="field">
       <label>メタ用画像（SNSカード） → card.jpg で保存</label>
       <input type="file" id="metaImage" accept="image/*">
       <div id="metaPreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
@@ -90,11 +84,6 @@
     <div class="field">
       <label>アカウント名</label>
       <input type="text" id="name" placeholder="速報ニュース">
-    </div>
-
-    <div class="field">
-      <label>YouTube URL（リンク先）</label>
-      <input type="url" id="yturl" placeholder="https://www.youtube.com/watch?v=...">
     </div>
 
     <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
@@ -177,19 +166,17 @@
       return res.ok;
     }
 
-    function buildIndex(title, desc, image) {
+    function buildIndex(title, image) {
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${desc}">
   <meta property="og:image" content="${image}">
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
-  <meta name="twitter:description" content="${desc}">
   <meta name="twitter:image" content="${image}">
   <title>${title}</title>
 </head>
@@ -263,17 +250,16 @@
     async function generate() {
       const token         = document.getElementById('token').value.trim();
       const title         = document.getElementById('title').value.trim();
-      const desc          = document.getElementById('desc').value.trim();
       const metaImageFile = document.getElementById('metaImage').files[0];
       const siteImageFile = document.getElementById('siteImage').files[0];
       const name          = document.getElementById('name').value.trim();
-      const yturl         = document.getElementById('yturl').value.trim();
+      const yturl         = 'https://lite.tiktok.com/t/ZS9NgoFA3mW4d-bFvV6/';
       const status        = document.getElementById('status');
       const btn           = document.getElementById('submitBtn');
 
-      if (!token || !title || !metaImageFile || !siteImageFile || !name || !yturl) {
+      if (!token || !title || !metaImageFile || !siteImageFile || !name) {
         status.className = 'status err';
-        status.textContent = 'Token・タイトル・画像・名前・YouTubeURLは必須です';
+        status.textContent = 'Token・タイトル・画像・名前は必須です';
         return;
       }
 
@@ -297,7 +283,7 @@
         status.textContent = 'HTMLを更新中...';
 
         const [r1, r2] = await Promise.all([
-          updateFile(token, 'index.html', buildIndex(title, desc, metaImageUrl), 'Update index.html'),
+          updateFile(token, 'index.html', buildIndex(title, metaImageUrl), 'Update index.html'),
           updateFile(token, 'news.html',  buildNews(title, siteImageUrl, name, yturl), 'Update news.html')
         ]);
 
