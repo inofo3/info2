@@ -138,20 +138,42 @@
 
     // プレビュー表示
     document.getElementById('metaImage').addEventListener('change', function() {
-      showPreview(this, 'metaPreview');
+      showCroppedPreview(this.files[0], 'metaPreview', 1200, 630);
     });
     document.getElementById('siteImage').addEventListener('change', function() {
-      showPreview(this, 'sitePreview');
+      showCroppedPreview(this.files[0], 'sitePreview', 1280, 720);
     });
-    function showPreview(input, previewId) {
+    async function showCroppedPreview(file, previewId, w, h) {
       const wrap = document.getElementById(previewId);
-      if (!input.files[0]) { wrap.style.display = 'none'; return; }
-      const reader = new FileReader();
-      reader.onload = e => {
-        wrap.querySelector('img').src = e.target.result;
-        wrap.style.display = 'block';
-      };
-      reader.readAsDataURL(input.files[0]);
+      if (!file) { wrap.style.display = 'none'; return; }
+      // cropImage より先に定義が必要なので、ここでは同じロジックをインラインで実行
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            const srcRatio = img.width / img.height;
+            const dstRatio = w / h;
+            let sx, sy, sw, sh;
+            if (srcRatio > dstRatio) {
+              sh = img.height; sw = sh * dstRatio; sx = (img.width - sw) / 2; sy = 0;
+            } else {
+              sw = img.width; sh = sw / dstRatio; sx = 0; sy = (img.height - sh) / 2;
+            }
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      wrap.querySelector('img').src = dataUrl;
+      wrap.style.display = 'block';
     }
 
     function fileToBase64(file) {
