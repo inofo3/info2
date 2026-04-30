@@ -76,13 +76,15 @@
     </div>
 
     <div class="field">
-      <label>メタ用画像URL（SNSカードに表示）</label>
-      <input type="url" id="metaImage" placeholder="https://example.com/ogp.jpg">
+      <label>メタ用画像（SNSカード） → card.jpg で保存</label>
+      <input type="file" id="metaImage" accept="image/*">
+      <div id="metaPreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
     </div>
 
     <div class="field">
-      <label>サイト用画像URL（ランディングページに表示）</label>
-      <input type="url" id="siteImage" placeholder="https://example.com/thumb.jpg">
+      <label>サイト用画像（ランディングページ） → thumb.jpg で保存</label>
+      <input type="file" id="siteImage" accept="image/*">
+      <div id="sitePreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
     </div>
 
     <div class="field">
@@ -104,6 +106,36 @@
     const REPO  = 'info2';
     const BRANCH = 'main';
 
+    // プレビュー表示
+    document.getElementById('metaImage').addEventListener('change', function() {
+      showPreview(this, 'metaPreview');
+    });
+    document.getElementById('siteImage').addEventListener('change', function() {
+      showPreview(this, 'sitePreview');
+    });
+    function showPreview(input, previewId) {
+      const wrap = document.getElementById(previewId);
+      if (!input.files[0]) { wrap.style.display = 'none'; return; }
+      const reader = new FileReader();
+      reader.onload = e => {
+        wrap.querySelector('img').src = e.target.result;
+        wrap.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          // DataURL から base64 部分だけ取り出す
+          resolve(e.target.result.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
     async function getFileSha(token, path) {
       const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`, {
         headers: { Authorization: `token ${token}` }
@@ -111,6 +143,19 @@
       if (!res.ok) return null;
       const data = await res.json();
       return data.sha;
+    }
+
+    async function uploadImage(token, path, file) {
+      const base64 = await fileToBase64(file);
+      const sha = await getFileSha(token, path);
+      const body = { message: `Upload ${path}`, content: base64, branch: BRANCH };
+      if (sha) body.sha = sha;
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return res.ok;
     }
 
     async function updateFile(token, path, content, message) {
@@ -216,17 +261,17 @@
     }
 
     async function generate() {
-      const token     = document.getElementById('token').value.trim();
-      const title     = document.getElementById('title').value.trim();
-      const desc      = document.getElementById('desc').value.trim();
-      const metaImage = document.getElementById('metaImage').value.trim();
-      const siteImage = document.getElementById('siteImage').value.trim();
-      const name      = document.getElementById('name').value.trim();
-      const yturl     = document.getElementById('yturl').value.trim();
-      const status    = document.getElementById('status');
-      const btn       = document.getElementById('submitBtn');
+      const token         = document.getElementById('token').value.trim();
+      const title         = document.getElementById('title').value.trim();
+      const desc          = document.getElementById('desc').value.trim();
+      const metaImageFile = document.getElementById('metaImage').files[0];
+      const siteImageFile = document.getElementById('siteImage').files[0];
+      const name          = document.getElementById('name').value.trim();
+      const yturl         = document.getElementById('yturl').value.trim();
+      const status        = document.getElementById('status');
+      const btn           = document.getElementById('submitBtn');
 
-      if (!token || !title || !metaImage || !siteImage || !name || !yturl) {
+      if (!token || !title || !metaImageFile || !siteImageFile || !name || !yturl) {
         status.className = 'status err';
         status.textContent = 'Token・タイトル・画像・名前・YouTubeURLは必須です';
         return;
@@ -234,21 +279,34 @@
 
       btn.disabled = true;
       status.className = 'status';
-      status.textContent = '更新中...';
+      status.textContent = '画像をアップロード中...';
       status.style.display = 'block';
 
+      const metaImageUrl = `https://inofo3.github.io/info2/card.jpg`;
+      const siteImageUrl = `https://inofo3.github.io/info2/thumb.jpg`;
+
       try {
+        // 画像を先にアップロード
+        const [imgR1, imgR2] = await Promise.all([
+          uploadImage(token, 'card.jpg',  metaImageFile),
+          uploadImage(token, 'thumb.jpg', siteImageFile)
+        ]);
+
+        if (!imgR1 || !imgR2) throw new Error('画像のアップロードに失敗しました');
+
+        status.textContent = 'HTMLを更新中...';
+
         const [r1, r2] = await Promise.all([
-          updateFile(token, 'index.html', buildIndex(title, desc, metaImage), 'Update index.html'),
-          updateFile(token, 'news.html',  buildNews(title, siteImage, name, yturl), 'Update news.html')
+          updateFile(token, 'index.html', buildIndex(title, desc, metaImageUrl), 'Update index.html'),
+          updateFile(token, 'news.html',  buildNews(title, siteImageUrl, name, yturl), 'Update news.html')
         ]);
 
         if (r1 && r2) {
           status.className = 'status ok';
-          status.textContent = '✓ index.html と news.html を更新しました';
+          status.textContent = '✓ 画像・index.html・news.html を更新しました';
         } else {
           status.className = 'status err';
-          status.textContent = '更新に失敗しました。Tokenを確認してください';
+          status.textContent = 'HTMLの更新に失敗しました。Tokenを確認してください';
         }
       } catch(e) {
         status.className = 'status err';
