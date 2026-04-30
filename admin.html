@@ -73,13 +73,13 @@
     <div class="field">
       <label>メタ用画像（SNSカード） → card.jpg で保存</label>
       <input type="file" id="metaImage" accept="image/*">
-      <div id="metaPreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
+      <div id="metaPreview" style="margin-top:8px;display:none;"><img style="width:100%;height:auto;border-radius:8px;opacity:0.8;object-fit:contain;" /></div>
     </div>
 
     <div class="field">
       <label>サイト用画像（ランディングページ） → thumb.jpg で保存</label>
       <input type="file" id="siteImage" accept="image/*">
-      <div id="sitePreview" style="margin-top:8px;display:none;"><img style="width:100%;border-radius:8px;opacity:0.8;" /></div>
+      <div id="sitePreview" style="margin-top:8px;display:none;"><img style="width:100%;height:auto;border-radius:8px;opacity:0.8;object-fit:contain;" /></div>
     </div>
 
     <div class="field">
@@ -190,14 +190,20 @@
 
     async function uploadImage(token, path, file, ogp = false) {
       const base64 = ogp ? await cropToOgp(file) : await fileToBase64(file);
-      const sha = await getFileSha(token, path);
-      const body = { message: `Upload ${path}`, content: base64, branch: BRANCH };
-      if (sha) body.sha = sha;
-      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+
+      const tryUpload = async () => {
+        const sha = await getFileSha(token, path);
+        const body = { message: `Upload ${path}`, content: base64, branch: BRANCH };
+        if (sha) body.sha = sha;
+        return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+          method: 'PUT',
+          headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      };
+
+      let res = await tryUpload();
+      if (res.status === 409) res = await tryUpload(); // SHA不一致ならリトライ
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(`${path} のアップロード失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
