@@ -49,7 +49,7 @@
       display: none;
     }
     .status.ok { background: #1a3a1a; color: #6f6; display: block; }
-    .status.err { background: #3a1a1a; color: #f66; display: block; }
+    .status.err { background: #3a1a1a; color: #f66; display: block; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
     .divider { border: none; border-top: 1px solid #222; margin: 24px 0; }
   </style>
 </head>
@@ -389,7 +389,12 @@
         document.getElementById('folder').value = genFolderName();
       } catch(e) {
         status.className = 'status err';
-        status.textContent = 'エラー: ' + e.message;
+        const detail = [
+          'エラー: ' + e.message,
+          e.stack ? '\n--- stack ---\n' + e.stack : ''
+        ].join('');
+        status.textContent = detail;
+        console.error(e);
       }
 
       btn.disabled = false;
