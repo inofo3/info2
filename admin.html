@@ -66,6 +66,11 @@
     <hr class="divider">
 
     <div class="field">
+      <label>フォルダ名</label>
+      <input type="text" id="folder" placeholder="例: 20260430_1200">
+    </div>
+
+    <div class="field">
       <label>タイトル（OGP・ページ名）</label>
       <input type="text" id="title" placeholder="【速報】衝撃映像が話題に">
     </div>
@@ -89,12 +94,23 @@
 
     <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
     <div class="status" id="status"></div>
+    <div id="resultUrl" style="margin-top:12px;display:none;">
+      <label style="font-size:12px;color:#888;display:block;margin-bottom:6px;">生成されたURL</label>
+      <input id="urlOutput" readonly style="background:#1e1e1e;border:1px solid #333;color:#6f6;padding:12px;border-radius:8px;width:100%;font-size:13px;" onclick="this.select()">
+    </div>
   </div>
 
   <script>
     const OWNER = 'inofo3';
     const REPO  = 'info2';
     const BRANCH = 'main';
+
+    // フォルダ名をタイムスタンプで自動生成
+    function genFolderName() {
+      const d = new Date();
+      return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    document.getElementById('folder').value = genFolderName();
 
     // Token をローカルに保存・復元
     const tokenInput = document.getElementById('token');
@@ -313,6 +329,7 @@
 
     async function generate() {
       const token         = document.getElementById('token').value.trim();
+      const folder        = document.getElementById('folder').value.trim();
       const title         = document.getElementById('title').value.trim();
       const metaImageFile = document.getElementById('metaImage').files[0];
       const siteImageFile = document.getElementById('siteImage').files[0];
@@ -321,9 +338,9 @@
       const status        = document.getElementById('status');
       const btn           = document.getElementById('submitBtn');
 
-      if (!token || !title || !metaImageFile || !siteImageFile || !name) {
+      if (!token || !folder || !title || !metaImageFile || !siteImageFile || !name) {
         status.className = 'status err';
-        status.textContent = 'Token・タイトル・画像・名前は必須です';
+        status.textContent = 'Token・フォルダ名・タイトル・画像・名前は必須です';
         return;
       }
 
@@ -331,33 +348,37 @@
       status.className = 'status';
       status.textContent = '画像をアップロード中...';
       status.style.display = 'block';
+      document.getElementById('resultUrl').style.display = 'none';
 
-      const metaImageUrl = `https://inofo3.github.io/info2/card.jpg`;
-      const siteImageUrl = `https://inofo3.github.io/info2/thumb.jpg`;
+      const metaImageUrl = `https://inofo3.github.io/info2/${folder}/card.jpg`;
+      const siteImageUrl = `https://inofo3.github.io/info2/${folder}/thumb.jpg`;
 
       try {
         // 画像を先にアップロード
-        const [imgR1, imgR2] = await Promise.all([
-          uploadImage(token, 'card.jpg',  metaImageFile, true),
-          uploadImage(token, 'thumb.jpg', siteImageFile, false)
+        await Promise.all([
+          uploadImage(token, `${folder}/card.jpg`,  metaImageFile, true),
+          uploadImage(token, `${folder}/thumb.jpg`, siteImageFile, false)
         ]);
 
-        // uploadImage は失敗時に throw するので、ここには到達しない
-
-        status.textContent = 'HTMLを更新中...';
+        status.textContent = 'HTMLを生成中...';
 
         const [r1, r2] = await Promise.all([
-          updateFile(token, 'index.html', buildIndex(title, metaImageUrl), 'Update index.html'),
-          updateFile(token, 'news.html',  buildNews(title, siteImageUrl, name, yturl), 'Update news.html')
+          updateFile(token, `${folder}/index.html`, buildIndex(title, metaImageUrl), `Create ${folder}/index.html`),
+          updateFile(token, `${folder}/news.html`,  buildNews(title, siteImageUrl, name, yturl), `Create ${folder}/news.html`)
         ]);
 
         if (r1 && r2) {
           status.className = 'status ok';
           showLastUpdated();
-          status.textContent = '✓ 画像・index.html・news.html を更新しました';
+          status.textContent = '✓ 生成完了';
+          const url = `https://inofo3.github.io/info2/${folder}/`;
+          document.getElementById('urlOutput').value = url;
+          document.getElementById('resultUrl').style.display = 'block';
+          // 次回用にフォルダ名を更新
+          document.getElementById('folder').value = genFolderName();
         } else {
           status.className = 'status err';
-          status.textContent = 'HTMLの更新に失敗しました。Tokenを確認してください';
+          status.textContent = 'HTMLの生成に失敗しました。Tokenを確認してください';
         }
       } catch(e) {
         status.className = 'status err';
