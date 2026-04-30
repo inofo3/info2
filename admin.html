@@ -235,7 +235,7 @@
         branch: BRANCH
       };
       if (sha) body.sha = sha;
-      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+      let res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
         method: 'PUT',
         headers: {
           Authorization: `token ${token}`,
@@ -243,7 +243,21 @@
         },
         body: JSON.stringify(body)
       });
-      return res.ok;
+      if (res.status === 409) {
+        // SHA不一致ならリトライ
+        const sha2 = await getFileSha(token, path);
+        if (sha2) body.sha = sha2;
+        res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+          method: 'PUT',
+          headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(`${path} の生成失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
+      }
+      return true;
     }
 
     function buildIndex(title, image) {
@@ -362,24 +376,18 @@
 
         status.textContent = 'HTMLを生成中...';
 
-        const [r1, r2] = await Promise.all([
+        await Promise.all([
           updateFile(token, `${folder}/index.html`, buildIndex(title, metaImageUrl), `Create ${folder}/index.html`),
           updateFile(token, `${folder}/news.html`,  buildNews(title, siteImageUrl, name, yturl), `Create ${folder}/news.html`)
         ]);
 
-        if (r1 && r2) {
-          status.className = 'status ok';
-          showLastUpdated();
-          status.textContent = '✓ 生成完了';
-          const url = `https://inofo3.github.io/info2/${folder}/`;
-          document.getElementById('urlOutput').value = url;
-          document.getElementById('resultUrl').style.display = 'block';
-          // 次回用にフォルダ名を更新
-          document.getElementById('folder').value = genFolderName();
-        } else {
-          status.className = 'status err';
-          status.textContent = 'HTMLの生成に失敗しました。Tokenを確認してください';
-        }
+        status.className = 'status ok';
+        showLastUpdated();
+        status.textContent = '✓ 生成完了';
+        const url = `https://inofo3.github.io/info2/${folder}/`;
+        document.getElementById('urlOutput').value = url;
+        document.getElementById('resultUrl').style.display = 'block';
+        document.getElementById('folder').value = genFolderName();
       } catch(e) {
         status.className = 'status err';
         status.textContent = 'エラー: ' + e.message;
