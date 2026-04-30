@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【速報】衝撃映像が話題に</title>
+  <style>
+    html, body { cursor: pointer; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 0 40px;
+    }
+    .banner {
+      background: linear-gradient(135deg, #ff0000, #cc0000);
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid #222;
+    }
+    .source {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .meta {
+      font-size: 12px;
+      color: #888;
+    }
+    .thumbnail-wrap {
+      position: relative;
+      cursor: pointer;
+      background: #000;
+    }
+    .thumbnail-wrap img {
+      width: 100%;
+      display: block;
+      opacity: 0.85;
+    }
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.35);
+    }
+    .play-btn {
+      width: 72px;
+      height: 72px;
+      background: rgba(255,0,0,0.9);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 0 30px rgba(255,0,0,0.5);
+    }
+    .play-btn svg {
+      width: 32px;
+      height: 32px;
+      fill: #fff;
+      margin-left: 4px;
+    }
+    .play-label {
+      font-size: 14px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 16px;
+      border-radius: 20px;
+    }
+    .views-badge {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.75);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+    .body {
+      padding: 16px;
+    }
+    .teaser {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+    .teaser strong {
+      color: #fff;
+    }
+    .blur-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .blurred-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #ddd;
+      filter: blur(5px);
+      user-select: none;
+    }
+    .blur-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, #0f0f0f 80%);
+    }
+    .cta-btn {
+      display: block;
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #ff0000, #e60000);
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(255,0,0,0.4);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(255,0,0,0.4); }
+      50% { box-shadow: 0 4px 30px rgba(255,0,0,0.7); }
+    }
+    .cta-sub {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+    .trending {
+      margin-top: 28px;
+      border-top: 1px solid #222;
+      padding-top: 16px;
+    }
+    .trending-title {
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .trending-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+    .trending-item img {
+      width: 80px;
+      height: 54px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #333;
+    }
+    .trending-item-title {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body onclick="window.location.href='https://YOUR_YOUTUBE_URL_HERE'">
+  <div class="container">
+    <div class="banner">🔴 LIVE · 速報ニュース</div>
+
+    <div class="header">
+      <div class="source">速報ニュース · たった今</div>
+      <div class="title">【ここにタイトルを入れる】衝撃の瞬間が完全に収められた映像がSNSで拡散中</div>
+      <div class="meta">再生数 1.2万 · シェア 3,400件</div>
+    </div>
+
+    <div class="thumbnail-wrap" onclick="window.location.href='https://YOUR_YOUTUBE_URL_HERE'">
+      <img src="https://via.placeholder.com/480x270/111111/444444?text=THUMBNAIL" alt="thumbnail">
+      <div class="play-overlay">
+        <div class="play-btn">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="play-label">▶ 動画を再生する</div>
+      </div>
+      <div class="views-badge">👁 12,847 回視聴</div>
+    </div>
+
+    <div class="body">
+      <div class="teaser">
+        <strong>この映像、本当にヤバい。</strong>現場にいた人が偶然撮影した映像がSNSで急拡散。
+        すでに1万人以上が視聴し、コメント欄は騒然としている。
+      </div>
+
+      <div class="blur-wrap">
+        <div class="blurred-text">
+          映像の中盤から信じられない展開が続く。専門家も「これは前例がない」とコメント。
+          後半の衝撃シーンは特に話題となっており、視聴者からは驚きの声が上がっている。
+          詳細は動画内で明かされているが、その内容は——
+        </div>
+        <div class="blur-overlay"></div>
+      </div>
+
+      <a class="cta-btn" href="https://YOUR_YOUTUBE_URL_HERE">
+        ▶ 続きを動画で見る
+      </a>
+      <div class="cta-sub">※ YouTubeで無料視聴できます</div>
+
+      <div class="trending">
+        <div class="trending-title">関連動画</div>
+        <div class="trending-item" onclick="window.location.href='https://YOUR_YOUTUBE_URL_HERE'">
+          <img src="https://via.placeholder.com/80x54/1a1a1a/444?text=動画1" alt="">
+          <div class="trending-item-title">【関連】この件についての続報が入ってきました…</div>
+        </div>
+        <div class="trending-item" onclick="window.location.href='https://YOUR_YOUTUBE_URL_HERE'">
+          <img src="https://via.placeholder.com/80x54/1a1a1a/444?text=動画2" alt="">
+          <div class="trending-item-title">現場の目撃者が語る衝撃の証言</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
