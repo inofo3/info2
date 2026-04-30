@@ -76,8 +76,13 @@
     </div>
 
     <div class="field">
-      <label>サムネイル画像URL</label>
-      <input type="url" id="image" placeholder="https://example.com/thumb.jpg">
+      <label>メタ用画像URL（SNSカードに表示）</label>
+      <input type="url" id="metaImage" placeholder="https://example.com/ogp.jpg">
+    </div>
+
+    <div class="field">
+      <label>サイト用画像URL（ランディングページに表示）</label>
+      <input type="url" id="siteImage" placeholder="https://example.com/thumb.jpg">
     </div>
 
     <div class="field">
@@ -211,16 +216,17 @@
     }
 
     async function generate() {
-      const token = document.getElementById('token').value.trim();
-      const title = document.getElementById('title').value.trim();
-      const desc  = document.getElementById('desc').value.trim();
-      const image = document.getElementById('image').value.trim();
-      const name  = document.getElementById('name').value.trim();
-      const yturl = document.getElementById('yturl').value.trim();
-      const status = document.getElementById('status');
-      const btn = document.getElementById('submitBtn');
+      const token     = document.getElementById('token').value.trim();
+      const title     = document.getElementById('title').value.trim();
+      const desc      = document.getElementById('desc').value.trim();
+      const metaImage = document.getElementById('metaImage').value.trim();
+      const siteImage = document.getElementById('siteImage').value.trim();
+      const name      = document.getElementById('name').value.trim();
+      const yturl     = document.getElementById('yturl').value.trim();
+      const status    = document.getElementById('status');
+      const btn       = document.getElementById('submitBtn');
 
-      if (!token || !title || !image || !name || !yturl) {
+      if (!token || !title || !metaImage || !siteImage || !name || !yturl) {
         status.className = 'status err';
         status.textContent = 'Token・タイトル・画像・名前・YouTubeURLは必須です';
         return;
@@ -233,8 +239,8 @@
 
       try {
         const [r1, r2] = await Promise.all([
-          updateFile(token, 'index.html', buildIndex(title, desc, image), 'Update index.html'),
-          updateFile(token, 'news.html',  buildNews(title, image, name, yturl), 'Update news.html')
+          updateFile(token, 'index.html', buildIndex(title, desc, metaImage), 'Update index.html'),
+          updateFile(token, 'news.html',  buildNews(title, siteImage, name, yturl), 'Update news.html')
         ]);
 
         if (r1 && r2) {
