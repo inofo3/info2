@@ -163,19 +163,18 @@
       });
     }
 
-    // OGP用に 1200x630 にセンタークロップして base64 で返す
-    function cropToOgp(file) {
+    // 指定サイズにセンタークロップして base64 で返す
+    function cropImage(file, W, H) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = e => {
           const img = new Image();
           img.onload = () => {
-            const OGP_W = 1200, OGP_H = 630;
             const canvas = document.createElement('canvas');
-            canvas.width = OGP_W; canvas.height = OGP_H;
+            canvas.width = W; canvas.height = H;
             const ctx = canvas.getContext('2d');
             const srcRatio = img.width / img.height;
-            const dstRatio = OGP_W / OGP_H;
+            const dstRatio = W / H;
             let sx, sy, sw, sh;
             if (srcRatio > dstRatio) {
               sh = img.height; sw = sh * dstRatio;
@@ -184,7 +183,7 @@
               sw = img.width; sh = sw / dstRatio;
               sx = 0; sy = (img.height - sh) / 2;
             }
-            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, OGP_W, OGP_H);
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
             resolve(canvas.toDataURL('image/jpeg', 0.9).split(',')[1]);
           };
           img.onerror = reject;
@@ -205,7 +204,7 @@
     }
 
     async function uploadImage(token, path, file, ogp = false) {
-      const base64 = ogp ? await cropToOgp(file) : await fileToBase64(file);
+      const base64 = ogp ? await cropImage(file, 1200, 630) : await cropImage(file, 1280, 720);
 
       const tryUpload = async () => {
         const sha = await getFileSha(token, path);
