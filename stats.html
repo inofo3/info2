@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f2f7;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px 20px 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .metrics {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+    }
+    .metric {
+      flex: 1;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+      cursor: pointer;
+    }
+    .metric.active {
+      border-bottom-color: #3b82f6;
+    }
+    .metric-label {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+    .metric.active .metric-label { color: #3b82f6; }
+    .metric-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #111;
+    }
+    .chart-wrap {
+      position: relative;
+      height: 160px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="metrics">
+      <div class="metric active" onclick="switchMetric('pv', this)">
+        <div class="metric-label">User</div>
+        <div class="metric-value" id="m-user">—</div>
+      </div>
+      <div class="metric" onclick="switchMetric('pv', this)">
+        <div class="metric-label">PV</div>
+        <div class="metric-value" id="m-pv">—</div>
+      </div>
+      <div class="metric" onclick="switchMetric('ct', this)">
+        <div class="metric-label">CT</div>
+        <div class="metric-value" id="m-ct">—</div>
+      </div>
+      <div class="metric" onclick="switchMetric('pv', this)">
+        <div class="metric-label">CTR</div>
+        <div class="metric-value" id="m-ctr">—</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const SB  = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+    const KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+
+    let chartInstance = null;
+    let pvByDay = {};
+    let ctByDay = {};
+    let dayLabels = [];
+
+    function buildDayMap() {
+      const map = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const key = `${d.getMonth()+1}/${d.getDate()}`;
+        map[key] = 0;
+      }
+      return map;
+    }
+
+    function renderChart(data) {
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+          labels: dayLabels,
+          datasets: [{
+            data,
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.08)',
+            borderWidth: 1.5,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { display: false },
+              ticks: { maxTicksLimit: 5, color: '#bbb', font: { size: 11 } }
+            },
+            y: {
+              position: 'right',
+              grid: { color: '#f0f0f0' },
+              border: { display: false },
+              ticks: { stepSize: 1, color: '#bbb', font: { size: 11 } },
+              min: 0
+            }
+          }
+        }
+      });
+    }
+
+    function switchMetric(type, el) {
+      document.querySelectorAll('.metric').forEach(m => m.classList.remove('active'));
+      el.classList.add('active');
+      renderChart(Object.values(type === 'ct' ? ctByDay : pvByDay));
+    }
+
+    async function load() {
+      const [statsRes, eventsRes] = await Promise.all([
+        fetch(`${SB}/rest/v1/stats?select=*`, {
+          headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
+        }),
+        fetch(`${SB}/rest/v1/events?select=created_at,type&created_at=gte.${(() => { const d = new Date(); d.setDate(d.getDate()-29); return d.toISOString(); })()}&order=created_at`, {
+          headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
+        })
+      ]);
+
+      const stats  = await statsRes.json();
+      const events = await eventsRes.json();
+
+      // サマリー集計
+      const totalPv = stats.reduce((s, r) => s + r.pv, 0);
+      const totalCt = stats.reduce((s, r) => s + r.ct, 0);
+      const users   = new Set(stats.map(r => r.path.split('/')[0])).size;
+      const ctr     = totalPv > 0 ? (totalCt / totalPv * 100).toFixed(2) : '0.00';
+
+      document.getElementById('m-user').textContent = users;
+      document.getElementById('m-pv').textContent   = totalPv.toLocaleString();
+      document.getElementById('m-ct').textContent   = totalCt.toLocaleString();
+      document.getElementById('m-ctr').textContent  = ctr + '%';
+
+      // 時系列集計
+      pvByDay = buildDayMap();
+      ctByDay = buildDayMap();
+      for (const e of events) {
+        const d = new Date(e.created_at);
+        const key = `${d.getMonth()+1}/${d.getDate()}`;
+        if (e.type === 'pv' && key in pvByDay) pvByDay[key]++;
+        if (e.type === 'ct' && key in ctByDay) ctByDay[key]++;
+      }
+      dayLabels = Object.keys(pvByDay);
+
+      renderChart(Object.values(pvByDay));
+    }
+
+    load();
+  </script>
+</body>
+</html>
