@@ -15,9 +15,11 @@
     }
     .container { max-width: 480px; margin: 0 auto; }
     h1 { font-size: 18px; margin-bottom: 24px; color: #aaa; }
+    h2 { font-size: 15px; color: #aaa; margin-bottom: 16px; }
+    #lastUpdated { font-size: 12px; color: #555; margin-bottom: 20px; display: none; }
     .field { margin-bottom: 16px; }
     label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; }
-    input, textarea {
+    input {
       width: 100%;
       background: #1e1e1e;
       border: 1px solid #333;
@@ -48,15 +50,19 @@
       font-size: 13px;
       display: none;
     }
-    .status.ok { background: #1a3a1a; color: #6f6; display: block; }
+    .status.ok  { background: #1a3a1a; color: #6f6; display: block; }
     .status.err { background: #3a1a1a; color: #f66; display: block; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
     .divider { border: none; border-top: 1px solid #222; margin: 24px 0; }
+    #resultUrl { margin-top: 12px; display: none; }
+    #urlOutput { color: #6f6; cursor: text; }
+    .preview { margin-top: 8px; display: none; }
+    .preview img { width: 100%; height: auto; border-radius: 8px; opacity: 0.8; object-fit: contain; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Admin</h1>
-    <div id="lastUpdated" style="font-size:12px;color:#555;margin-bottom:20px;display:none;">最終更新: <span></span></div>
+    <div id="lastUpdated">最終更新: <span></span></div>
 
     <div class="field">
       <label>GitHub Token</label>
@@ -64,6 +70,12 @@
     </div>
 
     <hr class="divider">
+    <h2>新規生成</h2>
+
+    <div class="field">
+      <label>ユーザー名</label>
+      <input type="text" id="username" placeholder="例: taro">
+    </div>
 
     <div class="field">
       <label>フォルダ名</label>
@@ -78,13 +90,13 @@
     <div class="field">
       <label>メタ用画像（SNSカード） → card.jpg で保存</label>
       <input type="file" id="metaImage" accept="image/*">
-      <div id="metaPreview" style="margin-top:8px;display:none;"><img style="width:100%;height:auto;border-radius:8px;opacity:0.8;object-fit:contain;" /></div>
+      <div id="metaPreview" class="preview"><img></div>
     </div>
 
     <div class="field">
       <label>サイト用画像（ランディングページ） → thumb.jpg で保存</label>
       <input type="file" id="siteImage" accept="image/*">
-      <div id="sitePreview" style="margin-top:8px;display:none;"><img style="width:100%;height:auto;border-radius:8px;opacity:0.8;object-fit:contain;" /></div>
+      <div id="sitePreview" class="preview"><img></div>
     </div>
 
     <div class="field">
@@ -92,62 +104,79 @@
       <input type="text" id="name" placeholder="速報ニュース">
     </div>
 
+    <div class="field">
+      <label>リンク先URL</label>
+      <input type="url" id="yturl" placeholder="https://...">
+    </div>
+
     <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
     <div class="status" id="status"></div>
-    <div id="resultUrl" style="margin-top:12px;display:none;">
-      <label style="font-size:12px;color:#888;display:block;margin-bottom:6px;">生成されたURL</label>
-      <input id="urlOutput" readonly style="background:#1e1e1e;border:1px solid #333;color:#6f6;padding:12px;border-radius:8px;width:100%;font-size:13px;" onclick="this.select()">
+    <div id="resultUrl">
+      <label>生成されたURL</label>
+      <input id="urlOutput" readonly onclick="this.select()">
     </div>
+
+    <hr class="divider">
+    <h2>リンク先を変更する</h2>
+
+    <div class="field">
+      <label>ユーザー名</label>
+      <input type="text" id="editUsername" placeholder="例: taro">
+    </div>
+
+    <div class="field">
+      <label>フォルダ名</label>
+      <input type="text" id="editFolder" placeholder="例: 20260430_1200">
+    </div>
+
+    <div class="field">
+      <label>新しいリンク先URL</label>
+      <input type="url" id="editUrl" placeholder="https://...">
+    </div>
+
+    <button class="btn" id="editBtn" onclick="updateUrl()">URLを変更する</button>
+    <div class="status" id="editStatus"></div>
   </div>
 
   <script>
-    const OWNER = 'inofo3';
-    const REPO  = 'info2';
+    const OWNER  = 'inofo3';
+    const REPO   = 'info2';
     const BRANCH = 'main';
 
-    // フォルダ名をタイムスタンプで自動生成
     function genFolderName() {
       const d = new Date();
-      return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
     }
+
+    function bindStorage(inputId, key) {
+      const el = document.getElementById(inputId);
+      const saved = localStorage.getItem(key);
+      if (saved) el.value = saved;
+      el.addEventListener('change', () => localStorage.setItem(key, el.value));
+    }
+
+    bindStorage('token', 'gh_token');
+    bindStorage('username', 'gh_username');
+    bindStorage('yturl', 'gh_yturl');
     document.getElementById('folder').value = genFolderName();
 
-    // Token をローカルに保存・復元
-    const tokenInput = document.getElementById('token');
-    const saved = localStorage.getItem('gh_token');
-    if (saved) tokenInput.value = saved;
-    tokenInput.addEventListener('change', () => {
-      localStorage.setItem('gh_token', tokenInput.value);
-    });
-
-    // リポジトリの最終コミット日時を GitHub API から取得して表示
     async function showLastUpdated() {
       const el = document.getElementById('lastUpdated');
       try {
         const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/commits?per_page=1&sha=${BRANCH}`);
         if (!res.ok) return;
-        const data = await res.json();
-        if (data[0]) {
-          const date = new Date(data[0].commit.committer.date);
-          el.querySelector('span').textContent = date.toLocaleString('ja-JP');
+        const [commit] = await res.json();
+        if (commit) {
+          el.querySelector('span').textContent = new Date(commit.commit.committer.date).toLocaleString('ja-JP');
           el.style.display = 'block';
         }
-      } catch(e) {}
+      } catch {}
     }
     showLastUpdated();
 
-    // プレビュー表示
-    document.getElementById('metaImage').addEventListener('change', function() {
-      showCroppedPreview(this.files[0], 'metaPreview', 1200, 630);
-    });
-    document.getElementById('siteImage').addEventListener('change', function() {
-      showCroppedPreview(this.files[0], 'sitePreview', 1280, 720);
-    });
-    async function showCroppedPreview(file, previewId, w, h) {
-      const wrap = document.getElementById(previewId);
-      if (!file) { wrap.style.display = 'none'; return; }
-      // cropImage より先に定義が必要なので、ここでは同じロジックをインラインで実行
-      const dataUrl = await new Promise((resolve, reject) => {
+    function cropImage(file, w, h) {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = e => {
           const img = new Image();
@@ -155,13 +184,13 @@
             const canvas = document.createElement('canvas');
             canvas.width = w; canvas.height = h;
             const ctx = canvas.getContext('2d');
-            const srcRatio = img.width / img.height;
-            const dstRatio = w / h;
+            const sr = img.width / img.height;
+            const dr = w / h;
             let sx, sy, sw, sh;
-            if (srcRatio > dstRatio) {
-              sh = img.height; sw = sh * dstRatio; sx = (img.width - sw) / 2; sy = 0;
+            if (sr > dr) {
+              sh = img.height; sw = sh * dr; sx = (img.width - sw) / 2; sy = 0;
             } else {
-              sw = img.width; sh = sw / dstRatio; sx = 0; sy = (img.height - sh) / 2;
+              sw = img.width; sh = sw / dr; sx = 0; sy = (img.height - sh) / 2;
             }
             ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
             resolve(canvas.toDataURL('image/jpeg', 0.9));
@@ -172,48 +201,20 @@
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      wrap.querySelector('img').src = dataUrl;
+    }
+
+    document.getElementById('metaImage').addEventListener('change', function() {
+      showPreview(this.files[0], 'metaPreview', 1200, 630);
+    });
+    document.getElementById('siteImage').addEventListener('change', function() {
+      showPreview(this.files[0], 'sitePreview', 1280, 720);
+    });
+
+    async function showPreview(file, previewId, w, h) {
+      const wrap = document.getElementById(previewId);
+      if (!file) { wrap.style.display = 'none'; return; }
+      wrap.querySelector('img').src = await cropImage(file, w, h);
       wrap.style.display = 'block';
-    }
-
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // 指定サイズにセンタークロップして base64 で返す
-    function cropImage(file, W, H) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = W; canvas.height = H;
-            const ctx = canvas.getContext('2d');
-            const srcRatio = img.width / img.height;
-            const dstRatio = W / H;
-            let sx, sy, sw, sh;
-            if (srcRatio > dstRatio) {
-              sh = img.height; sw = sh * dstRatio;
-              sx = (img.width - sw) / 2; sy = 0;
-            } else {
-              sw = img.width; sh = sw / dstRatio;
-              sx = 0; sy = (img.height - sh) / 2;
-            }
-            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
-            resolve(canvas.toDataURL('image/jpeg', 0.9).split(',')[1]);
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
     }
 
     async function getFileSha(token, path) {
@@ -221,64 +222,45 @@
         headers: { Authorization: `token ${token}` }
       });
       if (!res.ok) return null;
-      const data = await res.json();
-      return data.sha;
+      return (await res.json()).sha;
     }
 
-    async function uploadImage(token, path, file, ogp = false) {
-      const base64 = ogp ? await cropImage(file, 1200, 630) : await cropImage(file, 1280, 720);
-
-      const tryUpload = async () => {
+    async function githubPut(token, path, body) {
+      const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+      const headers = { Authorization: `token ${token}`, 'Content-Type': 'application/json' };
+      const tryPut = async () => {
         const sha = await getFileSha(token, path);
-        const body = { message: `Upload ${path}`, content: base64, branch: BRANCH };
         if (sha) body.sha = sha;
-        return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-          method: 'PUT',
-          headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
+        return fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
       };
+      let res = await tryPut();
+      if (res.status === 409) res = await tryPut();
+      return res;
+    }
 
-      let res = await tryUpload();
-      if (res.status === 409) res = await tryUpload(); // SHA不一致ならリトライ
+    async function uploadImage(token, path, file, isOgp) {
+      const dataUrl = await cropImage(file, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
+      const res = await githubPut(token, path, {
+        message: `Upload ${path}`,
+        content: dataUrl.split(',')[1],
+        branch: BRANCH
+      });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(`${path} のアップロード失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
       }
-      return true;
     }
 
     async function updateFile(token, path, content, message) {
-      const sha = await getFileSha(token, path);
-      const body = {
+      const res = await githubPut(token, path, {
         message,
         content: btoa(unescape(encodeURIComponent(content))),
         branch: BRANCH
-      };
-      if (sha) body.sha = sha;
-      let res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
       });
-      if (res.status === 409) {
-        // SHA不一致ならリトライ
-        const sha2 = await getFileSha(token, path);
-        if (sha2) body.sha = sha2;
-        res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-          method: 'PUT',
-          headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-      }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(`${path} の生成失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
       }
-      return true;
     }
 
     function buildIndex(title, image) {
@@ -296,14 +278,12 @@
   <title>${title}</title>
 </head>
 <body>
-  <script>
-    window.location.replace('./news.html');
-  <\/script>
+  <script>window.location.replace('./news.html');<\/script>
 </body>
 </html>`;
     }
 
-    function buildNews(title, image, name, yturl) {
+    function buildNews(title, image, name, path) {
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -338,84 +318,129 @@
       width: 100%;
       border-radius: 16px;
       overflow: hidden;
-      position: relative;
       background: #111;
       aspect-ratio: 16/9;
       box-shadow: 0 8px 32px rgba(0,0,0,0.13);
     }
-    .video-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .video-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
   </style>
 </head>
-<body onclick="window.location.href='${yturl}'">
+<body>
   <div class="container">
     <div class="profile-name">${name}</div>
-    <div class="video-wrap">
-      <img src="${image}" alt="">
-    </div>
+    <div class="video-wrap"><img src="${image}" alt=""></div>
   </div>
+  <script>
+    (function() {
+      var SB = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+      var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+      var PATH = '${path}';
+      function rpc(fn) {
+        fetch(SB + '/rest/v1/rpc/' + fn, {
+          method: 'POST',
+          headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_path: PATH }),
+          keepalive: true
+        }).catch(function(){});
+      }
+      rpc('increment_pv');
+      fetch('./link.txt').then(function(r){ return r.text(); }).then(function(url) {
+        document.body.onclick = function() {
+          rpc('increment_ct');
+          setTimeout(function(){ window.location.href = url.trim(); }, 100);
+        };
+      });
+    })();
+  <\/script>
 </body>
 </html>`;
     }
 
     async function generate() {
-      const token         = document.getElementById('token').value.trim();
-      const folder        = document.getElementById('folder').value.trim();
-      const title         = document.getElementById('title').value.trim();
-      const metaImageFile = document.getElementById('metaImage').files[0];
-      const siteImageFile = document.getElementById('siteImage').files[0];
-      const name          = document.getElementById('name').value.trim();
-      const yturl         = 'https://lite.tiktok.com/t/ZS9NpXcVtcyf3-kYU3z/';
-      const status        = document.getElementById('status');
-      const btn           = document.getElementById('submitBtn');
+      const token    = document.getElementById('token').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const folder   = document.getElementById('folder').value.trim();
+      const title    = document.getElementById('title').value.trim();
+      const metaFile = document.getElementById('metaImage').files[0];
+      const siteFile = document.getElementById('siteImage').files[0];
+      const name     = document.getElementById('name').value.trim();
+      const yturl    = document.getElementById('yturl').value.trim();
+      const status   = document.getElementById('status');
+      const btn      = document.getElementById('submitBtn');
 
-      if (!token || !folder || !title || !metaImageFile || !siteImageFile || !name) {
+      if (!token || !username || !folder || !title || !metaFile || !siteFile || !name || !yturl) {
         status.className = 'status err';
-        status.textContent = 'Token・フォルダ名・タイトル・画像・名前は必須です';
+        status.textContent = 'Token・ユーザー名・フォルダ名・タイトル・画像・名前・リンク先URLは必須です';
         return;
       }
 
+      const path = `${username}/${folder}`;
       btn.disabled = true;
       status.className = 'status';
       status.textContent = '画像をアップロード中...';
       status.style.display = 'block';
       document.getElementById('resultUrl').style.display = 'none';
 
-      const metaImageUrl = `https://inofo3.github.io/info2/${folder}/card.jpg`;
-      const siteImageUrl = `https://inofo3.github.io/info2/${folder}/thumb.jpg`;
+      const metaUrl = `https://inofo3.github.io/info2/${path}/card.jpg`;
+      const siteUrl = `https://inofo3.github.io/info2/${path}/thumb.jpg`;
 
       try {
-        // 画像を先にアップロード
         await Promise.all([
-          uploadImage(token, `${folder}/card.jpg`,  metaImageFile, true),
-          uploadImage(token, `${folder}/thumb.jpg`, siteImageFile, false)
+          uploadImage(token, `${path}/card.jpg`,  metaFile, true),
+          uploadImage(token, `${path}/thumb.jpg`, siteFile, false)
         ]);
 
         status.textContent = 'HTMLを生成中...';
 
         await Promise.all([
-          updateFile(token, `${folder}/index.html`, buildIndex(title, metaImageUrl), `Create ${folder}/index.html`),
-          updateFile(token, `${folder}/news.html`,  buildNews(title, siteImageUrl, name, yturl), `Create ${folder}/news.html`)
+          updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`),
+          updateFile(token, `${path}/news.html`,  buildNews(title, siteUrl, name, path), `Create ${path}/news.html`),
+          updateFile(token, `${path}/link.txt`,   yturl, `Set link for ${path}`)
         ]);
 
         status.className = 'status ok';
-        showLastUpdated();
         status.textContent = '✓ 生成完了';
-        const url = `https://inofo3.github.io/info2/${folder}/`;
-        document.getElementById('urlOutput').value = url;
+        showLastUpdated();
+        document.getElementById('urlOutput').value = `https://inofo3.github.io/info2/${path}/`;
         document.getElementById('resultUrl').style.display = 'block';
         document.getElementById('folder').value = genFolderName();
-      } catch(e) {
+      } catch (e) {
         status.className = 'status err';
-        const detail = [
-          'エラー: ' + e.message,
-          e.stack ? '\n--- stack ---\n' + e.stack : ''
-        ].join('');
-        status.textContent = detail;
+        status.textContent = 'エラー: ' + e.message + (e.stack ? '\n--- stack ---\n' + e.stack : '');
+        console.error(e);
+      }
+
+      btn.disabled = false;
+    }
+
+    async function updateUrl() {
+      const token    = document.getElementById('token').value.trim();
+      const username = document.getElementById('editUsername').value.trim();
+      const folder   = document.getElementById('editFolder').value.trim();
+      const newUrl   = document.getElementById('editUrl').value.trim();
+      const status   = document.getElementById('editStatus');
+      const btn      = document.getElementById('editBtn');
+
+      if (!token || !username || !folder || !newUrl) {
+        status.className = 'status err';
+        status.textContent = 'Token・ユーザー名・フォルダ名・新しいURLは必須です';
+        return;
+      }
+
+      const path = `${username}/${folder}`;
+      btn.disabled = true;
+      status.className = 'status';
+      status.textContent = 'URLを変更中...';
+      status.style.display = 'block';
+
+      try {
+        await updateFile(token, `${path}/link.txt`, newUrl, `Update link for ${path}`);
+        status.className = 'status ok';
+        status.textContent = '✓ URL変更完了';
+        showLastUpdated();
+      } catch (e) {
+        status.className = 'status err';
+        status.textContent = 'エラー: ' + e.message + (e.stack ? '\n--- stack ---\n' + e.stack : '');
         console.error(e);
       }
 
