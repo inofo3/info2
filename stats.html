@@ -13,61 +13,92 @@
       min-height: 100vh;
       padding: 24px 16px;
     }
+
+    /* ログイン画面 */
+    .login-wrap {
+      max-width: 320px;
+      margin: 80px auto 0;
+    }
+    .login-wrap h1 { font-size: 18px; color: #aaa; margin-bottom: 24px; text-align: center; }
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .lfield { margin-bottom: 14px; }
+    .lfield label { display: block; font-size: 11px; color: #aaa; margin-bottom: 6px; }
+    .lfield input {
+      width: 100%;
+      background: #f2f2f7;
+      border: none;
+      color: #111;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .login-err { font-size: 12px; color: #ef4444; margin-top: 10px; text-align: center; display: none; }
+
+    /* Stats 画面 */
+    .stats-wrap { display: none; max-width: 600px; margin: 0 auto; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .topbar h1 { font-size: 16px; color: #aaa; }
+    .logout-btn {
+      background: none;
+      border: 1px solid #ddd;
+      color: #aaa;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
     .card {
       background: #fff;
       border-radius: 16px;
       padding: 20px 20px 16px;
-      max-width: 600px;
-      margin: 0 auto 12px;
+      margin-bottom: 12px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }
-
-    /* サマリー */
-    .metrics {
-      display: flex;
-      margin-bottom: 20px;
-    }
-    .metric {
-      flex: 1;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #eee;
-      cursor: pointer;
-    }
+    .metrics { display: flex; margin-bottom: 20px; }
+    .metric { flex: 1; padding-bottom: 10px; border-bottom: 2px solid #eee; cursor: pointer; }
     .metric.active { border-bottom-color: #3b82f6; }
     .metric-label { font-size: 11px; color: #aaa; margin-bottom: 4px; }
     .metric.active .metric-label { color: #3b82f6; }
     .metric-value { font-size: 22px; font-weight: 600; color: #111; }
     .chart-wrap { position: relative; height: 160px; }
 
-    /* サイト一覧 */
     .site-card {
       background: #fff;
       border-radius: 16px;
-      max-width: 600px;
-      margin: 0 auto 8px;
+      margin-bottom: 8px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
       overflow: hidden;
     }
-    .site-row {
-      display: flex;
-      align-items: center;
-      padding: 14px 16px;
-      gap: 12px;
-    }
+    .site-row { display: flex; align-items: center; padding: 14px 16px; gap: 12px; }
     .site-info { flex: 1; min-width: 0; }
-    .site-path {
-      font-size: 13px;
-      color: #111;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .site-path { font-size: 13px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .site-path span { color: #aaa; margin: 0 4px; }
-    .site-nums {
-      display: flex;
-      gap: 14px;
-      margin-top: 4px;
-    }
+    .site-nums { display: flex; gap: 14px; margin-top: 4px; }
     .site-num { font-size: 12px; color: #888; }
     .site-num b { color: #111; font-weight: 600; }
     .ctr-high b { color: #22c55e; }
@@ -84,62 +115,127 @@
       font-weight: 600;
       cursor: pointer;
     }
-    .graph-btn:hover { background: #e5e7eb; }
-    .site-chart-wrap {
-      display: none;
-      padding: 0 16px 16px;
-      height: 130px;
-      position: relative;
-    }
+    .site-chart-wrap { display: none; padding: 0 16px 16px; height: 130px; position: relative; }
     .site-chart-wrap.open { display: block; }
   </style>
 </head>
 <body>
 
-  <!-- サマリーカード -->
-  <div class="card">
-    <div class="metrics">
-      <div class="metric active" onclick="switchMetric('pv', this)">
-        <div class="metric-label">User</div>
-        <div class="metric-value" id="m-user">—</div>
+  <!-- ログイン画面 -->
+  <div class="login-wrap" id="loginWrap">
+    <h1>Stats</h1>
+    <div class="login-card">
+      <div class="lfield">
+        <label>ユーザー名</label>
+        <input type="text" id="loginUser" placeholder="例: taro" autocomplete="username">
       </div>
-      <div class="metric" onclick="switchMetric('pv', this)">
-        <div class="metric-label">PV</div>
-        <div class="metric-value" id="m-pv">—</div>
+      <div class="lfield">
+        <label>PIN</label>
+        <input type="password" id="loginPin" placeholder="••••" autocomplete="current-password">
       </div>
-      <div class="metric" onclick="switchMetric('ct', this)">
-        <div class="metric-label">CT</div>
-        <div class="metric-value" id="m-ct">—</div>
-      </div>
-      <div class="metric" onclick="switchMetric('pv', this)">
-        <div class="metric-label">CTR</div>
-        <div class="metric-value" id="m-ctr">—</div>
-      </div>
-    </div>
-    <div class="chart-wrap">
-      <canvas id="chart-overall"></canvas>
+      <button class="login-btn" id="loginBtn" onclick="login()">ログイン</button>
+      <div class="login-err" id="loginErr">ユーザー名またはPINが違います</div>
     </div>
   </div>
 
-  <!-- サイト一覧 -->
-  <div id="site-list"></div>
+  <!-- Stats 画面 -->
+  <div class="stats-wrap" id="statsWrap">
+    <div class="topbar">
+      <h1 id="statsTitle">Stats</h1>
+      <button class="logout-btn" onclick="logout()">ログアウト</button>
+    </div>
+
+    <div class="card">
+      <div class="metrics">
+        <div class="metric active" onclick="switchMetric('pv', this)">
+          <div class="metric-label">PV</div>
+          <div class="metric-value" id="m-pv">—</div>
+        </div>
+        <div class="metric" onclick="switchMetric('ct', this)">
+          <div class="metric-label">CT</div>
+          <div class="metric-value" id="m-ct">—</div>
+        </div>
+        <div class="metric" onclick="switchMetric('pv', this)">
+          <div class="metric-label">CTR</div>
+          <div class="metric-value" id="m-ctr">—</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chart-overall"></canvas>
+      </div>
+    </div>
+
+    <div id="site-list"></div>
+  </div>
 
   <script>
     const SB  = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
     const KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
 
+    let currentUser  = null;
     let overallChart = null;
-    let pvByDay = {}, ctByDay = {};
+    let pvByHour = {}, ctByHour = {};
     let pvByPath = {}, ctByPath = {};
-    let dayLabels = [];
+    let hourLabels   = [];
     const siteCharts = {};
 
-    function buildDayMap() {
-      const map = {};
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        map[`${d.getMonth()+1}/${d.getDate()}`] = 0;
+    // セッション復元
+    const saved = sessionStorage.getItem('stats_user');
+    if (saved) showStats(saved);
+
+    async function login() {
+      const username = document.getElementById('loginUser').value.trim();
+      const pin      = document.getElementById('loginPin').value.trim();
+      const btn      = document.getElementById('loginBtn');
+      const err      = document.getElementById('loginErr');
+
+      if (!username || !pin) return;
+      btn.disabled = true;
+      err.style.display = 'none';
+
+      const res = await fetch(`${SB}/rest/v1/rpc/verify_pin`, {
+        method: 'POST',
+        headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_username: username, p_pin: pin })
+      });
+      const ok = await res.json();
+
+      if (ok === true) {
+        sessionStorage.setItem('stats_user', username);
+        showStats(username);
+      } else {
+        err.style.display = 'block';
+      }
+      btn.disabled = false;
+    }
+
+    document.getElementById('loginPin').addEventListener('keydown', e => {
+      if (e.key === 'Enter') login();
+    });
+
+    function logout() {
+      sessionStorage.removeItem('stats_user');
+      document.getElementById('loginWrap').style.display = 'block';
+      document.getElementById('statsWrap').style.display = 'none';
+      currentUser = null;
+      if (overallChart) { overallChart.destroy(); overallChart = null; }
+    }
+
+    function showStats(username) {
+      currentUser = username;
+      document.getElementById('loginWrap').style.display  = 'none';
+      document.getElementById('statsWrap').style.display  = 'block';
+      document.getElementById('statsTitle').textContent   = username;
+      loadStats();
+    }
+
+    function buildHourMap() {
+      const map  = {};
+      const base = new Date();
+      base.setMinutes(0, 0, 0);
+      for (let i = 23; i >= 0; i--) {
+        const d = new Date(base.getTime() - i * 3600000);
+        map[`${d.getHours()}時`] = 0;
       }
       return map;
     }
@@ -168,7 +264,7 @@
             x: {
               grid: { display: false },
               border: { display: false },
-              ticks: { maxTicksLimit: 5, color: '#bbb', font: { size: 10 } }
+              ticks: { maxTicksLimit: 6, color: '#bbb', font: { size: 10 } }
             },
             y: {
               position: 'right',
@@ -185,74 +281,67 @@
     function switchMetric(type, el) {
       document.querySelectorAll('.metric').forEach(m => m.classList.remove('active'));
       el.classList.add('active');
-      const data = Object.values(type === 'ct' ? ctByDay : pvByDay);
-      overallChart.data.datasets[0].data = data;
+      overallChart.data.datasets[0].data = Object.values(type === 'ct' ? ctByHour : pvByHour);
       overallChart.update();
     }
 
     function toggleChart(path, btn) {
-      const wrap = btn.closest('.site-card').querySelector('.site-chart-wrap');
+      const wrap   = btn.closest('.site-card').querySelector('.site-chart-wrap');
       const isOpen = wrap.classList.contains('open');
-
       if (isOpen) {
         wrap.classList.remove('open');
         btn.textContent = 'グラフ';
         return;
       }
-
       wrap.classList.add('open');
       btn.textContent = '閉じる';
-
       if (!siteCharts[path]) {
         const canvas = wrap.querySelector('canvas');
-        const data = Object.values(pvByPath[path] || buildDayMap());
-        siteCharts[path] = new Chart(canvas, makeChartConfig(dayLabels, data));
+        const data   = Object.values(pvByPath[path] || buildHourMap());
+        siteCharts[path] = new Chart(canvas, makeChartConfig(hourLabels, data));
       }
     }
 
     function buildSiteList(stats) {
-      const list = document.getElementById('site-list');
+      const list   = document.getElementById('site-list');
       list.innerHTML = '';
-
       const sorted = [...stats].sort((a, b) => b.pv - a.pv);
 
       for (const r of sorted) {
-        const parts  = r.path.split('/');
-        const user   = parts[0] ?? '';
-        const folder = parts[1] ?? '';
+        const folder = r.path.split('/')[1] ?? r.path;
         const ctr    = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
-        const ctrCls = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
-
-        const card = document.createElement('div');
+        const cls    = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
+        const card   = document.createElement('div');
         card.className = 'site-card';
         card.innerHTML = `
           <div class="site-row">
             <div class="site-info">
-              <div class="site-path">${user}<span>/</span>${folder}</div>
+              <div class="site-path">${folder}</div>
               <div class="site-nums">
                 <div class="site-num">PV <b>${r.pv.toLocaleString()}</b></div>
                 <div class="site-num">CT <b>${r.ct.toLocaleString()}</b></div>
-                <div class="site-num ${ctrCls}">CTR <b>${ctr}%</b></div>
+                <div class="site-num ${cls}">CTR <b>${ctr}%</b></div>
               </div>
             </div>
             <button class="graph-btn" onclick="toggleChart('${r.path}', this)">グラフ</button>
           </div>
-          <div class="site-chart-wrap">
-            <canvas></canvas>
-          </div>`;
+          <div class="site-chart-wrap"><canvas></canvas></div>`;
         list.appendChild(card);
       }
     }
 
-    async function load() {
+    async function loadStats() {
       const since = new Date();
-      since.setDate(since.getDate() - 29);
+      since.setHours(since.getHours() - 23);
+      since.setMinutes(0, 0, 0);
+
+      const prefix = encodeURIComponent(`${currentUser}/`);
 
       const [statsRes, eventsRes] = await Promise.all([
-        fetch(`${SB}/rest/v1/stats?select=*`, {
+        fetch(`${SB}/rest/v1/stats?path=like.${prefix}*&select=*`, {
           headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
         }),
-        fetch(`${SB}/rest/v1/events?select=created_at,type,path&created_at=gte.${since.toISOString()}&order=created_at&limit=10000`, {
+        fetch(`${SB}/rest/v1/events?path=like.${prefix}*&created_at=gte.${since.toISOString()}&select=created_at,type,path&order=created_at&limit=10000`, {
           headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }
         })
       ]);
@@ -260,47 +349,43 @@
       const stats  = await statsRes.json();
       const events = await eventsRes.json();
 
-      // サマリー
       const totalPv = stats.reduce((s, r) => s + r.pv, 0);
       const totalCt = stats.reduce((s, r) => s + r.ct, 0);
-      const users   = new Set(stats.map(r => r.path.split('/')[0])).size;
       const ctr     = totalPv > 0 ? (totalCt / totalPv * 100).toFixed(2) : '0.00';
 
-      document.getElementById('m-user').textContent = users;
-      document.getElementById('m-pv').textContent   = totalPv.toLocaleString();
-      document.getElementById('m-ct').textContent   = totalCt.toLocaleString();
-      document.getElementById('m-ctr').textContent  = ctr + '%';
+      document.getElementById('m-pv').textContent  = totalPv.toLocaleString();
+      document.getElementById('m-ct').textContent  = totalCt.toLocaleString();
+      document.getElementById('m-ctr').textContent = ctr + '%';
 
-      // 全体 & サイト別 時系列
-      pvByDay = buildDayMap();
-      ctByDay = buildDayMap();
+      pvByHour = buildHourMap();
+      ctByHour = buildHourMap();
+      pvByPath = {};
+      ctByPath = {};
 
       for (const e of events) {
         const d   = new Date(e.created_at);
-        const day = `${d.getMonth()+1}/${d.getDate()}`;
-
+        const key = `${d.getHours()}時`;
         if (e.type === 'pv') {
-          if (day in pvByDay) pvByDay[day]++;
-          if (!pvByPath[e.path]) pvByPath[e.path] = buildDayMap();
-          if (day in pvByPath[e.path]) pvByPath[e.path][day]++;
+          if (key in pvByHour) pvByHour[key]++;
+          if (!pvByPath[e.path]) pvByPath[e.path] = buildHourMap();
+          if (key in pvByPath[e.path]) pvByPath[e.path][key]++;
         } else {
-          if (day in ctByDay) ctByDay[day]++;
-          if (!ctByPath[e.path]) ctByPath[e.path] = buildDayMap();
-          if (day in ctByPath[e.path]) ctByPath[e.path][day]++;
+          if (key in ctByHour) ctByHour[key]++;
+          if (!ctByPath[e.path]) ctByPath[e.path] = buildHourMap();
+          if (key in ctByPath[e.path]) ctByPath[e.path][key]++;
         }
       }
 
-      dayLabels = Object.keys(pvByDay);
+      hourLabels = Object.keys(pvByHour);
 
+      if (overallChart) overallChart.destroy();
       overallChart = new Chart(
         document.getElementById('chart-overall'),
-        makeChartConfig(dayLabels, Object.values(pvByDay))
+        makeChartConfig(hourLabels, Object.values(pvByHour))
       );
 
       buildSiteList(stats);
     }
-
-    load();
   </script>
 </body>
 </html>
