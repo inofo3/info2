@@ -218,10 +218,19 @@
     }
 
     async function getFileSha(token, path) {
-      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}&t=${Date.now()}`, {
-        headers: { Authorization: `token ${token}` }
-      });
-      if (!res.ok) return null;
+      let res;
+      try {
+        res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}&t=${Date.now()}`, {
+          headers: { Authorization: `token ${token}` }
+        });
+      } catch (e) {
+        throw new Error(`ネットワークエラー [SHA取得 ${path}]: ${e.message}`);
+      }
+      if (res.status === 404) return null;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(`SHA取得失敗 [${path}] (${res.status}): ${body.message || JSON.stringify(body)}`);
+      }
       return (await res.json()).sha;
     }
 
@@ -232,11 +241,15 @@
       for (let i = 0; i < 3; i++) {
         const sha = await getFileSha(token, path);
         if (sha) body.sha = sha; else delete body.sha;
-        const sentSha = sha || '(なし)';
-        res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+        console.log(`[PUT試行${i+1}] ${path} SHA=${sha || 'なし'}`);
+        try {
+          res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+        } catch (e) {
+          throw new Error(`ネットワークエラー [PUT ${path}]: ${e.message}`);
+        }
         if (res.status !== 409) break;
         const errBody = await res.json().catch(() => ({}));
-        console.warn(`[試行${i+1}] 409 SHA不一致: 送信=${sentSha} / GitHub応答=${errBody.message}`);
+        console.warn(`[PUT試行${i+1}] 409: ${errBody.message}`);
       }
       return res;
     }
@@ -392,25 +405,39 @@
 
       const path = `${username}/${folder}`;
       btn.disabled = true;
-      status.className = 'status';
-      status.textContent = '画像をアップロード中...';
       status.style.display = 'block';
       document.getElementById('resultUrl').style.display = 'none';
+
+      const step = (msg) => {
+        status.className = 'status';
+        status.textContent = msg;
+        console.log('[Admin]', msg);
+      };
 
       const metaUrl = `https://inofo3.github.io/info2/${path}/card.jpg`;
       const siteUrl = `https://inofo3.github.io/info2/${path}/thumb.jpg`;
 
       try {
-        await Promise.all([
-          uploadImage(token, `${path}/card.jpg`,  metaFile, true),
-          uploadImage(token, `${path}/thumb.jpg`, siteFile, false)
-        ]);
+        step('① Token を確認中...');
+        const testRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, {
+          headers: { Authorization: `token ${token}` }
+        }).catch(e => { throw new Error(`ネットワークエラー [Token確認]: ${e.message}`); });
+        if (!testRes.ok) throw new Error(`Token が無効または権限不足 (${testRes.status})`);
 
-        status.textContent = 'HTMLを生成中...';
+        step('② card.jpg をアップロード中...');
+        await uploadImage(token, `${path}/card.jpg`, metaFile, true);
 
-        await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl),              `Create ${path}/index.html`);
-        await updateFile(token, `${path}/news.html`,  buildNews(title, siteUrl, name, path),  `Create ${path}/news.html`);
-        await updateFile(token, `${path}/link.txt`,   yturl,                                  `Set link for ${path}`);
+        step('③ thumb.jpg をアップロード中...');
+        await uploadImage(token, `${path}/thumb.jpg`, siteFile, false);
+
+        step('④ index.html を生成中...');
+        await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
+
+        step('⑤ news.html を生成中...');
+        await updateFile(token, `${path}/news.html`, buildNews(title, siteUrl, name, path), `Create ${path}/news.html`);
+
+        step('⑥ link.txt を生成中...');
+        await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
 
         status.className = 'status ok';
         status.textContent = '✓ 生成完了';
@@ -420,7 +447,7 @@
         document.getElementById('folder').value = genFolderName();
       } catch (e) {
         status.className = 'status err';
-        status.textContent = 'エラー: ' + e.message + (e.stack ? '\n--- stack ---\n' + e.stack : '');
+        status.textContent = e.message;
         console.error(e);
       }
 
