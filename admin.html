@@ -218,8 +218,8 @@
     }
 
     async function getFileSha(token, path) {
-      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}`, {
-        headers: { Authorization: `token ${token}` }
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}&t=${Date.now()}`, {
+        headers: { Authorization: `token ${token}`, 'Cache-Control': 'no-cache' }
       });
       if (!res.ok) return null;
       return (await res.json()).sha;
@@ -232,8 +232,11 @@
       for (let i = 0; i < 3; i++) {
         const sha = await getFileSha(token, path);
         if (sha) body.sha = sha; else delete body.sha;
+        const sentSha = sha || '(なし)';
         res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
         if (res.status !== 409) break;
+        const errBody = await res.json().catch(() => ({}));
+        console.warn(`[試行${i+1}] 409 SHA不一致: 送信=${sentSha} / GitHub応答=${errBody.message}`);
       }
       return res;
     }
@@ -247,7 +250,13 @@
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(`${path} のアップロード失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
+        const detail = [
+          `[画像アップロード失敗]`,
+          `ファイル: ${path}`,
+          `ステータス: ${res.status}`,
+          `GitHub: ${err.message || JSON.stringify(err)}`
+        ].join('\n');
+        throw new Error(detail);
       }
     }
 
@@ -259,7 +268,14 @@
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(`${path} の生成失敗 (${res.status}): ${err.message || JSON.stringify(err)}`);
+        const detail = [
+          `[ファイル生成失敗]`,
+          `ファイル: ${path}`,
+          `ステータス: ${res.status}`,
+          `GitHub: ${err.message || JSON.stringify(err)}`,
+          res.status === 409 ? `→ 3回リトライしてもSHA不一致。ブラウザのコンソールで詳細を確認してください。` : ''
+        ].filter(Boolean).join('\n');
+        throw new Error(detail);
       }
     }
 
@@ -392,11 +408,9 @@
 
         status.textContent = 'HTMLを生成中...';
 
-        await Promise.all([
-          updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`),
-          updateFile(token, `${path}/news.html`,  buildNews(title, siteUrl, name, path), `Create ${path}/news.html`),
-          updateFile(token, `${path}/link.txt`,   yturl, `Set link for ${path}`)
-        ]);
+        await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl),              `Create ${path}/index.html`);
+        await updateFile(token, `${path}/news.html`,  buildNews(title, siteUrl, name, path),  `Create ${path}/news.html`);
+        await updateFile(token, `${path}/link.txt`,   yturl,                                  `Set link for ${path}`);
 
         status.className = 'status ok';
         status.textContent = '✓ 生成完了';
