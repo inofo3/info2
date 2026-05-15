@@ -228,13 +228,13 @@
     async function githubPut(token, path, body) {
       const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
       const headers = { Authorization: `token ${token}`, 'Content-Type': 'application/json' };
-      const tryPut = async () => {
+      let res;
+      for (let i = 0; i < 3; i++) {
         const sha = await getFileSha(token, path);
-        if (sha) body.sha = sha;
-        return fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
-      };
-      let res = await tryPut();
-      if (res.status === 409) res = await tryPut();
+        if (sha) body.sha = sha; else delete body.sha;
+        res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+        if (res.status !== 409) break;
+      }
       return res;
     }
 
