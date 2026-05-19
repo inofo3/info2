@@ -5,137 +5,286 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin</title>
   <style>
+    :root {
+      --bg: #f5f4f8;
+      --card: #ffffff;
+      --border: #e8e6f0;
+      --border2: #d8d4e8;
+      --input-bg: #faf9fc;
+      --accent: #a78bfa;
+      --accent2: #f472b6;
+      --text: #1a1828;
+      --sub: #7c7a9a;
+      --dim: #b0aec8;
+      --ok: #16a34a;
+      --err: #dc2626;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #111;
-      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 32px 16px;
+      padding: 40px 16px 72px;
+      background-image:
+        radial-gradient(ellipse 700px 500px at -10% -5%, rgba(167,139,250,0.12) 0%, transparent 65%),
+        radial-gradient(ellipse 500px 400px at 110% 105%, rgba(244,114,182,0.09) 0%, transparent 65%);
     }
-    .container { max-width: 480px; margin: 0 auto; }
-    h1 { font-size: 18px; margin-bottom: 24px; color: #aaa; }
-    h2 { font-size: 15px; color: #aaa; margin-bottom: 16px; }
-    #lastUpdated { font-size: 12px; color: #555; margin-bottom: 20px; display: none; }
-    .field { margin-bottom: 16px; }
-    label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; }
-    input {
+    .wrap { max-width: 440px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .site-header { text-align: center; margin-bottom: 32px; }
+    .site-title {
+      font-size: 20px; font-weight: 700; letter-spacing: 0.04em;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 6px;
+    }
+    #lastUpdated { font-size: 11px; color: var(--dim); display: none; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px 20px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 16px rgba(100,80,180,0.06);
+    }
+    .card-title {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--sub);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title::before {
+      content: ''; display: block; width: 3px; height: 13px;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      border-radius: 99px; flex-shrink: 0;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 13px; }
+    .field:last-child { margin-bottom: 0; }
+    label { display: block; font-size: 11px; font-weight: 500; color: var(--sub); margin-bottom: 6px; letter-spacing: 0.03em; }
+
+    input[type=text], input[type=password], input[type=url] {
       width: 100%;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      color: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 11px;
+      font-size: 14px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
     }
-    input:focus { border-color: #555; }
-    .btn {
+    input[type=text]:focus, input[type=password]:focus, input[type=url]:focus {
+      border-color: rgba(167,139,250,0.6);
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.12);
+    }
+    input[type=file] {
       width: 100%;
-      padding: 16px;
-      background: #fff;
-      color: #111;
-      font-size: 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 8px;
+      background: var(--input-bg);
+      border: 1.5px dashed var(--border2);
+      color: var(--sub);
+      padding: 9px 12px;
+      border-radius: 11px;
+      font-size: 13px; cursor: pointer; outline: none;
+      font-family: inherit;
     }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .status {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: none;
+    input[type=file]::file-selector-button {
+      background: rgba(167,139,250,0.12);
+      border: 1px solid rgba(167,139,250,0.25);
+      color: var(--accent);
+      padding: 5px 12px; border-radius: 7px;
+      font-size: 11px; cursor: pointer; margin-right: 10px;
+      font-family: inherit; transition: background 0.15s;
     }
-    .status.ok  { background: #1a3a1a; color: #6f6; display: block; }
-    .status.err { background: #3a1a1a; color: #f66; display: block; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
-    .divider { border: none; border-top: 1px solid #222; margin: 24px 0; }
-    #resultUrl { margin-top: 12px; display: none; }
-    #urlOutput { color: #6f6; cursor: text; }
+    input[type=file]::file-selector-button:hover { background: rgba(167,139,250,0.22); }
+
+    /* ── Sync ── */
+    .label-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .label-row label { margin-bottom: 0; }
+    .sync-badge {
+      font-size: 10px;
+      background: rgba(167,139,250,0.1);
+      color: var(--accent);
+      padding: 2px 8px; border-radius: 99px; display: none;
+      white-space: nowrap; border: 1px solid rgba(167,139,250,0.2);
+    }
+    .reset-link {
+      background: none; border: none; color: var(--dim);
+      font-size: 11px; cursor: pointer; padding: 4px 0;
+      margin-top: 4px; display: none; font-family: inherit;
+    }
+    .reset-link:hover { color: var(--sub); }
+
+    /* ── Preview ── */
     .preview { margin-top: 8px; display: none; }
-    .preview img { width: 100%; height: auto; border-radius: 8px; opacity: 0.8; object-fit: contain; }
+    .preview img {
+      width: 100%; height: auto; border-radius: 10px;
+      border: 1px solid var(--border); object-fit: contain;
+    }
+
+    /* ── Mark toggle ── */
+    .mark-toggle {
+      background: none; border: none; color: var(--dim);
+      font-size: 11px; cursor: pointer; padding: 5px 0;
+      margin-top: 4px; display: none; text-align: left; font-family: inherit;
+    }
+    .mark-toggle:hover { color: var(--sub); }
+    .mark-toggle.active { color: var(--ok); }
+
+    /* ── Mark panel ── */
+    .mark-panel {
+      margin-top: 8px;
+      background: #f8f7fc;
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px; display: none;
+    }
+    .mark-panel canvas {
+      display: block; width: 100%; height: auto;
+      border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border);
+    }
+    .mark-ctrl { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .mark-ctrl .lbl { font-size: 11px; color: var(--sub); width: 42px; flex-shrink: 0; }
+    .mark-ctrl input[type=range] {
+      flex: 1; height: 2px; -webkit-appearance: none; appearance: none;
+      background: var(--border2); border-radius: 2px; outline: none;
+    }
+    .mark-ctrl input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      background: var(--accent); border-radius: 50%; cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+    .mark-ctrl .val { font-size: 11px; color: var(--sub); min-width: 28px; text-align: right; }
+    .mark-btns { display: flex; gap: 6px; margin-top: 10px; }
+    .mark-btns button { flex: 1; padding: 9px; font-size: 13px; border-radius: 8px; cursor: pointer; border: none; font-family: inherit; }
+    .mark-btns .apply {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-weight: 600;
+    }
+    .mark-btns .clear {
+      background: #f0eef8; color: var(--sub);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Main button ── */
+    .btn {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #fff; font-size: 15px; font-weight: 600;
+      border: none; border-radius: 13px; cursor: pointer;
+      margin-top: 10px; font-family: inherit;
+      transition: opacity 0.15s, transform 0.1s; letter-spacing: 0.03em;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* ── Status ── */
+    .status { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 13px; display: none; }
+    .status.ok  { background: #f0fdf4; color: var(--ok);  border: 1px solid #bbf7d0; display: block; }
+    .status.err { background: #fff1f2; color: var(--err); border: 1px solid #fecdd3; display: block; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+
+    /* ── Result URL ── */
+    #resultUrl { margin-top: 10px; display: none; }
+    #urlOutput { color: var(--ok); cursor: text; font-size: 13px; }
+    .url-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+    .url-row input { flex: 1; }
+    .copy-url-btn {
+      flex-shrink: 0; padding: 11px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-size: 13px; font-weight: 600;
+      border: none; border-radius: 11px; cursor: pointer;
+      font-family: inherit; white-space: nowrap; transition: opacity 0.15s;
+    }
+    .copy-url-btn:hover { opacity: 0.85; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Admin</h1>
-    <div id="lastUpdated">最終更新: <span></span></div>
+  <div class="wrap">
 
-    <div class="field">
-      <label>GitHub Token</label>
-      <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+    <header class="site-header">
+      <div class="site-title">✦ Admin</div>
+      <div id="lastUpdated">最終更新: <span></span></div>
+    </header>
+
+    <div class="card">
+      <div class="field">
+        <label>GitHub Token</label>
+        <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+      </div>
     </div>
 
-    <hr class="divider">
-    <h2>新規生成</h2>
+    <div class="card">
+      <div class="card-title">新規生成</div>
 
-    <div class="field">
-      <label>ユーザー名</label>
-      <input type="text" id="username" placeholder="例: taro">
+      <div class="field">
+        <label>ユーザー名</label>
+        <input type="text" id="username" placeholder="例: taro">
+      </div>
+      <div class="field">
+        <label>フォルダ名</label>
+        <input type="text" id="folder" placeholder="例: 20260430_1200">
+      </div>
+      <div class="field">
+        <label>タイトル（OGP・ページ名）</label>
+        <input type="text" id="title" placeholder="【速報】衝撃映像が話題に">
+      </div>
+
+      <div class="field">
+        <label>メタ用画像 → card.jpg</label>
+        <input type="file" id="metaImage" accept="image/*">
+        <div id="metaPreview" class="preview"><img></div>
+        <button type="button" class="mark-toggle" id="metaMarkToggle" onclick="toggleMarkPanel('meta')">▶ 再生マーク</button>
+        <div class="mark-panel" id="metaMarkPanel">
+          <canvas id="metaMarkCanvas"></canvas>
+          <div class="mark-ctrl"><span class="lbl">サイズ</span><input type="range" id="metaMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">濃さ</span><input type="range" id="metaMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('meta')">適用</button><button class="clear" onclick="clearMark('meta')">クリア</button></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label>サイト用画像 → thumb.jpg</label>
+          <span id="syncBadge" class="sync-badge">メタと同じ</span>
+        </div>
+        <input type="file" id="siteImage" accept="image/*">
+        <div id="sitePreview" class="preview"><img></div>
+        <button type="button" class="mark-toggle" id="siteMarkToggle" onclick="toggleMarkPanel('site')">▶ 再生マーク</button>
+        <div class="mark-panel" id="siteMarkPanel">
+          <canvas id="siteMarkCanvas"></canvas>
+          <div class="mark-ctrl"><span class="lbl">サイズ</span><input type="range" id="siteMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">濃さ</span><input type="range" id="siteMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('site')">適用</button><button class="clear" onclick="clearMark('site')">クリア</button></div>
+        </div>
+        <button type="button" id="resetSyncBtn" class="reset-link" onclick="resetSync()">↩ メタ用と同じに戻す</button>
+      </div>
+
+      <div class="field">
+        <label>アカウント名</label>
+        <input type="text" id="name" placeholder="速報ニュース">
+      </div>
+      <div class="field">
+        <label>リンク先URL</label>
+        <input type="url" id="yturl" placeholder="https://...">
+      </div>
+
+      <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
+      <div class="status" id="status"></div>
+      <div id="resultUrl">
+        <label>生成されたURL</label>
+        <div class="url-row">
+          <input id="urlOutput" readonly onclick="this.select()">
+          <button class="copy-url-btn" id="copyUrlBtn" onclick="copyGenUrl()">コピー</button>
+        </div>
+      </div>
     </div>
 
-    <div class="field">
-      <label>フォルダ名</label>
-      <input type="text" id="folder" placeholder="例: 20260430_1200">
-    </div>
 
-    <div class="field">
-      <label>タイトル（OGP・ページ名）</label>
-      <input type="text" id="title" placeholder="【速報】衝撃映像が話題に">
-    </div>
-
-    <div class="field">
-      <label>メタ用画像（SNSカード） → card.jpg で保存</label>
-      <input type="file" id="metaImage" accept="image/*">
-      <div id="metaPreview" class="preview"><img></div>
-    </div>
-
-    <div class="field">
-      <label>サイト用画像（ランディングページ） → thumb.jpg で保存</label>
-      <input type="file" id="siteImage" accept="image/*">
-      <div id="sitePreview" class="preview"><img></div>
-    </div>
-
-    <div class="field">
-      <label>アカウント名</label>
-      <input type="text" id="name" placeholder="速報ニュース">
-    </div>
-
-    <div class="field">
-      <label>リンク先URL</label>
-      <input type="url" id="yturl" placeholder="https://...">
-    </div>
-
-    <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
-    <div class="status" id="status"></div>
-    <div id="resultUrl">
-      <label>生成されたURL</label>
-      <input id="urlOutput" readonly onclick="this.select()">
-    </div>
-
-    <hr class="divider">
-    <h2>リンク先を変更する</h2>
-
-    <div class="field">
-      <label>ユーザー名</label>
-      <input type="text" id="editUsername" placeholder="例: taro">
-    </div>
-
-    <div class="field">
-      <label>フォルダ名</label>
-      <input type="text" id="editFolder" placeholder="例: 20260430_1200">
-    </div>
-
-    <div class="field">
-      <label>新しいリンク先URL</label>
-      <input type="url" id="editUrl" placeholder="https://...">
-    </div>
-
-    <button class="btn" id="editBtn" onclick="updateUrl()">URLを変更する</button>
-    <div class="status" id="editStatus"></div>
   </div>
 
   <script>
@@ -203,18 +352,166 @@
       });
     }
 
-    document.getElementById('metaImage').addEventListener('change', function() {
-      showPreview(this.files[0], 'metaPreview', 1200, 630);
+    let siteLinked = false;
+    let metaMarkedUrl = null, siteMarkedUrl = null;
+    let metaCroppedUrl = null, siteCroppedUrl = null;
+
+    function updateSyncUI() {
+      const hasMeta = !!document.getElementById('metaImage').files[0];
+      document.getElementById('syncBadge').style.display    = siteLinked ? 'inline-block' : 'none';
+      document.getElementById('resetSyncBtn').style.display = (!siteLinked && hasMeta) ? 'block' : 'none';
+      const siteToggle = document.getElementById('siteMarkToggle');
+      if (siteLinked) {
+        siteToggle.style.display = 'none';
+        document.getElementById('siteMarkPanel').style.display = 'none';
+      } else if (siteCroppedUrl) {
+        siteToggle.style.display = 'block';
+      }
+    }
+
+    document.getElementById('metaImage').addEventListener('change', async function() {
+      if (!this.files[0]) return;
+      await showPreview(this.files[0], 'metaPreview', 1200, 630);
+      siteLinked = true;
+      await showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSyncUI();
     });
+
     document.getElementById('siteImage').addEventListener('change', function() {
+      if (!this.files[0]) return;
+      siteLinked = false;
       showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSyncUI();
     });
+
+    function resetSync() {
+      const metaFile = document.getElementById('metaImage').files[0];
+      if (!metaFile) return;
+      siteLinked = true;
+      showPreview(metaFile, 'sitePreview', 1280, 720);
+      updateSyncUI();
+    }
 
     async function showPreview(file, previewId, w, h) {
       const wrap = document.getElementById(previewId);
       if (!file) { wrap.style.display = 'none'; return; }
-      wrap.querySelector('img').src = await cropImage(file, w, h);
+      const dataUrl = await cropImage(file, w, h);
+      wrap.querySelector('img').src = dataUrl;
       wrap.style.display = 'block';
+      if (previewId === 'metaPreview') {
+        metaCroppedUrl = dataUrl; metaMarkedUrl = null; resetMarkUI('meta');
+      } else if (previewId === 'sitePreview') {
+        siteCroppedUrl = dataUrl; siteMarkedUrl = null; resetMarkUI('site');
+      }
+    }
+
+    function resetMarkUI(type) {
+      const toggle = document.getElementById(type + 'MarkToggle');
+      const panel  = document.getElementById(type + 'MarkPanel');
+      toggle.textContent = '▶ 再生マーク';
+      toggle.classList.remove('active');
+      panel.style.display = 'none';
+      toggle.style.display = (type === 'site' && siteLinked) ? 'none' : 'block';
+    }
+
+    function toggleMarkPanel(type) {
+      const panel = document.getElementById(type + 'MarkPanel');
+      if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      renderMarkPreview(type);
+    }
+
+    function renderMarkPreview(type) {
+      const src = type === 'meta' ? metaCroppedUrl : siteCroppedUrl;
+      if (!src) return;
+      const canvas = document.getElementById(type + 'MarkCanvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        drawPlayMark(ctx, img.width, img.height,
+          parseFloat(document.getElementById(type + 'MarkSize').value),
+          parseInt(document.getElementById(type + 'MarkOpacity').value));
+      };
+      img.src = src;
+    }
+
+    function onMarkSlider(type) {
+      document.getElementById(type + 'MarkSizeVal').textContent    = document.getElementById(type + 'MarkSize').value + '%';
+      document.getElementById(type + 'MarkOpacityVal').textContent = document.getElementById(type + 'MarkOpacity').value + '%';
+      renderMarkPreview(type);
+    }
+
+    function drawPlayMark(ctx, w, h, sizePct, opacityPct) {
+      const minDim = Math.min(w, h);
+      const radius = minDim * (sizePct / 100);
+      const cx = w / 2;
+      const cy = h / 2;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur  = radius * 0.4;
+      ctx.fillStyle   = `rgba(0,0,0,${opacityPct / 100})`;
+      ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#fff';
+      const tri = radius * 0.42, ox = tri * 0.12;
+      ctx.beginPath();
+      ctx.moveTo(cx - tri * 0.55 + ox, cy - tri);
+      ctx.lineTo(cx - tri * 0.55 + ox, cy + tri);
+      ctx.lineTo(cx + tri + ox, cy);
+      ctx.closePath(); ctx.fill();
+    }
+
+    function renderMarkToUrl(srcUrl, sizePct, opacityPct) {
+      return new Promise(resolve => {
+        const tmp = document.createElement('canvas');
+        const tctx = tmp.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+          tmp.width = img.width; tmp.height = img.height;
+          tctx.drawImage(img, 0, 0);
+          drawPlayMark(tctx, img.width, img.height, sizePct, opacityPct);
+          resolve(tmp.toDataURL('image/jpeg', 0.9));
+        };
+        img.src = srcUrl;
+      });
+    }
+
+    async function applyMark(type) {
+      const canvas  = document.getElementById(type + 'MarkCanvas');
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      if (type === 'meta') {
+        metaMarkedUrl = dataUrl;
+        document.getElementById('metaPreview').querySelector('img').src = dataUrl;
+        if (siteLinked && siteCroppedUrl) {
+          siteMarkedUrl = await renderMarkToUrl(siteCroppedUrl,
+            parseFloat(document.getElementById('metaMarkSize').value),
+            parseInt(document.getElementById('metaMarkOpacity').value));
+          document.getElementById('sitePreview').querySelector('img').src = siteMarkedUrl;
+        }
+      } else {
+        siteMarkedUrl = dataUrl;
+        document.getElementById('sitePreview').querySelector('img').src = dataUrl;
+      }
+      const toggle = document.getElementById(type + 'MarkToggle');
+      toggle.textContent = '✓ 適用済み';
+      toggle.classList.add('active');
+      document.getElementById(type + 'MarkPanel').style.display = 'none';
+    }
+
+    function clearMark(type) {
+      if (type === 'meta') {
+        metaMarkedUrl = null;
+        if (metaCroppedUrl) document.getElementById('metaPreview').querySelector('img').src = metaCroppedUrl;
+      } else {
+        siteMarkedUrl = null;
+        if (siteCroppedUrl) document.getElementById('sitePreview').querySelector('img').src = siteCroppedUrl;
+      }
+      const toggle = document.getElementById(type + 'MarkToggle');
+      toggle.textContent = '▶ 再生マーク';
+      toggle.classList.remove('active');
+      document.getElementById(type + 'MarkPanel').style.display = 'none';
     }
 
     async function getFileSha(token, path) {
@@ -254,8 +551,10 @@
       return res;
     }
 
-    async function uploadImage(token, path, file, isOgp) {
-      const dataUrl = await cropImage(file, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
+    async function uploadImage(token, path, source, isOgp) {
+      const dataUrl = typeof source === 'string'
+        ? source
+        : await cropImage(source, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
       const res = await githubPut(token, path, {
         message: `Upload ${path}`,
         content: dataUrl.split(',')[1],
@@ -385,19 +684,30 @@
 </html>`;
     }
 
+    function copyGenUrl() {
+      const url = document.getElementById('urlOutput').value;
+      if (!url) return;
+      const btn = document.getElementById('copyUrlBtn');
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = '✓';
+        setTimeout(() => { btn.textContent = 'コピー'; }, 1600);
+      });
+    }
+
     async function generate() {
       const token    = document.getElementById('token').value.trim();
       const username = document.getElementById('username').value.trim();
       const folder   = document.getElementById('folder').value.trim();
       const title    = document.getElementById('title').value.trim();
-      const metaFile = document.getElementById('metaImage').files[0];
-      const siteFile = document.getElementById('siteImage').files[0];
-      const name     = document.getElementById('name').value.trim();
-      const yturl    = document.getElementById('yturl').value.trim();
-      const status   = document.getElementById('status');
-      const btn      = document.getElementById('submitBtn');
+      const metaFile     = document.getElementById('metaImage').files[0];
+      const siteFileRaw  = document.getElementById('siteImage').files[0];
+      const siteFile     = (siteLinked || !siteFileRaw) ? metaFile : siteFileRaw;
+      const name         = document.getElementById('name').value.trim();
+      const yturl        = document.getElementById('yturl').value.trim();
+      const status       = document.getElementById('status');
+      const btn          = document.getElementById('submitBtn');
 
-      if (!token || !username || !folder || !title || !metaFile || !siteFile || !name || !yturl) {
+      if (!token || !username || !folder || !title || !metaFile || !name || !yturl) {
         status.className = 'status err';
         status.textContent = 'Token・ユーザー名・フォルダ名・タイトル・画像・名前・リンク先URLは必須です';
         return;
@@ -425,10 +735,10 @@
         if (!testRes.ok) throw new Error(`Token が無効または権限不足 (${testRes.status})`);
 
         step('② card.jpg をアップロード中...');
-        await uploadImage(token, `${path}/card.jpg`, metaFile, true);
+        await uploadImage(token, `${path}/card.jpg`, metaMarkedUrl || metaFile, true);
 
         step('③ thumb.jpg をアップロード中...');
-        await uploadImage(token, `${path}/thumb.jpg`, siteFile, false);
+        await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false);
 
         step('④ index.html を生成中...');
         await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
@@ -454,39 +764,6 @@
       btn.disabled = false;
     }
 
-    async function updateUrl() {
-      const token    = document.getElementById('token').value.trim();
-      const username = document.getElementById('editUsername').value.trim();
-      const folder   = document.getElementById('editFolder').value.trim();
-      const newUrl   = document.getElementById('editUrl').value.trim();
-      const status   = document.getElementById('editStatus');
-      const btn      = document.getElementById('editBtn');
-
-      if (!token || !username || !folder || !newUrl) {
-        status.className = 'status err';
-        status.textContent = 'Token・ユーザー名・フォルダ名・新しいURLは必須です';
-        return;
-      }
-
-      const path = `${username}/${folder}`;
-      btn.disabled = true;
-      status.className = 'status';
-      status.textContent = 'URLを変更中...';
-      status.style.display = 'block';
-
-      try {
-        await updateFile(token, `${path}/link.txt`, newUrl, `Update link for ${path}`);
-        status.className = 'status ok';
-        status.textContent = '✓ URL変更完了';
-        showLastUpdated();
-      } catch (e) {
-        status.className = 'status err';
-        status.textContent = 'エラー: ' + e.message + (e.stack ? '\n--- stack ---\n' + e.stack : '');
-        console.error(e);
-      }
-
-      btn.disabled = false;
-    }
   </script>
 </body>
 </html>
