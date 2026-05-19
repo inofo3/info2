@@ -275,13 +275,9 @@
     let hourLabels   = [];
     const siteCharts = {};
 
-    // セッション復元（hub ログイン済みなら自動ログイン）
-    const saved = sessionStorage.getItem('stats_user');
+    // hub or セッションでログイン済みならスキップ
+    const saved = sessionStorage.getItem('stats_user') || localStorage.getItem('hub_user');
     if (saved) showStats(saved);
-    else {
-      const hubUser = localStorage.getItem('hub_user');
-      if (hubUser) document.getElementById('loginUser').value = hubUser;
-    }
 
     async function login() {
       const username = document.getElementById('loginUser').value.trim();
