@@ -115,8 +115,44 @@
       font-weight: 600;
       cursor: pointer;
     }
-    .site-chart-wrap { display: none; padding: 0 16px 16px; height: 130px; position: relative; }
+    .site-chart-wrap { display: none; padding: 0 16px 16px; height: 160px; position: relative; }
     .site-chart-wrap.open { display: block; }
+    .copy-btn {
+      flex-shrink: 0; padding: 6px 11px;
+      background: #f2f2f7; border: none; border-radius: 8px;
+      font-size: 12px; color: #888; font-weight: 600; cursor: pointer;
+      transition: color 0.15s;
+    }
+    .copy-btn.copied { color: #22c55e; }
+    .url-btn {
+      flex-shrink: 0; padding: 6px 11px;
+      background: #f2f2f7; border: none; border-radius: 8px;
+      font-size: 12px; color: #888; font-weight: 600; cursor: pointer; margin-left: 4px;
+    }
+    .url-btn:hover { background: #e5e5ec; color: #555; }
+    .edit-wrap { display: none; padding: 12px 16px 14px; border-top: 1px solid #f2f2f7; }
+    .edit-wrap.open { display: block; }
+    .edit-lbl { font-size: 11px; color: #aaa; margin-bottom: 4px; }
+    .edit-input {
+      width: 100%; background: #f2f2f7; border: none; color: #111;
+      padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none;
+      margin-bottom: 8px; font-family: inherit;
+    }
+    .edit-input:focus { box-shadow: 0 0 0 2px rgba(59,130,246,0.18); }
+    .edit-btns { display: flex; gap: 6px; }
+    .edit-ok {
+      flex: 1; padding: 9px; background: #111; color: #fff;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .edit-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+    .edit-cancel {
+      padding: 9px 14px; background: #f2f2f7; color: #888;
+      border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    .edit-st { font-size: 12px; margin-top: 8px; display: none; }
+    .edit-st.ok  { color: #22c55e; display: block; }
+    .edit-st.err { color: #ef4444; display: block; }
   </style>
 </head>
 <body>
@@ -169,8 +205,68 @@
   </div>
 
   <script>
-    const SB  = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
-    const KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+    const SB     = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+    const KEY    = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+    const OWNER  = 'inofo3';
+    const REPO   = 'info2';
+    const BRANCH = 'main';
+
+    function copyUrl(path, btn) {
+      const url = `https://inofo3.github.io/info2/${path}/`;
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 1600);
+      });
+    }
+
+    function toggleEdit(eid) {
+      const wrap = document.getElementById('edit-' + eid);
+      const opening = !wrap.classList.contains('open');
+      document.querySelectorAll('.edit-wrap.open').forEach(w => w.classList.remove('open'));
+      if (opening) wrap.classList.add('open');
+    }
+
+    async function saveLink(sitePath, eid) {
+      const wrap   = document.getElementById('edit-' + eid);
+      const token  = wrap.querySelector('.edit-tok').value.trim();
+      const newUrl = wrap.querySelector('.edit-url').value.trim();
+      const status = document.getElementById('editst-' + eid);
+      const btn    = wrap.querySelector('.edit-ok');
+      if (!token || !newUrl) {
+        status.textContent = 'TokenとURLを入力してください';
+        status.className = 'edit-st err';
+        return;
+      }
+      btn.disabled = true;
+      status.textContent = '更新中...';
+      status.className = 'edit-st';
+      status.style.display = 'block';
+      try {
+        const filePath = `${sitePath}/link.txt`;
+        const shaRes = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath}?ref=${BRANCH}&t=${Date.now()}`,
+          { headers: { Authorization: `token ${token}` } }
+        );
+        const sha  = shaRes.ok ? (await shaRes.json()).sha : null;
+        const body = { message: `Update link for ${sitePath}`, content: btoa(unescape(encodeURIComponent(newUrl))), branch: BRANCH };
+        if (sha) body.sha = sha;
+        const res = await fetch(
+          `https://api.github.com/repos/${OWNER}/${REPO}/contents/${filePath}`,
+          { method: 'PUT', headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+        );
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || `HTTP ${res.status}`); }
+        localStorage.setItem('gh_token', token);
+        status.textContent = '✓ 変更しました';
+        status.className = 'edit-st ok';
+        wrap.querySelector('.edit-url').value = '';
+        setTimeout(() => { wrap.classList.remove('open'); status.style.display = 'none'; }, 1800);
+      } catch (e) {
+        status.textContent = 'エラー: ' + e.message;
+        status.className = 'edit-st err';
+      }
+      btn.disabled = false;
+    }
 
     let currentUser  = null;
     let overallChart = null;
@@ -179,9 +275,13 @@
     let hourLabels   = [];
     const siteCharts = {};
 
-    // セッション復元
+    // セッション復元（hub ログイン済みなら自動ログイン）
     const saved = sessionStorage.getItem('stats_user');
     if (saved) showStats(saved);
+    else {
+      const hubUser = localStorage.getItem('hub_user');
+      if (hubUser) document.getElementById('loginUser').value = hubUser;
+    }
 
     async function login() {
       const username = document.getElementById('loginUser').value.trim();
@@ -241,6 +341,7 @@
     }
 
     function makeChartConfig(labels, data) {
+      const now = new Date().getHours();
       return {
         type: 'line',
         data: {
@@ -253,24 +354,39 @@
             pointRadius: 0,
             pointHoverRadius: 4,
             fill: true,
-            tension: 0.3
+            tension: 0.3,
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: items => items[0].label,
+                label: item => `  ${item.raw} 人`
+              },
+              backgroundColor: 'rgba(17,17,17,0.82)',
+              padding: { x: 12, y: 8 },
+              titleFont: { size: 11 },
+              bodyFont: { size: 14, weight: '700' },
+              displayColors: false,
+              cornerRadius: 8,
+            }
+          },
           scales: {
             x: {
               grid: { display: false },
               border: { display: false },
-              ticks: { maxTicksLimit: 6, color: '#bbb', font: { size: 10 } }
+              ticks: { maxTicksLimit: 8, color: '#bbb', font: { size: 10 } }
             },
             y: {
               position: 'right',
-              grid: { color: '#f0f0f0' },
+              grid: { color: '#f5f5f5' },
               border: { display: false },
-              ticks: { stepSize: 1, color: '#bbb', font: { size: 10 } },
+              ticks: { precision: 0, color: '#bbb', font: { size: 10 } },
               min: 0
             }
           }
@@ -311,6 +427,7 @@
         const folder = r.path.split('/')[1] ?? r.path;
         const ctr    = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
         const cls    = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
+        const eid    = r.path.replace(/\//g, '-');
         const card   = document.createElement('div');
         card.className = 'site-card';
         card.innerHTML = `
@@ -323,9 +440,22 @@
                 <div class="site-num ${cls}">CTR <b>${ctr}%</b></div>
               </div>
             </div>
+            <button class="copy-btn" onclick="copyUrl('${r.path}', this)">コピー</button>
             <button class="graph-btn" onclick="toggleChart('${r.path}', this)">グラフ</button>
+            <button class="url-btn" onclick="toggleEdit('${eid}')">URL</button>
           </div>
-          <div class="site-chart-wrap"><canvas></canvas></div>`;
+          <div class="site-chart-wrap"><canvas></canvas></div>
+          <div class="edit-wrap" id="edit-${eid}">
+            <div class="edit-lbl">GitHub Token</div>
+            <input type="password" class="edit-input edit-tok" placeholder="ghp_xxxx" value="${localStorage.getItem('gh_token') || ''}">
+            <div class="edit-lbl">新しいリンク先URL</div>
+            <input type="url" class="edit-input edit-url" placeholder="https://...">
+            <div class="edit-btns">
+              <button class="edit-ok" onclick="saveLink('${r.path}','${eid}')">変更する</button>
+              <button class="edit-cancel" onclick="toggleEdit('${eid}')">キャンセル</button>
+            </div>
+            <div class="edit-st" id="editst-${eid}"></div>
+          </div>`;
         list.appendChild(card);
       }
     }
