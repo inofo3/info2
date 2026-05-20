@@ -195,6 +195,10 @@
           <div class="metric-label">CTR</div>
           <div class="metric-value" id="m-ctr">—</div>
         </div>
+        <div class="metric" onclick="switchMetric('ct', this)">
+          <div class="metric-label">推定CT/h</div>
+          <div class="metric-value" id="m-cth">—</div>
+        </div>
       </div>
       <div class="chart-wrap">
         <canvas id="chart-overall"></canvas>
@@ -273,6 +277,7 @@
     let pvByHour = {}, ctByHour = {};
     let pvByPath = {}, ctByPath = {};
     let hourLabels   = [];
+    let estimatedCtPerHour = 0;
     const siteCharts = {};
 
     // hub or セッションでログイン済みならスキップ
@@ -336,23 +341,32 @@
       return map;
     }
 
-    function makeChartConfig(labels, data) {
-      const now = new Date().getHours();
+    function makeChartConfig(labels, data, refValue) {
+      const datasets = [{
+        data,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.08)',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: true,
+        tension: 0.3,
+      }];
+      if (refValue != null) {
+        datasets.push({
+          data: new Array(labels.length).fill(refValue),
+          borderColor: 'rgba(245,158,11,0.6)',
+          borderWidth: 1.2,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0,
+          hidden: true,
+        });
+      }
       return {
         type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            data,
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59,130,246,0.08)',
-            borderWidth: 1.5,
-            pointRadius: 0,
-            pointHoverRadius: 4,
-            fill: true,
-            tension: 0.3,
-          }]
-        },
+        data: { labels, datasets },
         options: {
           responsive: true,
           maintainAspectRatio: false,
@@ -360,6 +374,7 @@
           plugins: {
             legend: { display: false },
             tooltip: {
+              filter: item => item.datasetIndex === 0,
               callbacks: {
                 title: items => items[0].label,
                 label: item => `  ${item.raw} 人`
@@ -394,6 +409,9 @@
       document.querySelectorAll('.metric').forEach(m => m.classList.remove('active'));
       el.classList.add('active');
       overallChart.data.datasets[0].data = Object.values(type === 'ct' ? ctByHour : pvByHour);
+      if (overallChart.data.datasets.length > 1) {
+        overallChart.data.datasets[1].hidden = (type !== 'ct');
+      }
       overallChart.update();
     }
 
@@ -504,10 +522,16 @@
 
       hourLabels = Object.keys(pvByHour);
 
+      const ctEventTotal = Object.values(ctByHour).reduce((s, v) => s + v, 0);
+      const nowRef = new Date();
+      const effectiveHours = 23 + (nowRef.getMinutes() + nowRef.getSeconds() / 60) / 60;
+      estimatedCtPerHour = +(ctEventTotal / Math.max(effectiveHours, 1)).toFixed(1);
+      document.getElementById('m-cth').textContent = estimatedCtPerHour;
+
       if (overallChart) overallChart.destroy();
       overallChart = new Chart(
         document.getElementById('chart-overall'),
-        makeChartConfig(hourLabels, Object.values(pvByHour))
+        makeChartConfig(hourLabels, Object.values(pvByHour), estimatedCtPerHour)
       );
 
       buildSiteList(stats);
