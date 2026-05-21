@@ -3,287 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin</title>
+  <title>ADMIN · generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg: #f5f4f8;
-      --card: #ffffff;
-      --border: #e8e6f0;
-      --border2: #d8d4e8;
-      --input-bg: #faf9fc;
-      --accent: #a78bfa;
-      --accent2: #f472b6;
-      --text: #1a1828;
-      --sub: #7c7a9a;
-      --dim: #b0aec8;
-      --ok: #16a34a;
-      --err: #dc2626;
+      --bg:      #ecebe6;
+      --surface: #f4f3ee;
+      --raise:   #faf9f4;
+      --ink:     #101010;
+      --inkSoft: rgba(16,16,16,0.55);
+      --inkFaint:rgba(16,16,16,0.30);
+      --hair:    rgba(16,16,16,0.18);
+      --accent:  #e8ff5a;
+      --ok:      #1a7a3a;
+      --warn:    #b78104;
+      --err:     #b71d10;
+      --mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { min-height: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: var(--mono);
       background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 40px 16px 72px;
+      color: var(--ink);
       background-image:
-        radial-gradient(ellipse 700px 500px at -10% -5%, rgba(167,139,250,0.12) 0%, transparent 65%),
-        radial-gradient(ellipse 500px 400px at 110% 105%, rgba(244,114,182,0.09) 0%, transparent 65%);
+        repeating-linear-gradient(0deg,  transparent 0 23px, rgba(16,16,16,0.05) 23px 24px),
+        repeating-linear-gradient(90deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px);
+      padding: 16px 16px 56px;
+      -webkit-font-smoothing: antialiased;
     }
-    .wrap { max-width: 440px; margin: 0 auto; }
+    .wrap { max-width: 480px; margin: 0 auto; }
 
-    /* ── Header ── */
-    .site-header { text-align: center; margin-bottom: 32px; }
-    .site-title {
-      font-size: 20px; font-weight: 700; letter-spacing: 0.04em;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 6px;
+    /* ── Top stamp ── */
+    .stamp {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--inkSoft);
     }
-    #lastUpdated { font-size: 11px; color: var(--dim); display: none; }
+    .stamp .badge { background: var(--ink); color: var(--bg); padding: 3px 6px; font-weight: 700; margin-right: 8px; }
+
+    /* ── Header block ── */
+    .head {
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 12px; margin-bottom: 18px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .head .meta { font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft); margin-bottom: 2px; }
+    .head .title { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; line-height: 1; }
+    #lastUpdated {
+      font-size: 10px; color: var(--inkSoft); letter-spacing: 1px;
+      display: none; text-align: right;
+    }
+    #lastUpdated::before { content: '// '; color: var(--inkFaint); }
 
     /* ── Card ── */
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 22px 20px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 16px rgba(100,80,180,0.06);
+      background: var(--surface);
+      border: 1px solid var(--ink);
+      padding: 14px;
+      margin-bottom: 14px;
     }
     .card-title {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--sub);
-      margin-bottom: 18px;
+      font-size: 10px; letter-spacing: 1.4px; font-weight: 700;
+      color: var(--ink); margin-bottom: 14px;
       display: flex; align-items: center; gap: 8px;
     }
     .card-title::before {
-      content: ''; display: block; width: 3px; height: 13px;
-      background: linear-gradient(180deg, var(--accent), var(--accent2));
-      border-radius: 99px; flex-shrink: 0;
+      content: '#'; color: var(--inkSoft); font-weight: 400;
+    }
+    .card-title::after {
+      content: ''; flex: 1; border-top: 1px dashed var(--hair);
     }
 
     /* ── Fields ── */
-    .field { margin-bottom: 13px; }
+    .field { margin-bottom: 12px; }
     .field:last-child { margin-bottom: 0; }
-    label { display: block; font-size: 11px; font-weight: 500; color: var(--sub); margin-bottom: 6px; letter-spacing: 0.03em; }
+    label {
+      display: block; font-size: 10px; letter-spacing: 1.2px;
+      color: var(--inkSoft); margin-bottom: 4px;
+    }
+    label::before { content: '> '; color: var(--inkFaint); }
 
     input[type=text], input[type=password], input[type=url] {
       width: 100%;
-      background: var(--input-bg);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      padding: 11px 14px;
-      border-radius: 11px;
-      font-size: 14px; outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      font-family: inherit;
+      background: var(--bg);
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      padding: 9px 10px;
+      font-size: 13px; outline: none;
+      font-family: var(--mono); letter-spacing: 0.3px;
     }
     input[type=text]:focus, input[type=password]:focus, input[type=url]:focus {
-      border-color: rgba(167,139,250,0.6);
-      box-shadow: 0 0 0 3px rgba(167,139,250,0.12);
+      box-shadow: inset 0 0 0 1px var(--ink);
+      background: var(--raise);
     }
+    input::placeholder { color: var(--inkFaint); }
+
     input[type=file] {
       width: 100%;
-      background: var(--input-bg);
-      border: 1.5px dashed var(--border2);
-      color: var(--sub);
-      padding: 9px 12px;
-      border-radius: 11px;
-      font-size: 13px; cursor: pointer; outline: none;
-      font-family: inherit;
+      background: var(--bg);
+      border: 1px dashed var(--ink);
+      color: var(--inkSoft);
+      padding: 8px 10px;
+      font-size: 11px; cursor: pointer; outline: none;
+      font-family: var(--mono);
     }
     input[type=file]::file-selector-button {
-      background: rgba(167,139,250,0.12);
-      border: 1px solid rgba(167,139,250,0.25);
-      color: var(--accent);
-      padding: 5px 12px; border-radius: 7px;
-      font-size: 11px; cursor: pointer; margin-right: 10px;
-      font-family: inherit; transition: background 0.15s;
+      background: var(--bg); color: var(--ink);
+      border: 1px solid var(--ink); padding: 5px 12px;
+      font-size: 10px; cursor: pointer; margin-right: 10px;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; transition: background 0.1s, color 0.1s;
     }
-    input[type=file]::file-selector-button:hover { background: rgba(167,139,250,0.22); }
+    input[type=file]::file-selector-button:hover { background: var(--ink); color: var(--bg); }
 
     /* ── Sync ── */
-    .label-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .label-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
     .label-row label { margin-bottom: 0; }
     .sync-badge {
-      font-size: 10px;
-      background: rgba(167,139,250,0.1);
-      color: var(--accent);
-      padding: 2px 8px; border-radius: 99px; display: none;
-      white-space: nowrap; border: 1px solid rgba(167,139,250,0.2);
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px;
+      background: var(--accent); color: var(--ink);
+      padding: 1px 6px; display: none; white-space: nowrap;
     }
     .reset-link {
-      background: none; border: none; color: var(--dim);
-      font-size: 11px; cursor: pointer; padding: 4px 0;
-      margin-top: 4px; display: none; font-family: inherit;
+      background: transparent; border: none; color: var(--inkSoft);
+      font-size: 10.5px; cursor: pointer; padding: 4px 0;
+      margin-top: 4px; display: none; font-family: var(--mono); letter-spacing: 0.5px;
     }
-    .reset-link:hover { color: var(--sub); }
+    .reset-link:hover { color: var(--ink); text-decoration: underline; }
 
     /* ── Preview ── */
     .preview { margin-top: 8px; display: none; }
     .preview img {
-      width: 100%; height: auto; border-radius: 10px;
-      border: 1px solid var(--border); object-fit: contain;
+      width: 100%; height: auto;
+      border: 1px solid var(--ink); object-fit: contain; display: block;
     }
 
     /* ── Mark toggle ── */
     .mark-toggle {
-      background: none; border: none; color: var(--dim);
-      font-size: 11px; cursor: pointer; padding: 5px 0;
-      margin-top: 4px; display: none; text-align: left; font-family: inherit;
+      background: transparent; border: 1px solid var(--ink); color: var(--ink);
+      font-size: 11px; cursor: pointer; padding: 5px 10px;
+      margin-top: 8px; display: none; text-align: left;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+      transition: background 0.1s, color 0.1s;
     }
-    .mark-toggle:hover { color: var(--sub); }
-    .mark-toggle.active { color: var(--ok); }
+    .mark-toggle:hover { background: var(--ink); color: var(--bg); }
+    .mark-toggle.active { background: var(--accent); color: var(--ink); border-color: var(--ink); }
 
     /* ── Mark panel ── */
     .mark-panel {
       margin-top: 8px;
-      background: #f8f7fc;
-      border: 1px solid var(--border);
-      border-radius: 12px; padding: 12px; display: none;
+      background: var(--bg);
+      border: 1px solid var(--ink);
+      padding: 10px; display: none;
     }
     .mark-panel canvas {
       display: block; width: 100%; height: auto;
-      border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border);
+      margin-bottom: 10px; border: 1px solid var(--ink);
     }
     .mark-ctrl { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .mark-ctrl .lbl { font-size: 11px; color: var(--sub); width: 42px; flex-shrink: 0; }
+    .mark-ctrl .lbl {
+      font-size: 10px; color: var(--inkSoft); width: 42px;
+      flex-shrink: 0; letter-spacing: 1px;
+    }
     .mark-ctrl input[type=range] {
-      flex: 1; height: 2px; -webkit-appearance: none; appearance: none;
-      background: var(--border2); border-radius: 2px; outline: none;
+      flex: 1; height: 18px;
+      -webkit-appearance: none; appearance: none; background: transparent; outline: none;
+    }
+    .mark-ctrl input[type=range]::-webkit-slider-runnable-track {
+      height: 1px; background: var(--ink);
+    }
+    .mark-ctrl input[type=range]::-moz-range-track {
+      height: 1px; background: var(--ink);
     }
     .mark-ctrl input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 14px; height: 14px;
-      background: var(--accent); border-radius: 50%; cursor: pointer;
-      border: 2px solid var(--bg);
+      -webkit-appearance: none;
+      width: 14px; height: 14px; background: var(--accent);
+      border: 1px solid var(--ink); cursor: pointer;
+      margin-top: -7px; border-radius: 0;
     }
-    .mark-ctrl .val { font-size: 11px; color: var(--sub); min-width: 28px; text-align: right; }
-    .mark-btns { display: flex; gap: 6px; margin-top: 10px; }
-    .mark-btns button { flex: 1; padding: 9px; font-size: 13px; border-radius: 8px; cursor: pointer; border: none; font-family: inherit; }
-    .mark-btns .apply {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; font-weight: 600;
+    .mark-ctrl input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px; background: var(--accent);
+      border: 1px solid var(--ink); cursor: pointer; border-radius: 0;
     }
-    .mark-btns .clear {
-      background: #f0eef8; color: var(--sub);
-      border: 1px solid var(--border);
+    .mark-ctrl .val {
+      font-size: 10.5px; color: var(--ink); min-width: 36px;
+      text-align: right; font-weight: 700;
     }
+    .mark-btns { display: flex; gap: 0; margin-top: 10px; }
+    .mark-btns button {
+      flex: 1; padding: 8px; font-size: 11px; cursor: pointer;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+      border: 1px solid var(--ink); margin-left: -1px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .mark-btns button:first-child { margin-left: 0; }
+    .mark-btns .apply { background: var(--accent); color: var(--ink); }
+    .mark-btns .apply:hover { background: var(--ink); color: var(--accent); }
+    .mark-btns .clear { background: transparent; color: var(--ink); }
+    .mark-btns .clear:hover { background: var(--ink); color: var(--bg); }
 
     /* ── Main button ── */
     .btn {
-      width: 100%; padding: 14px;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-      color: #fff; font-size: 15px; font-weight: 600;
-      border: none; border-radius: 13px; cursor: pointer;
-      margin-top: 10px; font-family: inherit;
-      transition: opacity 0.15s, transform 0.1s; letter-spacing: 0.03em;
+      width: 100%; padding: 12px 14px; cursor: pointer;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); font-family: var(--mono);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px; text-align: left;
+      margin-top: 14px; transition: background 0.1s, color 0.1s;
     }
-    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
-    .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+    .btn:hover { background: var(--ink); color: var(--accent); }
+    .btn:active { background: var(--ink); color: var(--accent); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
+    .btn .arr { float: right; }
 
     /* ── Status ── */
-    .status { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 13px; display: none; }
-    .status.ok  { background: #f0fdf4; color: var(--ok);  border: 1px solid #bbf7d0; display: block; }
-    .status.err { background: #fff1f2; color: var(--err); border: 1px solid #fecdd3; display: block; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+    .status {
+      margin-top: 12px; padding: 8px 10px;
+      font-size: 11.5px; display: none; font-family: var(--mono);
+      border: 1px dashed var(--ink);
+    }
+    .status::before { content: '[..] '; color: var(--inkFaint); font-weight: 700; }
+    .status.ok  { color: var(--ok); border-color: var(--ok); }
+    .status.ok::before { content: '[OK] '; }
+    .status.err {
+      color: var(--err); border-color: var(--err);
+      white-space: pre-wrap; word-break: break-all; max-height: 240px; overflow-y: auto;
+    }
+    .status.err::before { content: '[ERR] '; }
 
     /* ── Result URL ── */
-    #resultUrl { margin-top: 10px; display: none; }
-    #urlOutput { color: var(--ok); cursor: text; font-size: 13px; }
-    .url-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
-    .url-row input { flex: 1; }
-    .copy-url-btn {
-      flex-shrink: 0; padding: 11px 14px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; font-size: 13px; font-weight: 600;
-      border: none; border-radius: 11px; cursor: pointer;
-      font-family: inherit; white-space: nowrap; transition: opacity 0.15s;
+    #resultUrl { margin-top: 12px; display: none; }
+    .url-row { display: flex; gap: 0; align-items: stretch; margin-top: 4px; }
+    .url-row input {
+      flex: 1; color: var(--ok); font-weight: 500;
+      background: var(--raise);
     }
-    .copy-url-btn:hover { opacity: 0.85; }
+    .copy-url-btn {
+      flex-shrink: 0; padding: 0 14px; min-height: 38px;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); margin-left: -1px;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.5px; cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .copy-url-btn:hover { background: var(--ink); color: var(--accent); }
+
+    /* ── Foot ── */
+    .foot {
+      margin-top: 18px; padding-top: 10px;
+      border-top: 1px dashed var(--hair);
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--inkFaint); letter-spacing: 1.2px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
 
-    <header class="site-header">
-      <div class="site-title">✦ Admin</div>
-      <div id="lastUpdated">最終更新: <span></span></div>
+    <!-- Top stamp -->
+    <div class="stamp">
+      <div><span class="badge">ADMIN</span>v1.0 · page generator</div>
+      <div id="stampDate"></div>
+    </div>
+
+    <header class="head">
+      <div>
+        <div class="meta">## /usr/local/admin</div>
+        <div class="title">GENERATOR_</div>
+      </div>
+      <div id="lastUpdated">last commit <span></span></div>
     </header>
 
     <div class="card">
+      <div class="card-title">AUTH</div>
       <div class="field">
-        <label>GitHub Token</label>
+        <label>github token</label>
         <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">新規生成</div>
+      <div class="card-title">NEW / generate</div>
 
       <div class="field">
-        <label>ユーザー名</label>
-        <input type="text" id="username" placeholder="例: taro">
+        <label>username</label>
+        <input type="text" id="username" placeholder="taro">
       </div>
       <div class="field">
-        <label>フォルダ名</label>
-        <input type="text" id="folder" placeholder="例: 20260430_1200">
+        <label>folder name</label>
+        <input type="text" id="folder" placeholder="20260430_1200">
       </div>
       <div class="field">
-        <label>タイトル（OGP・ページ名）</label>
+        <label>title (ogp / page)</label>
         <input type="text" id="title" placeholder="【速報】衝撃映像が話題に">
       </div>
 
       <div class="field">
-        <label>メタ用画像 → card.jpg</label>
+        <label>meta image → card.jpg</label>
         <input type="file" id="metaImage" accept="image/*">
         <div id="metaPreview" class="preview"><img></div>
-        <button type="button" class="mark-toggle" id="metaMarkToggle" onclick="toggleMarkPanel('meta')">▶ 再生マーク</button>
+        <button type="button" class="mark-toggle" id="metaMarkToggle" onclick="toggleMarkPanel('meta')">[▸] play mark</button>
         <div class="mark-panel" id="metaMarkPanel">
           <canvas id="metaMarkCanvas"></canvas>
-          <div class="mark-ctrl"><span class="lbl">サイズ</span><input type="range" id="metaMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkSizeVal">20%</span></div>
-          <div class="mark-ctrl"><span class="lbl">濃さ</span><input type="range" id="metaMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkOpacityVal">60%</span></div>
-          <div class="mark-btns"><button class="apply" onclick="applyMark('meta')">適用</button><button class="clear" onclick="clearMark('meta')">クリア</button></div>
+          <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="metaMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="metaMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('meta')">$ apply ▶</button><button class="clear" onclick="clearMark('meta')">clear</button></div>
         </div>
       </div>
 
       <div class="field">
         <div class="label-row">
-          <label>サイト用画像 → thumb.jpg</label>
-          <span id="syncBadge" class="sync-badge">メタと同じ</span>
+          <label>site image → thumb.jpg</label>
+          <span id="syncBadge" class="sync-badge">SYNC ⇆ META</span>
         </div>
         <input type="file" id="siteImage" accept="image/*">
         <div id="sitePreview" class="preview"><img></div>
-        <button type="button" class="mark-toggle" id="siteMarkToggle" onclick="toggleMarkPanel('site')">▶ 再生マーク</button>
+        <button type="button" class="mark-toggle" id="siteMarkToggle" onclick="toggleMarkPanel('site')">[▸] play mark</button>
         <div class="mark-panel" id="siteMarkPanel">
           <canvas id="siteMarkCanvas"></canvas>
-          <div class="mark-ctrl"><span class="lbl">サイズ</span><input type="range" id="siteMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkSizeVal">20%</span></div>
-          <div class="mark-ctrl"><span class="lbl">濃さ</span><input type="range" id="siteMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkOpacityVal">60%</span></div>
-          <div class="mark-btns"><button class="apply" onclick="applyMark('site')">適用</button><button class="clear" onclick="clearMark('site')">クリア</button></div>
+          <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="siteMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="siteMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('site')">$ apply ▶</button><button class="clear" onclick="clearMark('site')">clear</button></div>
         </div>
-        <button type="button" id="resetSyncBtn" class="reset-link" onclick="resetSync()">↩ メタ用と同じに戻す</button>
+        <button type="button" id="resetSyncBtn" class="reset-link" onclick="resetSync()">↩ reset to meta</button>
       </div>
 
       <div class="field">
-        <label>アカウント名</label>
+        <label>account name</label>
         <input type="text" id="name" placeholder="速報ニュース">
       </div>
       <div class="field">
-        <label>リンク先URL</label>
+        <label>destination url</label>
         <input type="url" id="yturl" placeholder="https://...">
       </div>
 
-      <button class="btn" id="submitBtn" onclick="generate()">生成・更新する</button>
+      <button class="btn" id="submitBtn" onclick="generate()">$ generate &amp; commit <span class="arr">▶</span></button>
       <div class="status" id="status"></div>
       <div id="resultUrl">
-        <label>生成されたURL</label>
+        <label>generated url</label>
         <div class="url-row">
           <input id="urlOutput" readonly onclick="this.select()">
-          <button class="copy-url-btn" id="copyUrlBtn" onclick="copyGenUrl()">コピー</button>
+          <button class="copy-url-btn" id="copyUrlBtn" onclick="copyGenUrl()">COPY</button>
         </div>
       </div>
     </div>
 
+    <div class="foot">
+      <span>// admin.v1.0 · github contents api</span>
+      <span id="footTime"></span>
+    </div>
 
   </div>
 
@@ -291,6 +362,17 @@
     const OWNER  = 'inofo3';
     const REPO   = 'info2';
     const BRANCH = 'main';
+
+    // ── stamp date
+    (function () {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const dow = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+      const txt = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${dow} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      document.getElementById('stampDate').textContent = txt;
+      const ft = document.getElementById('footTime');
+      if (ft) ft.textContent = `// session ${txt}`;
+    })();
 
     function genFolderName() {
       const d = new Date();
@@ -408,7 +490,7 @@
     function resetMarkUI(type) {
       const toggle = document.getElementById(type + 'MarkToggle');
       const panel  = document.getElementById(type + 'MarkPanel');
-      toggle.textContent = '▶ 再生マーク';
+      toggle.textContent = '[▸] play mark';
       toggle.classList.remove('active');
       panel.style.display = 'none';
       toggle.style.display = (type === 'site' && siteLinked) ? 'none' : 'block';
@@ -495,7 +577,7 @@
         document.getElementById('sitePreview').querySelector('img').src = dataUrl;
       }
       const toggle = document.getElementById(type + 'MarkToggle');
-      toggle.textContent = '✓ 適用済み';
+      toggle.textContent = '[✓] applied';
       toggle.classList.add('active');
       document.getElementById(type + 'MarkPanel').style.display = 'none';
     }
@@ -509,7 +591,7 @@
         if (siteCroppedUrl) document.getElementById('sitePreview').querySelector('img').src = siteCroppedUrl;
       }
       const toggle = document.getElementById(type + 'MarkToggle');
-      toggle.textContent = '▶ 再生マーク';
+      toggle.textContent = '[▸] play mark';
       toggle.classList.remove('active');
       document.getElementById(type + 'MarkPanel').style.display = 'none';
     }
@@ -585,7 +667,7 @@
           `ファイル: ${path}`,
           `ステータス: ${res.status}`,
           `GitHub: ${err.message || JSON.stringify(err)}`,
-          res.status === 409 ? `→ 3回リトライしてもSHA不一致。ブラウザのコンソールで詳細を確認してください。` : ''
+          res.status === 409 ? `→ 3回リトライしてもSHA不一致。コンソールで詳細を確認してください。` : ''
         ].filter(Boolean).join('\n');
         throw new Error(detail);
       }
@@ -689,8 +771,8 @@
       if (!url) return;
       const btn = document.getElementById('copyUrlBtn');
       navigator.clipboard.writeText(url).then(() => {
-        btn.textContent = '✓';
-        setTimeout(() => { btn.textContent = 'コピー'; }, 1600);
+        btn.textContent = '[✓] OK';
+        setTimeout(() => { btn.textContent = 'COPY'; }, 1600);
       });
     }
 
@@ -750,7 +832,7 @@
         await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
 
         status.className = 'status ok';
-        status.textContent = '✓ 生成完了';
+        status.textContent = '生成完了';
         showLastUpdated();
         document.getElementById('urlOutput').value = `https://click-click.site/${path}/`;
         document.getElementById('resultUrl').style.display = 'block';
