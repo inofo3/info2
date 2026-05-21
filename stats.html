@@ -3,207 +3,326 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stats</title>
+  <title>STATS · analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
+    :root {
+      --bg:      #ecebe6;
+      --surface: #f4f3ee;
+      --ink:     #101010;
+      --inkSoft: rgba(16,16,16,0.55);
+      --inkFaint:rgba(16,16,16,0.30);
+      --hair:    rgba(16,16,16,0.18);
+      --accent:  #e8ff5a;
+      --pos:     #1a7a3a;
+      --warn:    #b78104;
+      --neg:     #b71d10;
+      --mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f2f2f7;
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--ink);
+      background-image:
+        repeating-linear-gradient(0deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px),
+        repeating-linear-gradient(90deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px);
       min-height: 100vh;
-      padding: 24px 16px;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* ログイン画面 */
-    .login-wrap {
-      max-width: 320px;
-      margin: 80px auto 0;
+    /* ── Top stamp ── */
+    .stamp {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 720px; margin: 0 auto 16px;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--inkSoft);
     }
-    .login-wrap h1 { font-size: 18px; color: #aaa; margin-bottom: 24px; text-align: center; }
-    .login-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    }
-    .lfield { margin-bottom: 14px; }
-    .lfield label { display: block; font-size: 11px; color: #aaa; margin-bottom: 6px; }
+    .stamp .badge { background: var(--ink); color: var(--bg); padding: 3px 6px; font-weight: 700; margin-right: 8px; }
+
+    /* ── Login ── */
+    .login-wrap { width: 100%; max-width: 380px; margin: 6vh auto 0; }
+    .h-section { font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft); margin-bottom: 4px; }
+    .h-title { font-size: 38px; font-weight: 700; letter-spacing: -1px; line-height: 1; margin-bottom: 14px; color: var(--ink); }
+
+    .login-card { border: 1px solid var(--ink); background: var(--surface); padding: 14px; }
+
+    .lfield { margin-bottom: 12px; }
+    .lfield label { display: block; font-size: 10px; letter-spacing: 1.2px; color: var(--inkSoft); margin-bottom: 4px; }
+    .lfield .inp { display: flex; align-items: center; border: 1px solid var(--ink); background: var(--bg); }
+    .lfield .prompt { padding: 0 8px; font-size: 12px; color: var(--inkSoft); font-weight: 700; }
     .lfield input {
-      width: 100%;
-      background: #f2f2f7;
-      border: none;
-      color: #111;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
+      flex: 1; padding: 9px 8px 9px 0; background: transparent; border: none; outline: none;
+      font-family: var(--mono); font-size: 13px; color: var(--ink); letter-spacing: 0.5px;
     }
+    .lfield input::placeholder { color: var(--inkFaint); }
+
     .login-btn {
-      width: 100%;
-      padding: 14px;
-      background: #111;
-      color: #fff;
-      font-size: 15px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 4px;
+      width: 100%; padding: 12px 14px; cursor: pointer;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); font-family: var(--mono);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px; text-align: left;
+      transition: background 0.1s;
     }
-    .login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .login-err { font-size: 12px; color: #ef4444; margin-top: 10px; text-align: center; display: none; }
+    .login-btn:hover { background: var(--ink); color: var(--accent); }
+    .login-btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
+    .login-btn .arr { float: right; }
 
-    /* Stats 画面 */
-    .stats-wrap { display: none; max-width: 600px; margin: 0 auto; }
+    .login-err {
+      font-size: 11px; margin-top: 12px; padding: 6px 10px;
+      color: var(--neg); border: 1px dashed var(--neg); display: none;
+    }
+    .login-foot { margin-top: 12px; text-align: center; font-size: 9.5px; color: var(--inkFaint); letter-spacing: 1px; }
+
+    /* ── Stats ── */
+    .stats-wrap { display: none; max-width: 720px; margin: 0 auto; }
+
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+      border-bottom: 1px solid var(--ink); padding-bottom: 14px; margin-bottom: 18px;
     }
-    .topbar h1 { font-size: 16px; color: #aaa; }
+    .topbar .id .meta { font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft); margin-bottom: 2px; }
+    .topbar .id .who { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .topbar .id .who .at { color: var(--inkSoft); font-weight: 400; }
     .logout-btn {
-      background: none;
-      border: 1px solid #ddd;
-      color: #aaa;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
+      background: transparent; color: var(--ink); border: 1px solid var(--ink);
+      padding: 6px 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px; cursor: pointer;
+    }
+    .logout-btn:hover { background: var(--ink); color: var(--bg); }
+
+    /* metrics row — segmented hairline grid */
+    .card { background: var(--surface); border: 1px solid var(--ink); padding: 0; margin-bottom: 14px; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--ink); }
+    .metric {
+      padding: 14px 12px 12px; cursor: pointer; border-right: 1px dashed var(--hair);
+      position: relative; transition: background 0.12s;
+    }
+    .metric:last-child { border-right: none; }
+    .metric:hover { background: rgba(16,16,16,0.04); }
+    .metric.active { background: var(--ink); color: var(--bg); }
+    .metric.active .metric-label { color: var(--accent); }
+    .metric-label { font-size: 10px; letter-spacing: 1.2px; color: var(--inkSoft); margin-bottom: 6px; }
+    .metric-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: inherit; }
+    .metric.active::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+      height: 3px; background: var(--accent);
     }
 
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px 20px 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    .chart-block { padding: 10px 12px 8px; }
+    .chart-head {
+      display: flex; justify-content: space-between;
+      font-size: 9.5px; color: var(--inkSoft); letter-spacing: 1px; margin-bottom: 4px;
     }
-    .metrics { display: flex; margin-bottom: 20px; }
-    .metric { flex: 1; padding-bottom: 10px; border-bottom: 2px solid #eee; cursor: pointer; }
-    .metric.active { border-bottom-color: #3b82f6; }
-    .metric-label { font-size: 11px; color: #aaa; margin-bottom: 4px; }
-    .metric.active .metric-label { color: #3b82f6; }
-    .metric-value { font-size: 22px; font-weight: 600; color: #111; }
-    .chart-wrap { position: relative; height: 160px; }
+    .chart-wrap { position: relative; height: 170px; }
+    .chart-foot {
+      display: flex; justify-content: space-between;
+      font-size: 9.5px; color: var(--inkSoft); letter-spacing: 1px; margin-top: 4px;
+    }
+
+    /* site list */
+    .sites-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft);
+      margin-bottom: 6px;
+    }
+    .sites-head .count { color: var(--ink); font-weight: 700; }
 
     .site-card {
-      background: #fff;
-      border-radius: 16px;
-      margin-bottom: 8px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--ink);
+      margin-top: -1px; overflow: hidden;
     }
-    .site-row { display: flex; align-items: center; padding: 12px 14px; gap: 10px; }
+    .site-row { display: flex; align-items: center; padding: 10px 12px; gap: 12px; }
     .site-thumb {
-      width: 52px; height: 52px; border-radius: 9px;
-      object-fit: cover; flex-shrink: 0; background: #f2f2f7;
+      width: 44px; height: 44px;
+      object-fit: cover; flex-shrink: 0;
+      background: var(--bg);
+      border: 1px solid var(--hair);
     }
     .site-info { flex: 1; min-width: 0; }
-    .site-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
-    .site-path { font-size: 13px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
-    .site-btns { display: flex; gap: 5px; flex-shrink: 0; }
-    .site-nums { display: flex; flex-wrap: wrap; gap: 4px 12px; }
-    .site-num { font-size: 12px; color: #888; }
-    .site-num b { color: #111; font-weight: 600; }
-    .ctr-high b { color: #22c55e; }
-    .ctr-mid  b { color: #f59e0b; }
-    .ctr-low  b { color: #ef4444; }
+    .site-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 4px;
+    }
+    .site-path {
+      font-size: 13px; font-weight: 700; color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex: 1; min-width: 0; letter-spacing: -0.2px;
+    }
+    .site-path::before { content: '/'; color: var(--inkSoft); font-weight: 400; }
+    .site-btns { display: flex; gap: 0; flex-shrink: 0; }
+    .site-nums {
+      display: flex; flex-wrap: wrap; gap: 0;
+      font-size: 11px; color: var(--inkSoft);
+    }
+    .site-num {
+      padding: 1px 8px; border-right: 1px dashed var(--hair);
+    }
+    .site-num:last-child { border-right: none; padding-right: 0; }
+    .site-num:first-child { padding-left: 0; }
+    .site-num b { color: var(--ink); font-weight: 700; }
+    .ctr-high b { color: var(--pos); }
+    .ctr-mid  b { color: var(--warn); }
+    .ctr-low  b { color: var(--neg); }
     .pv-h-badge {
-      display: inline-block; font-size: 11px; font-weight: 700;
-      color: #3b82f6; background: rgba(59,130,246,0.08);
-      padding: 1px 7px; border-radius: 20px; white-space: nowrap;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      color: var(--ink); background: var(--accent);
+      padding: 1px 5px; white-space: nowrap; margin-left: 8px;
     }
-    .pv-h-badge.zero { color: #bbb; background: #f5f5f5; }
-    .copy-btn {
-      flex-shrink: 0; padding: 6px 11px;
-      background: #f2f2f7; border: none; border-radius: 8px;
-      font-size: 12px; color: #888; font-weight: 600; cursor: pointer;
-      transition: color 0.15s;
+    .pv-h-badge.zero { color: var(--inkFaint); background: transparent; border: 1px dashed var(--hair); }
+
+    .copy-btn, .url-btn {
+      padding: 5px 9px; background: transparent;
+      border: 1px solid var(--ink); border-radius: 0;
+      font-family: var(--mono); font-size: 10px; font-weight: 700;
+      color: var(--ink); cursor: pointer; margin-left: -1px;
+      letter-spacing: 0.5px; line-height: 1.2;
+      transition: background 0.1s, color 0.1s;
     }
-    .copy-btn.copied { color: #22c55e; }
-    .url-btn {
-      flex-shrink: 0; padding: 6px 11px;
-      background: #f2f2f7; border: none; border-radius: 8px;
-      font-size: 12px; color: #888; font-weight: 600; cursor: pointer; margin-left: 4px;
+    .copy-btn:hover, .url-btn:hover { background: var(--ink); color: var(--bg); }
+    .copy-btn.copied { background: var(--accent); color: var(--ink); }
+
+    /* edit panel */
+    .edit-wrap {
+      display: none; padding: 10px 12px 12px;
+      border-top: 1px dashed var(--ink);
+      background: rgba(16,16,16,0.04);
     }
-    .url-btn:hover { background: #e5e5ec; color: #555; }
-    .edit-wrap { display: none; padding: 12px 16px 14px; border-top: 1px solid #f2f2f7; }
     .edit-wrap.open { display: block; }
-    .edit-lbl { font-size: 11px; color: #aaa; margin-bottom: 4px; }
+    .edit-lbl { font-size: 10px; letter-spacing: 1.2px; color: var(--inkSoft); margin-bottom: 4px; margin-top: 6px; }
+    .edit-lbl:first-child { margin-top: 0; }
     .edit-input {
-      width: 100%; background: #f2f2f7; border: none; color: #111;
-      padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none;
-      margin-bottom: 8px; font-family: inherit;
+      width: 100%; background: var(--bg); border: 1px solid var(--ink);
+      color: var(--ink); padding: 8px 10px; font-size: 12px; outline: none;
+      margin-bottom: 4px; font-family: var(--mono);
     }
-    .edit-input:focus { box-shadow: 0 0 0 2px rgba(59,130,246,0.18); }
-    .edit-btns { display: flex; gap: 6px; }
+    .edit-input:focus { box-shadow: inset 0 0 0 1px var(--ink); }
+
+    .edit-btns { display: flex; gap: 0; margin-top: 8px; }
     .edit-ok {
-      flex: 1; padding: 9px; background: #111; color: #fff;
-      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
-      cursor: pointer; font-family: inherit;
+      flex: 1; padding: 9px; background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); font-family: var(--mono);
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      cursor: pointer; text-align: left;
+      transition: background 0.1s;
     }
-    .edit-ok:disabled { opacity: 0.4; cursor: not-allowed; }
+    .edit-ok:hover { background: var(--ink); color: var(--accent); }
+    .edit-ok:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
+    .edit-ok .arr { float: right; }
     .edit-cancel {
-      padding: 9px 14px; background: #f2f2f7; color: #888;
-      border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;
+      padding: 9px 14px; background: transparent; color: var(--ink);
+      border: 1px solid var(--ink); margin-left: -1px;
+      font-family: var(--mono); font-size: 11px; cursor: pointer;
     }
-    .edit-st { font-size: 12px; margin-top: 8px; display: none; }
-    .edit-st.ok  { color: #22c55e; display: block; }
-    .edit-st.err { color: #ef4444; display: block; }
+    .edit-cancel:hover { background: var(--ink); color: var(--bg); }
+
+    .edit-st { font-size: 11px; margin-top: 8px; padding: 5px 8px; display: none; }
+    .edit-st.ok  { color: var(--pos); border: 1px dashed var(--pos); display: block; }
+    .edit-st.err { color: var(--neg); border: 1px dashed var(--neg); display: block; }
+
+    .foot {
+      margin-top: 18px; padding-top: 10px; border-top: 1px dashed var(--hair);
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--inkFaint); letter-spacing: 1.2px;
+    }
   </style>
 </head>
 <body>
 
+  <!-- Top stamp -->
+  <div class="stamp">
+    <div><span class="badge">STATS</span>v1.0 · analytics</div>
+    <div id="stampDate"></div>
+  </div>
+
   <!-- ログイン画面 -->
   <div class="login-wrap" id="loginWrap">
-    <h1>Stats</h1>
+    <div class="h-section">## /usr/local/auth</div>
+    <div class="h-title">AUTH_</div>
     <div class="login-card">
       <div class="lfield">
-        <label>ユーザー名</label>
-        <input type="text" id="loginUser" placeholder="例: taro" autocomplete="username">
+        <label>username</label>
+        <div class="inp">
+          <span class="prompt">&gt;</span>
+          <input type="text" id="loginUser" placeholder="taro" autocomplete="username">
+        </div>
       </div>
       <div class="lfield">
-        <label>PIN</label>
-        <input type="password" id="loginPin" placeholder="••••" autocomplete="current-password">
+        <label>pin</label>
+        <div class="inp">
+          <span class="prompt">#</span>
+          <input type="password" id="loginPin" placeholder="••••" autocomplete="current-password">
+        </div>
       </div>
-      <button class="login-btn" id="loginBtn" onclick="login()">ログイン</button>
-      <div class="login-err" id="loginErr">ユーザー名またはPINが違います</div>
+      <button class="login-btn" id="loginBtn" onclick="login()">
+        $ stats login <span class="arr">▶</span>
+      </button>
+      <div class="login-err" id="loginErr">[ERR] ユーザー名またはPINが違います</div>
     </div>
+    <div class="login-foot">// supabase rpc verify_pin</div>
   </div>
 
   <!-- Stats 画面 -->
   <div class="stats-wrap" id="statsWrap">
     <div class="topbar">
-      <h1 id="statsTitle">Stats</h1>
-      <button class="logout-btn" onclick="logout()">ログアウト</button>
+      <div class="id">
+        <div class="meta">## SESSION ACTIVE</div>
+        <div class="who"><span class="at">@</span><span id="statsTitle">Stats</span></div>
+      </div>
+      <button class="logout-btn" onclick="logout()">$ logout ↗</button>
     </div>
+
+    <div class="h-section" style="margin-bottom:6px;">## OVERVIEW / last 24h</div>
 
     <div class="card">
       <div class="metrics">
         <div class="metric active" onclick="switchMetric('pv', this)">
-          <div class="metric-label">PV</div>
+          <div class="metric-label">[01] PV</div>
           <div class="metric-value" id="m-pv">—</div>
         </div>
         <div class="metric" onclick="switchMetric('ct', this)">
-          <div class="metric-label">CT</div>
+          <div class="metric-label">[02] CT</div>
           <div class="metric-value" id="m-ct">—</div>
         </div>
         <div class="metric" onclick="switchMetric('pv', this)">
-          <div class="metric-label">CTR</div>
+          <div class="metric-label">[03] CTR</div>
           <div class="metric-value" id="m-ctr">—</div>
         </div>
         <div class="metric" onclick="switchMetric('ct', this)">
-          <div class="metric-label">推定CT/h</div>
+          <div class="metric-label">[04] CT/H</div>
           <div class="metric-value" id="m-cth">—</div>
         </div>
       </div>
-      <div class="chart-wrap">
-        <canvas id="chart-overall"></canvas>
+      <div class="chart-block">
+        <div class="chart-head">
+          <span>┌ 24H-SERIES</span>
+          <span id="chartHeadMax">PEAK —</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart-overall"></canvas>
+        </div>
+        <div class="chart-foot">
+          <span>└ -24H</span>
+          <span>NOW ◀</span>
+        </div>
       </div>
     </div>
 
+    <div class="sites-head">
+      <span>## SITES.LOG</span>
+      <span>n=<span class="count" id="siteCount">—</span></span>
+    </div>
+
     <div id="site-list"></div>
+
+    <div class="foot">
+      <span>// stats.v1.0 · supabase + github</span>
+      <span id="footTime"></span>
+    </div>
   </div>
 
   <script>
@@ -213,12 +332,33 @@
     const REPO   = 'info2';
     const BRANCH = 'main';
 
+    // brutalist palette mirrored into JS for Chart.js
+    const COL = {
+      ink:     '#101010',
+      inkSoft: 'rgba(16,16,16,0.55)',
+      inkFaint:'rgba(16,16,16,0.30)',
+      hair:    'rgba(16,16,16,0.10)',
+      accent:  '#e8ff5a',
+      bg:      '#ecebe6',
+    };
+
+    // ── stamp date
+    (function () {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const dow = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+      const txt = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${dow} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      document.getElementById('stampDate').textContent = txt;
+      const ft = document.getElementById('footTime');
+      if (ft) ft.textContent = `// updated ${txt}`;
+    })();
+
     function copyUrl(path, btn) {
       const url = `https://click-click.site/${path}/`;
       navigator.clipboard.writeText(url).then(() => {
-        btn.textContent = '✓';
+        btn.textContent = '[✓] OK';
         btn.classList.add('copied');
-        setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 1600);
+        setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1600);
       });
     }
 
@@ -236,12 +376,12 @@
       const status = document.getElementById('editst-' + eid);
       const btn    = wrap.querySelector('.edit-ok');
       if (!token || !newUrl) {
-        status.textContent = 'TokenとURLを入力してください';
+        status.textContent = '[ERR] TokenとURLを入力してください';
         status.className = 'edit-st err';
         return;
       }
       btn.disabled = true;
-      status.textContent = '更新中...';
+      status.textContent = '[..] 更新中...';
       status.className = 'edit-st';
       status.style.display = 'block';
       try {
@@ -259,12 +399,12 @@
         );
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || `HTTP ${res.status}`); }
         localStorage.setItem('gh_token', token);
-        status.textContent = '✓ 変更しました';
+        status.textContent = '[OK] 変更しました';
         status.className = 'edit-st ok';
         wrap.querySelector('.edit-url').value = '';
         setTimeout(() => { wrap.classList.remove('open'); status.style.display = 'none'; }, 1800);
       } catch (e) {
-        status.textContent = 'エラー: ' + e.message;
+        status.textContent = '[ERR] ' + e.message;
         status.className = 'edit-st err';
       }
       btn.disabled = false;
@@ -272,11 +412,11 @@
 
     let currentUser  = null;
     let overallChart = null;
-    let pvByHour = [], ctByHour = [];   // Array[24]: slot 0=23h ago, slot 23=current
+    let pvByHour = [], ctByHour = [];
     let pvByPath = {}, ctByPath = {};
     let hourLabels   = [];
     let estimatedCtPerHour = 0;
-    let _slotBaseTs  = 0;               // current-hour start in ms (UTC)
+    let _slotBaseTs  = 0;
 
     // hub or セッションでログイン済みならスキップ
     const saved = sessionStorage.getItem('stats_user') || localStorage.getItem('hub_user');
@@ -334,7 +474,7 @@
       _slotBaseTs = base.getTime();
       hourLabels  = [];
       for (let i = 23; i >= 0; i--) {
-        hourLabels.push(`${new Date(_slotBaseTs - i * 3600000).getHours()}時`);
+        hourLabels.push(`${new Date(_slotBaseTs - i * 3600000).getHours()}h`);
       }
       return new Array(24).fill(0);
     }
@@ -348,20 +488,24 @@
     function makeChartConfig(labels, data, refValue) {
       const datasets = [{
         data,
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59,130,246,0.08)',
+        borderColor: COL.ink,
+        backgroundColor: 'rgba(232,255,90,0.22)',
         borderWidth: 1.5,
-        pointRadius: 0,
+        pointRadius: (ctx) => ctx.dataIndex === labels.length - 1 ? 3.5 : 0,
+        pointBackgroundColor: COL.accent,
+        pointBorderColor: COL.ink,
+        pointBorderWidth: 1,
         pointHoverRadius: 4,
         fill: true,
-        tension: 0.3,
+        tension: 0,
+        stepped: false,
       }];
       if (refValue != null) {
         datasets.push({
           data: new Array(labels.length).fill(refValue),
-          borderColor: 'rgba(245,158,11,0.6)',
-          borderWidth: 1.2,
-          borderDash: [5, 4],
+          borderColor: COL.ink,
+          borderWidth: 1,
+          borderDash: [3, 3],
           pointRadius: 0,
           fill: false,
           tension: 0,
@@ -374,34 +518,45 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 250 },
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { display: false },
             tooltip: {
               filter: item => item.datasetIndex === 0,
               callbacks: {
-                title: items => items[0].label,
-                label: item => `  ${item.raw} 人`
+                title: items => `[ ${items[0].label} ]`,
+                label:  item => `  ${item.raw} n`
               },
-              backgroundColor: 'rgba(17,17,17,0.82)',
-              padding: { x: 12, y: 8 },
-              titleFont: { size: 11 },
-              bodyFont: { size: 14, weight: '700' },
+              backgroundColor: COL.ink,
+              titleColor: COL.accent,
+              bodyColor: '#ecebe6',
+              titleFont: { family: '"JetBrains Mono", monospace', size: 10, weight: '700' },
+              bodyFont:  { family: '"JetBrains Mono", monospace', size: 12, weight: '700' },
+              padding: { x: 10, y: 6 },
+              cornerRadius: 0,
               displayColors: false,
-              cornerRadius: 8,
+              borderColor: COL.accent,
+              borderWidth: 1,
             }
           },
           scales: {
             x: {
               grid: { display: false },
-              border: { display: false },
-              ticks: { maxTicksLimit: 8, color: '#bbb', font: { size: 10 } }
+              border: { color: COL.ink, width: 1 },
+              ticks: {
+                maxTicksLimit: 7, color: COL.inkSoft,
+                font: { family: '"JetBrains Mono", monospace', size: 9 }
+              }
             },
             y: {
               position: 'right',
-              grid: { color: '#f5f5f5' },
-              border: { display: false },
-              ticks: { precision: 0, color: '#bbb', font: { size: 10 } },
+              grid: { color: COL.hair, drawTicks: false },
+              border: { display: false, dash: [2, 3] },
+              ticks: {
+                precision: 0, color: COL.inkSoft,
+                font: { family: '"JetBrains Mono", monospace', size: 9 }, padding: 6
+              },
               min: 0
             }
           }
@@ -412,14 +567,17 @@
     function switchMetric(type, el) {
       document.querySelectorAll('.metric').forEach(m => m.classList.remove('active'));
       el.classList.add('active');
-      overallChart.data.datasets[0].data = type === 'ct' ? ctByHour : pvByHour;
+      const data = type === 'ct' ? ctByHour : pvByHour;
+      overallChart.data.datasets[0].data = data;
+      const peak = data.reduce((m, v) => v > m ? v : m, 0);
+      document.getElementById('chartHeadMax').textContent = `PEAK ${peak}`;
       if (overallChart.data.datasets.length > 1) {
         overallChart.data.datasets[1].hidden = (type !== 'ct');
       }
       overallChart.update();
     }
 
-function buildSiteList(stats) {
+    function buildSiteList(stats) {
       const list   = document.getElementById('site-list');
       list.innerHTML = '';
       const sorted = [...stats].sort((a, b) => {
@@ -428,16 +586,18 @@ function buildSiteList(stats) {
         return fb.localeCompare(fa);
       });
 
+      document.getElementById('siteCount').textContent = sorted.length;
+
       for (const r of sorted) {
         const folder   = r.path.split('/')[1] ?? r.path;
         const ctr      = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
         const cls      = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
         const eid      = r.path.replace(/\//g, '-');
         const thumbUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/a/${folder}/card.jpg`;
-        const pvH      = pvByPath[r.path]?.[23] ?? 0;   // slot 23 = current hour
+        const pvH      = pvByPath[r.path]?.[23] ?? 0;
         const ctH      = ctByPath[r.path]?.[23] ?? 0;
         const badgeCls = pvH > 0 ? '' : 'zero';
-        const badgeTxt = pvH > 0 ? `+${pvH} PV${ctH > 0 ? ' / +' + ctH + ' CT' : ''}` : `+0/h`;
+        const badgeTxt = pvH > 0 ? `+${pvH} PV${ctH > 0 ? ' / +' + ctH + ' CT' : ''}` : '+0/h';
         const card     = document.createElement('div');
         card.className = 'site-card';
         card.innerHTML = `
@@ -447,8 +607,8 @@ function buildSiteList(stats) {
               <div class="site-top">
                 <div class="site-path">${folder}</div>
                 <div class="site-btns">
-                  <button class="copy-btn" onclick="copyUrl('${r.path}', this)">コピー</button>
-                  <button class="url-btn" onclick="toggleEdit('${eid}')">URL</button>
+                  <button class="copy-btn" onclick="copyUrl('${r.path}', this)">COPY</button>
+                  <button class="url-btn"  onclick="toggleEdit('${eid}')">EDIT</button>
                 </div>
               </div>
               <div class="site-nums">
@@ -460,13 +620,13 @@ function buildSiteList(stats) {
             </div>
           </div>
           <div class="edit-wrap" id="edit-${eid}">
-            <div class="edit-lbl">GitHub Token</div>
+            <div class="edit-lbl"># github token</div>
             <input type="password" class="edit-input edit-tok" placeholder="ghp_xxxx" value="${localStorage.getItem('gh_token') || ''}">
-            <div class="edit-lbl">新しいリンク先URL</div>
+            <div class="edit-lbl"># new link url</div>
             <input type="url" class="edit-input edit-url" placeholder="https://...">
             <div class="edit-btns">
-              <button class="edit-ok" onclick="saveLink('${r.path}','${eid}')">変更する</button>
-              <button class="edit-cancel" onclick="toggleEdit('${eid}')">キャンセル</button>
+              <button class="edit-ok" onclick="saveLink('${r.path}','${eid}')">$ save <span class="arr">▶</span></button>
+              <button class="edit-cancel" onclick="toggleEdit('${eid}')">cancel</button>
             </div>
             <div class="edit-st" id="editst-${eid}"></div>
           </div>`;
@@ -501,7 +661,7 @@ function buildSiteList(stats) {
       document.getElementById('m-ct').textContent  = totalCt.toLocaleString();
       document.getElementById('m-ctr').textContent = ctr + '%';
 
-      pvByHour = initSlots();   // Array[24] も設定し hourLabels も確定
+      pvByHour = initSlots();
       ctByHour = new Array(24).fill(0);
       pvByPath = {};
       ctByPath = {};
@@ -525,6 +685,9 @@ function buildSiteList(stats) {
       const effectiveHours = 23 + (nowRef.getMinutes() + nowRef.getSeconds() / 60) / 60;
       estimatedCtPerHour = +(ctEventTotal / Math.max(effectiveHours, 1)).toFixed(1);
       document.getElementById('m-cth').textContent = estimatedCtPerHour;
+
+      const peak = pvByHour.reduce((m, v) => v > m ? v : m, 0);
+      document.getElementById('chartHeadMax').textContent = `PEAK ${peak}`;
 
       if (overallChart) overallChart.destroy();
       overallChart = new Chart(
