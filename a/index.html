@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TikTok Lite 帳簿</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+  @keyframes rinSlide { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .rin-side-info { display: none; }
+  @media (min-width: 700px) { .rin-side-info { display: block; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+// ─────────────────────────────────────────────────────────────
+// TweaksPanel
+// ─────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;overflow-wrap:anywhere}
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem('tkl_tweaks');
+      return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+    } catch { return defaults; }
+  });
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => {
+      const next = { ...prev, ...edits };
+      try { localStorage.setItem('tkl_tweaks', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+  return [values, setTweak];
+}
+
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(clampToViewport) : null;
+    if (ro) { ro.observe(document.documentElement); return () => ro.disconnect(); }
+    window.addEventListener('resize', clampToViewport);
+    return () => window.removeEventListener('resize', clampToViewport);
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel"
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    return (
+      <TweakRow label={label}>
+        <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+          {options.map((o) => {
+            const v = typeof o === 'object' ? o.value : o;
+            const l = typeof o === 'object' ? o.label : o;
+            return <option key={v} value={v}>{l}</option>;
+          })}
+        </select>
+      </TweakRow>
+    );
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>{sup.map((c, j) => <i key={j} style={{ background: c }} />)}</span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Core
+// ─────────────────────────────────────────────────────────────
+
+const F = { mono: '"JetBrains Mono", ui-monospace, "SF Mono", monospace' };
+
+const yen    = (n) => Math.round(Number(n) || 0).toLocaleString('ja-JP');
+const isY    = (d, y) => d && String(d).startsWith(String(y));
+const isYM   = (d, y, m) => d && String(d).startsWith(`${y}-${String(m).padStart(2,'0')}`);
+const today  = () => new Date().toISOString().split('T')[0];
+
+const themes = {
+  light: {
+    bg:      '#ecebe6',
+    surface: '#f4f3ee',
+    ink:     '#101010',
+    inkSoft: 'rgba(16,16,16,0.55)',
+    inkFaint:'rgba(16,16,16,0.28)',
+    hair:    'rgba(16,16,16,0.16)',
+    neg:     '#b71d10',
+    invert:  '#ecebe6',
+    onInk:   '#ecebe6',
+  },
+  dark: {
+    bg:      '#0d0f13',
+    surface: '#13161b',
+    ink:     '#ecebe6',
+    inkSoft: 'rgba(236,235,230,0.60)',
+    inkFaint:'rgba(236,235,230,0.30)',
+    hair:    'rgba(236,235,230,0.16)',
+    neg:     '#ff8a7a',
+    invert:  '#0d0f13',
+    onInk:   '#0d0f13',
+  },
+};
+
+const ThemeCtx = React.createContext(themes.light);
+const useTheme = () => React.useContext(ThemeCtx);
+
+const gridBgFor = (th) => `
+  repeating-linear-gradient(0deg,  transparent 0 23px, ${th === themes.dark ? 'rgba(236,235,230,0.04)' : 'rgba(16,16,16,0.04)'} 23px 24px),
+  repeating-linear-gradient(90deg, transparent 0 23px, ${th === themes.dark ? 'rgba(236,235,230,0.04)' : 'rgba(16,16,16,0.04)'} 23px 24px)
+`;
+
+function LineChart({ data, w, h, stroke, accent, light = true }) {
+  if (!data || data.length < 2) return (
+    <div style={{ height: h, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F.mono, fontSize: 10, color: light ? 'rgba(16,16,16,0.25)' : 'rgba(236,235,230,0.25)' }}>
+      NO DATA
+    </div>
+  );
+  const min = Math.min(...data) * 0.85;
+  const max = Math.max(...data) * 1.08 || 1;
+  const padX = 4, padY = 8;
+  const iW = w - padX * 2, iH = h - padY * 2;
+  const xAt = (i) => padX + (i / (data.length - 1)) * iW;
+  const yAt = (v) => padY + iH - ((v - min) / ((max - min) || 1)) * iH;
+  const path = data.map((v, i) => `${i === 0 ? 'M' : 'L'} ${xAt(i).toFixed(1)} ${yAt(v).toFixed(1)}`).join(' ');
+  const peakIdx = data.reduce((mx, v, i, a) => v > a[mx] ? i : mx, 0);
+  const gc = light ? 'rgba(16,16,16,0.07)' : 'rgba(236,235,230,0.09)';
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+      {[0, 0.5, 1].map(t => (
+        <line key={t} x1={padX} y1={padY + iH * t} x2={w - padX} y2={padY + iH * t}
+          stroke={gc} strokeWidth="1" strokeDasharray={t === 0 || t === 1 ? '' : '3 5'} />
+      ))}
+      <path d={path} fill="none" stroke={stroke} strokeWidth="1.4" strokeLinejoin="miter"/>
+      <circle cx={xAt(data.length - 1)} cy={yAt(data[data.length - 1])} r="3.5" fill={accent} stroke={stroke} strokeWidth="1"/>
+      {peakIdx !== data.length - 1 && (
+        <circle cx={xAt(peakIdx)} cy={yAt(data[peakIdx])} r="2" fill={stroke}/>
+      )}
+    </svg>
+  );
+}
+
+function Stamp({ section, idx }) {
+  const t = useTheme();
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '14px 16px 0',
+      fontFamily: F.mono, fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ background: t.ink, color: t.invert, padding: '3px 7px', fontWeight: 700 }}>帳簿</span>
+        <span style={{ color: t.inkSoft }}>{section}</span>
+      </div>
+      <span style={{ color: t.inkFaint }}>FILE-{String(idx).padStart(3,'0')}/005</span>
+    </div>
+  );
+}
+
+function TabBar({ active, onChange }) {
+  const t = useTheme();
+  const tabs = [
+    { id: 'home',    label: '[01]\nHOME'  },
+    { id: 'income',  label: '[02]\n収入'  },
+    { id: 'expense', label: '[03]\n支出'  },
+    { id: 'ledger',  label: '[04]\nLOG'   },
+    { id: 'tax',     label: '[05]\n税金'  },
+  ];
+  return (
+    <div style={{
+      flex: '0 0 auto',
+      borderTop: `1px solid ${t.ink}`,
+      display: 'grid', gridTemplateColumns: 'repeat(5,1fr)',
+      background: t.bg, padding: '6px 4px 14px',
+    }}>
+      {tabs.map(tab => {
+        const on = tab.id === active;
+        return (
+          <button key={tab.id} onClick={() => onChange(tab.id)} style={{
+            fontFamily: F.mono, fontSize: 9, letterSpacing: 0.3,
+            padding: '5px 2px', lineHeight: 1.4,
+            background: on ? t.ink : 'transparent',
+            color: on ? t.invert : t.inkSoft,
+            border: 'none', cursor: 'pointer',
+            fontWeight: on ? 700 : 400,
+            transition: 'background 0.12s, color 0.12s',
+            whiteSpace: 'pre',
+          }}>{tab.label}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+function HomeScreen({ accent, appData }) {
+  const t = useTheme();
+  const { income = [], expenses = [], loaded = false } = appData;
+  const [range, setRange] = React.useState('3M');
+  const now = new Date();
+  const yr = now.getFullYear(), mo = now.getMonth() + 1;
+
+  const cutoff = React.useMemo(() => {
+    const d = new Date();
+    if      (range === '7D')  d.setDate(d.getDate() - 7);
+    else if (range === '30D') d.setDate(d.getDate() - 30);
+    else if (range === '3M')  d.setMonth(d.getMonth() - 3);
+    else d.setFullYear(2000);
+    return d.toISOString().split('T')[0];
+  }, [range]);
+
+  const prevCutoff = React.useMemo(() => {
+    if (range === 'ALL') return null;
+    const cur = new Date(cutoff);
+    const shift = new Date(cutoff);
+    if      (range === '7D')  shift.setDate(cur.getDate() - 7);
+    else if (range === '30D') shift.setDate(cur.getDate() - 30);
+    else if (range === '3M')  shift.setMonth(cur.getMonth() - 3);
+    return shift.toISOString().split('T')[0];
+  }, [range, cutoff]);
+
+  const rangeInc = income.filter(e => e.date >= cutoff).reduce((s,e) => s + e.amount, 0);
+  const prevInc  = prevCutoff ? income.filter(e => e.date >= prevCutoff && e.date < cutoff).reduce((s,e) => s + e.amount, 0) : 0;
+  const delta    = prevInc > 0 ? ((rangeInc - prevInc) / prevInc) * 100 : null;
+
+  const MONTHS = 6;
+  const chartData = Array.from({ length: MONTHS }, (_, i) => {
+    const d = new Date(yr, mo - 1 - (MONTHS - 1 - i), 1);
+    return income.filter(e => isYM(e.date, d.getFullYear(), d.getMonth()+1)).reduce((s,e) => s+e.amount, 0);
+  });
+  const peak = Math.max(...chartData, 1);
+
+  const mInc = income.filter(e=>isYM(e.date,yr,mo)).reduce((s,e)=>s+e.amount, 0);
+  const mExp = expenses.filter(e=>isYM(e.date,yr,mo)).reduce((s,e)=>s+e.amount, 0);
+  const yInc = income.filter(e=>isY(e.date,yr)).reduce((s,e)=>s+e.amount, 0);
+  const yExp = expenses.filter(e=>isY(e.date,yr)).reduce((s,e)=>s+e.amount, 0);
+  const yPro = yInc - yExp;
+  const taxPct = Math.min(100, Math.floor(yPro / 2000));
+
+  const recent = [
+    ...income.map(e=>({...e, _t:'i'})),
+    ...expenses.map(e=>({...e, _t:'e'})),
+  ].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 5);
+
+  const isLight = t === themes.light;
+
+  return (
+    <div style={{ paddingBottom: 16 }}>
+      <Stamp section="OVERVIEW" idx={1} />
+      <div style={{ height: 1, background: t.ink, margin: '12px 16px 0' }} />
+      {!loaded ? (
+        <div style={{ padding: '60px 16px', textAlign: 'center', fontFamily: F.mono, fontSize: 11, color: t.inkSoft }}>LOADING DATA...</div>
+      ) : (
+        <>
+          <div style={{ padding: '14px 16px 0' }}>
+            <div style={{ fontFamily: F.mono, fontSize: 10, color: t.inkSoft, letterSpacing: 1.4 }}>## {range}-INCOME</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 2 }}>
+              <span style={{ fontFamily: F.mono, fontSize: rangeInc >= 100000 ? 42 : 52, fontWeight: 700, letterSpacing: -2, lineHeight: 0.95, color: t.ink }}>{yen(rangeInc)}</span>
+              <span style={{ fontFamily: F.mono, fontSize: 14, color: t.inkSoft }}>JPY</span>
+            </div>
+            {delta !== null && (
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, fontFamily: F.mono, fontSize: 11 }}>
+                <span style={{ background: delta >= 0 ? accent : t.neg, color: delta >= 0 ? '#101010' : t.onInk, padding: '1px 6px', fontWeight: 700 }}>{delta >= 0 ? '+' : ''}{delta.toFixed(1)}%</span>
+                <span style={{ color: t.inkSoft }}>vs PREV {yen(prevInc)}</span>
+              </div>
+            )}
+          </div>
+
+          <div style={{ padding: '12px 16px 0', display: 'flex' }}>
+            {['7D','30D','3M','ALL'].map((r,i) => {
+              const on = r === range;
+              return (
+                <button key={r} onClick={() => setRange(r)} style={{
+                  flex: 1, fontFamily: F.mono, fontSize: 11, padding: '5px 0',
+                  border: `1px solid ${t.ink}`, background: on ? t.ink : 'transparent',
+                  color: on ? t.invert : t.ink, fontWeight: on ? 700 : 400,
+                  marginLeft: i === 0 ? 0 : -1, cursor: 'pointer',
+                }}>{r}</button>
+              );
+            })}
+          </div>
+
+          <div style={{ margin: '12px 16px 0', border: `1px solid ${t.ink}`, padding: 8, background: t.surface }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: F.mono, fontSize: 9, color: t.inkSoft }}>
+              <span>┌ 6MO-SERIES n={MONTHS}</span><span>MAX ¥{yen(peak)}</span>
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <LineChart data={chartData} w={400} h={84} stroke={t.ink} accent={accent} light={isLight}/>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: F.mono, fontSize: 9, color: t.inkSoft, marginTop: 4 }}>
+              <span>└ -{MONTHS}MO</span><span>{yr}-{String(mo).padStart(2,'0')} ◀</span>
+            </div>
+          </div>
+
+          <div style={{ margin: '12px 16px 0', border: `1px solid ${t.ink}` }}>
+            {[
+              ['今月収入......', `¥ ${yen(mInc)}`, false],
+              ['今月支出......', `¥ ${yen(mExp)}`, false],
+              ['今月利益......', `¥ ${yen(mInc - mExp)}`, (mInc-mExp) < 0],
+              ['年間収入......', `¥ ${yen(yInc)}`, false],
+              ['年間利益......', `¥ ${yen(yPro)}`, yPro < 0],
+            ].map(([k, v, isNeg], i, arr) => (
+              <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', fontFamily: F.mono, fontSize: 12, borderBottom: i < arr.length-1 ? `1px dashed ${t.hair}` : 'none' }}>
+                <span style={{ color: t.inkSoft }}>{k}</span>
+                <span style={{ fontWeight: 700, color: isNeg ? t.neg : t.ink }}>{v}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ margin: '12px 16px 0', fontFamily: F.mono, fontSize: 11 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ color: t.inkSoft }}>確定申告ライン / ¥200,000</span>
+              <span style={{ color: yPro > 200000 ? t.neg : t.ink, fontWeight: 700 }}>{yPro > 200000 ? '⚠ 要申告' : `${taxPct}%`}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 1, height: 8 }}>
+              {Array.from({ length: 20 }).map((_, i) => {
+                const thr = Math.min(20, Math.floor(yPro / 10000));
+                return <div key={i} style={{ flex: 1, background: i < thr ? (yPro > 200000 ? t.neg : (i === thr-1 ? accent : t.ink)) : t.hair }}/>;
+              })}
+            </div>
+            <div style={{ marginTop: 4, color: t.inkFaint, fontSize: 10 }}>
+              {yPro > 200000 ? `超過 +¥${yen(yPro - 200000)} · 翌年 2/16〜3/15 に申告` : `REMAIN ¥${yen(Math.max(0, 200000 - yPro))} · ${yr}年度`}
+            </div>
+          </div>
+
+          <div style={{ margin: '12px 16px 0' }}>
+            <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}># RECENT-TXN</div>
+            <div style={{ border: `1px solid ${t.ink}`, background: t.surface }}>
+              {recent.length === 0 ? (
+                <div style={{ padding: '20px', textAlign: 'center', fontFamily: F.mono, fontSize: 11, color: t.inkSoft }}>-- NO RECORDS YET --</div>
+              ) : recent.map((e, i) => {
+                const isInc = e._t === 'i';
+                const label = isInc ? (e.type || 'アフィリエイト') : (e.category || '支出');
+                return (
+                  <div key={e.id || i} style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', fontFamily: F.mono, fontSize: 11, borderBottom: i < recent.length-1 ? `1px dashed ${t.hair}` : 'none' }}>
+                    <span style={{ flex: '0 0 46px', color: t.inkFaint, fontSize: 10 }}>{e.date ? e.date.slice(5) : ''}</span>
+                    <span style={{ flex: 1, color: t.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontWeight: 700, color: isInc ? t.ink : t.neg }}>{isInc ? '+' : '−'}</span>{' '}{label}
+                    </span>
+                    <span style={{ fontWeight: 700, color: isInc ? t.ink : t.neg, flexShrink: 0, marginLeft: 8 }}>{isInc ? '+' : '−'}¥{yen(e.amount)}</span>
+                  </div>
+                );
+              })}
+              <div style={{ padding: '4px 10px', fontFamily: F.mono, fontSize: 9, color: t.inkFaint }}>EOF · {income.length + expenses.length} RECORDS TOTAL</div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// DB — Google Sheets API
+// ─────────────────────────────────────────────────────────────
+
+// ▼ Google Cloud Console で取得した OAuth 2.0 クライアント ID をここに貼り付けてください
+const GOOGLE_CLIENT_ID = '843896897256-o8rmqfvvhavuutttna7v0eev846v3ag4.apps.googleusercontent.com';
+
+const DB = (() => {
+  const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+  const SS_KEY = 'tkl_spreadsheet_id';
+
+  let _token = null;
+  let _ssId   = localStorage.getItem(SS_KEY);
+  let _incSId = null, _expSId = null;
+  let _tokenClient = null;
+  let _pendingRes  = null, _pendingRej = null;
+
+  async function _req(method, path, body) {
+    if (!_token) throw new Error('NOT_AUTH');
+    const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets' + path, {
+      method,
+      headers: { Authorization: `Bearer ${_token}`, 'Content-Type': 'application/json' },
+      body: body != null ? JSON.stringify(body) : undefined,
+    });
+    if (res.status === 401) { _token = null; throw new Error('TOKEN_EXPIRED'); }
+    if (res.status === 404 && _ssId && path.startsWith('/' + _ssId)) {
+      _ssId = null; _incSId = null; _expSId = null;
+      localStorage.removeItem(SS_KEY);
+      throw new Error('SS_NOT_FOUND');
+    }
+    if (!res.ok) throw new Error('API_' + res.status);
+    return res.json();
+  }
+
+  async function _ensureSS() {
+    if (_ssId && _incSId !== null) return;
+    if (!_ssId) {
+      const d = await _req('POST', '', {
+        properties: { title: 'TKL帳簿' },
+        sheets: [
+          { properties: { title: 'income',   sheetId: 0 } },
+          { properties: { title: 'expenses', sheetId: 1 } },
+        ],
+      });
+      _ssId = d.spreadsheetId; _incSId = 0; _expSId = 1;
+      localStorage.setItem(SS_KEY, _ssId);
+      await _req('POST', `/${_ssId}/values/income!A1:append?valueInputOption=RAW`,
+        { values: [['id','date','type','points','amount','memo']] });
+      await _req('POST', `/${_ssId}/values/expenses!A1:append?valueInputOption=RAW`,
+        { values: [['id','date','category','amount','description','note']] });
+    } else {
+      try {
+        const meta = await _req('GET', `/${_ssId}?fields=sheets.properties`);
+        const ss = meta.sheets || [];
+        _incSId = ss.find(s => s.properties.title === 'income')?.properties.sheetId ?? 0;
+        _expSId = ss.find(s => s.properties.title === 'expenses')?.properties.sheetId ?? 1;
+      } catch(e) {
+        if (e.message === 'SS_NOT_FOUND') { _ssId = null; await _ensureSS(); }
+        else throw e;
+      }
+    }
+  }
+
+  return {
+    init(cb) {
+      return new Promise(resolve => {
+        const t = setInterval(() => {
+          if (window.google?.accounts?.oauth2) {
+            clearInterval(t);
+            _tokenClient = google.accounts.oauth2.initTokenClient({
+              client_id: GOOGLE_CLIENT_ID,
+              scope: SCOPES,
+              callback: r => {
+                if (r.error) {
+                  cb(false);
+                  if (_pendingRej) { _pendingRej(new Error(r.error)); _pendingRej = null; }
+                  return;
+                }
+                _token = r.access_token;
+                cb(true);
+                if (_pendingRes) { _pendingRes(_token); _pendingRes = null; }
+              },
+              error_callback: e => {
+                cb(false);
+                if (_pendingRej) { _pendingRej(e); _pendingRej = null; }
+              },
+            });
+            resolve();
+          }
+        }, 100);
+      });
+    },
+
+    login() { _tokenClient.requestAccessToken({ prompt: '' }); },
+
+    async getAllData() {
+      await _ensureSS();
+      const [ir, er] = await Promise.all([
+        _req('GET', `/${_ssId}/values/income!A:F`),
+        _req('GET', `/${_ssId}/values/expenses!A:F`),
+      ]);
+      const rows = r => (r.values || []).slice(1).filter(x => x[0]);
+      return {
+        income:   rows(ir).map(r => ({ id:r[0], date:r[1]||'', type:r[2]||'', points:+r[3]||0, amount:+r[4]||0, memo:r[5]||'' })),
+        expenses: rows(er).map(r => ({ id:r[0], date:r[1]||'', category:r[2]||'', amount:+r[3]||0, description:r[4]||'', note:r[5]||'' })),
+      };
+    },
+
+    async addIncome(data) {
+      await _ensureSS();
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+      await _req('POST', `/${_ssId}/values/income!A:F:append?valueInputOption=RAW`,
+        { values: [[id, data.date, data.type, data.points||0, data.amount, data.memo||'']] });
+      return { success: true };
+    },
+
+    async addExpense(data) {
+      await _ensureSS();
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+      await _req('POST', `/${_ssId}/values/expenses!A:F:append?valueInputOption=RAW`,
+        { values: [[id, data.date, data.category, data.amount, data.description||'', data.note||'']] });
+      return { success: true };
+    },
+
+    async deleteEntry(type, id) {
+      await _ensureSS();
+      const sheet   = type === 'income' ? 'income' : 'expenses';
+      const sheetId = type === 'income' ? _incSId  : _expSId;
+      const res = await _req('GET', `/${_ssId}/values/${sheet}!A:A`);
+      const rowIdx = (res.values || []).findIndex(r => r[0] === id);
+      if (rowIdx < 0) return { success: false, error: 'not found' };
+      await _req('POST', `/${_ssId}:batchUpdate`, {
+        requests: [{ deleteDimension: { range: { sheetId, dimension: 'ROWS', startIndex: rowIdx, endIndex: rowIdx + 1 } } }],
+      });
+      return { success: true };
+    },
+  };
+})();
+
+// ─────────────────────────────────────────────────────────────
+// Screens
+// ─────────────────────────────────────────────────────────────
+
+function inputSt(t) {
+  return {
+    width: '100%', padding: '8px 10px', border: `1px solid ${t.ink}`,
+    background: t.surface, color: t.ink, fontFamily: F.mono, fontSize: 13,
+    outline: 'none', WebkitAppearance: 'none', appearance: 'none', display: 'block',
+  };
+}
+
+function IncomeScreen({ accent, onSaved }) {
+  const t = useTheme();
+  const [form, setForm] = React.useState({ date: today(), type: 'アフィリエイト', points: '', amount: '', memo: '' });
+  const [msg, setMsg]     = React.useState(null);
+  const [saving, setSaving] = React.useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const save = async () => {
+    if (!form.amount || Number(form.amount) <= 0) {
+      setMsg({ ok: false, text: 'ERROR: 換金額を入力してください (> 0)' }); return;
+    }
+    setSaving(true);
+    try {
+      await DB.addIncome({ date: form.date, type: form.type, points: Number(form.points)||0, amount: Number(form.amount), memo: form.memo||'' });
+      setMsg({ ok: true, text: 'EXIT 0 · OK — 収入を記録しました' });
+      setForm({ date: today(), type: 'アフィリエイト', points: '', amount: '', memo: '' });
+      onSaved && onSaved();
+    } catch(e) {
+      const isAuth = e.message.includes('AUTH') || e.message.includes('TOKEN');
+      setMsg({ ok: false, text: isAuth ? 'ERROR: セッション切れ — ページを再読み込みしてください' : 'ERROR: ' + e.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const st = inputSt(t);
+  return (
+    <div style={{ paddingBottom: 16 }}>
+      <Stamp section="ADD-INCOME" idx={2} />
+      <div style={{ height: 1, background: t.ink, margin: '12px 16px 0' }} />
+      <div style={{ padding: '14px 16px 0' }}>
+        <div style={{ fontFamily: F.mono, fontSize: 10, color: t.inkSoft, letterSpacing: 1.4 }}>## INPUT</div>
+        <div style={{ fontFamily: F.mono, fontSize: 30, fontWeight: 700, letterSpacing: -1, lineHeight: 1, marginTop: 2, color: t.ink }}>収入記録_</div>
+      </div>
+      {msg && <div style={{ margin: '12px 16px 0', padding: '10px 12px', background: msg.ok ? accent : t.neg, color: msg.ok ? '#101010' : t.onInk, fontFamily: F.mono, fontSize: 11, fontWeight: 700 }}>{msg.text}</div>}
+      <div style={{ margin: '14px 16px 0', border: `1px solid ${t.ink}` }}>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>DATE</div>
+          <input type="date" value={form.date} onChange={e => set('date', e.target.value)} style={st}/>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>TYPE</div>
+          <select value={form.type} onChange={e => set('type', e.target.value)} style={st}>
+            <option value="アフィリエイト">アフィリエイト</option>
+            <option value="ライブギフト">ライブギフト換金</option>
+            <option value="動画報酬">動画再生報酬</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>TIKTOK-POINTS (optional)</div>
+          <input type="number" value={form.points} onChange={e => set('points', e.target.value)} placeholder="0" min="0" inputMode="numeric" style={st}/>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>AMOUNT-JPY *</div>
+          <div style={{ display: 'flex' }}>
+            <span style={{ fontFamily: F.mono, fontSize: 20, fontWeight: 700, color: t.ink, padding: '8px 10px', background: t.surface, border: `1px solid ${t.ink}`, borderRight: 'none', flexShrink: 0 }}>¥</span>
+            <input type="number" value={form.amount} onChange={e => set('amount', e.target.value)} placeholder="3000" min="1" inputMode="numeric" style={{ ...st, fontSize: 20, fontWeight: 700 }}/>
+          </div>
+        </div>
+        <div style={{ padding: '8px 10px' }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>MEMO (optional)</div>
+          <input type="text" value={form.memo} onChange={e => set('memo', e.target.value)} placeholder="例: 4月分アフィリエイト報酬" style={st}/>
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px 0' }}>
+        <button onClick={save} disabled={saving} style={{ display: 'block', width: '100%', padding: '14px 16px', background: saving ? t.inkFaint : accent, color: '#101010', border: `1px solid ${t.ink}`, fontFamily: F.mono, fontSize: 13, fontWeight: 700, letterSpacing: 1, cursor: saving ? 'default' : 'pointer', textAlign: 'left' }}>
+          {saving ? '$ SAVING...' : `$ record income ▶ ¥${yen(form.amount || 0)}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ExpenseScreen({ accent, onSaved }) {
+  const t = useTheme();
+  const [form, setForm] = React.useState({ date: today(), category: '', amount: '', description: '', note: '' });
+  const [msg, setMsg]     = React.useState(null);
+  const [saving, setSaving] = React.useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const save = async () => {
+    if (!form.category) { setMsg({ ok: false, text: 'ERROR: カテゴリを選択してください' }); return; }
+    if (!form.amount || Number(form.amount) <= 0) { setMsg({ ok: false, text: 'ERROR: 金額を入力してください (> 0)' }); return; }
+    setSaving(true);
+    try {
+      await DB.addExpense({ date: form.date, category: form.category, amount: Number(form.amount), description: form.description||'', note: form.note||'' });
+      setMsg({ ok: true, text: 'EXIT 0 · OK — 支出を記録しました' });
+      setForm({ date: today(), category: '', amount: '', description: '', note: '' });
+      onSaved && onSaved();
+    } catch(e) {
+      const isAuth = e.message.includes('AUTH') || e.message.includes('TOKEN');
+      setMsg({ ok: false, text: isAuth ? 'ERROR: セッション切れ — ページを再読み込みしてください' : 'ERROR: ' + e.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const st = inputSt(t);
+  return (
+    <div style={{ paddingBottom: 16 }}>
+      <Stamp section="ADD-EXPENSE" idx={3} />
+      <div style={{ height: 1, background: t.ink, margin: '12px 16px 0' }} />
+      <div style={{ padding: '14px 16px 0' }}>
+        <div style={{ fontFamily: F.mono, fontSize: 10, color: t.inkSoft, letterSpacing: 1.4 }}>## INPUT</div>
+        <div style={{ fontFamily: F.mono, fontSize: 30, fontWeight: 700, letterSpacing: -1, lineHeight: 1, marginTop: 2, color: t.ink }}>支出記録_</div>
+      </div>
+      {msg && <div style={{ margin: '12px 16px 0', padding: '10px 12px', background: msg.ok ? accent : t.neg, color: msg.ok ? '#101010' : t.onInk, fontFamily: F.mono, fontSize: 11, fontWeight: 700 }}>{msg.text}</div>}
+      <div style={{ margin: '14px 16px 0', border: `1px solid ${t.ink}` }}>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>DATE</div>
+          <input type="date" value={form.date} onChange={e => set('date', e.target.value)} style={st}/>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>CATEGORY *</div>
+          <select value={form.category} onChange={e => set('category', e.target.value)} style={st}>
+            <option value="">-- select --</option>
+            <option value="機材・スマホ代">機材・スマホ代</option>
+            <option value="通信費">通信費（スマホ・ネット）</option>
+            <option value="サブスク">サブスクリプション</option>
+            <option value="衣装・小道具">衣装・小道具</option>
+            <option value="交通費">交通費</option>
+            <option value="外注費">外注費</option>
+            <option value="その他経費">その他経費</option>
+          </select>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>AMOUNT-JPY *</div>
+          <div style={{ display: 'flex' }}>
+            <span style={{ fontFamily: F.mono, fontSize: 20, fontWeight: 700, color: t.neg, padding: '8px 10px', background: t.surface, border: `1px solid ${t.ink}`, borderRight: 'none', flexShrink: 0 }}>¥</span>
+            <input type="number" value={form.amount} onChange={e => set('amount', e.target.value)} placeholder="5000" min="1" inputMode="numeric" style={{ ...st, fontSize: 20, fontWeight: 700 }}/>
+          </div>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>DESCRIPTION (optional)</div>
+          <input type="text" value={form.description} onChange={e => set('description', e.target.value)} placeholder="例: iPhoneケース" style={st}/>
+        </div>
+        <div style={{ padding: '8px 10px' }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 5 }}>NOTE (optional)</div>
+          <input type="text" value={form.note} onChange={e => set('note', e.target.value)} placeholder="例: Amazon購入 #領収書あり" style={st}/>
+        </div>
+      </div>
+      <div style={{ padding: '14px 16px 0' }}>
+        <button onClick={save} disabled={saving} style={{ display: 'block', width: '100%', padding: '14px 16px', background: saving ? t.inkFaint : t.ink, color: t.invert, border: `1px solid ${t.ink}`, fontFamily: F.mono, fontSize: 13, fontWeight: 700, letterSpacing: 1, cursor: saving ? 'default' : 'pointer', textAlign: 'left' }}>
+          {saving ? '$ SAVING...' : `$ record expense ▶ ¥${yen(form.amount || 0)}`}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LedgerScreen({ accent, appData, onDelete }) {
+  const t = useTheme();
+  const { income = [], expenses = [], loaded = false } = appData;
+  const [filter, setFilter] = React.useState('all');
+  const [query, setQuery]   = React.useState('');
+  const [deleting, setDeleting] = React.useState(null);
+
+  const allTxns = React.useMemo(() => [
+    ...income.map(e => ({ ...e, _t: 'income', label: e.type || 'アフィリエイト', sub: e.memo || '' })),
+    ...expenses.map(e => ({ ...e, _t: 'expense', label: e.category || '支出', sub: e.description || '' })),
+  ].sort((a, b) => b.date.localeCompare(a.date)), [income, expenses]);
+
+  const filtered = allTxns.filter(tx => {
+    if (filter === 'in'  && tx._t !== 'income')  return false;
+    if (filter === 'out' && tx._t !== 'expense') return false;
+    const q = query.toLowerCase();
+    if (q && !tx.label.includes(query) && !tx.sub.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const groups = {};
+  filtered.forEach(tx => { (groups[tx.date] ||= []).push(tx); });
+
+  const doDelete = async (type, id) => {
+    if (!confirm('この記録を削除しますか？')) return;
+    setDeleting(id);
+    try {
+      await DB.deleteEntry(type, id);
+      onDelete && onDelete();
+    } catch(e) {
+      alert('削除エラー: ' + e.message);
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const filtersConf = [
+    { id: 'all', sigil: '*', label: 'ALL' },
+    { id: 'in',  sigil: '+', label: 'IN'  },
+    { id: 'out', sigil: '-', label: 'OUT' },
+  ];
+
+  return (
+    <div style={{ paddingBottom: 16 }}>
+      <Stamp section="LEDGER" idx={4} />
+      <div style={{ height: 1, background: t.ink, margin: '12px 16px 0' }} />
+      <div style={{ padding: '14px 16px 0' }}>
+        <div style={{ fontFamily: F.mono, fontSize: 10, color: t.inkSoft, letterSpacing: 1.4 }}>## TRANSACTIONS</div>
+        <div style={{ fontFamily: F.mono, fontSize: 30, fontWeight: 700, letterSpacing: -1, lineHeight: 1, marginTop: 2, color: t.ink }}>取引履歴.LOG</div>
+      </div>
+      <div style={{ margin: '12px 16px 0', border: `1px solid ${t.ink}`, display: 'flex', alignItems: 'center', background: t.surface }}>
+        <span style={{ padding: '0 10px', fontFamily: F.mono, fontSize: 12, color: t.inkSoft, fontWeight: 700 }}>&gt;</span>
+        <input value={query} onChange={e => setQuery(e.target.value)} placeholder="grep label..."
+          style={{ flex: 1, padding: '9px 0', border: 'none', background: 'transparent', fontFamily: F.mono, fontSize: 12, color: t.ink, outline: 'none' }}/>
+        {query && <button onClick={() => setQuery('')} style={{ border: 'none', background: 'transparent', color: t.inkSoft, fontFamily: F.mono, fontSize: 13, padding: '0 10px', cursor: 'pointer' }}>×</button>}
+      </div>
+      <div style={{ margin: '10px 16px 0', display: 'flex', fontFamily: F.mono, fontSize: 10 }}>
+        {filtersConf.map((f, i) => {
+          const on = f.id === filter;
+          return (
+            <button key={f.id} onClick={() => setFilter(f.id)} style={{ flex: 1, padding: '5px 4px', border: `1px solid ${t.ink}`, background: on ? t.ink : 'transparent', color: on ? t.invert : t.ink, fontWeight: on ? 700 : 400, marginLeft: i === 0 ? 0 : -1, cursor: 'pointer' }}>[{f.sigil}] {f.label}</button>
+          );
+        })}
+        <div style={{ paddingLeft: 10, color: t.inkSoft, fontSize: 10, alignSelf: 'center' }}>n={filtered.length}</div>
+      </div>
+      <div style={{ margin: '10px 16px 0', border: `1px solid ${t.ink}`, background: t.surface }}>
+        <div style={{ display: 'flex', padding: '5px 10px', background: t.ink, color: t.invert, fontFamily: F.mono, fontSize: 9, letterSpacing: 1 }}>
+          <span style={{ flex: '0 0 52px' }}>DATE</span>
+          <span style={{ flex: 1 }}>LABEL</span>
+          <span style={{ flex: '0 0 78px', textAlign: 'right' }}>AMOUNT</span>
+          <span style={{ flex: '0 0 22px' }}></span>
+        </div>
+        {!loaded ? (
+          <div style={{ padding: '24px', textAlign: 'center', fontFamily: F.mono, fontSize: 11, color: t.inkSoft }}>LOADING...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: '24px 12px', textAlign: 'center', fontFamily: F.mono, fontSize: 11, color: t.inkSoft }}>-- NO ROWS MATCH --</div>
+        ) : Object.entries(groups).map(([date, list]) => {
+          const tot = list.reduce((a, x) => a + (x._t === 'income' ? x.amount : -x.amount), 0);
+          const isLightTheme = t === themes.light;
+          return (
+            <React.Fragment key={date}>
+              <div style={{ padding: '4px 10px', fontFamily: F.mono, fontSize: 9.5, letterSpacing: 1, background: isLightTheme ? 'rgba(16,16,16,0.05)' : 'rgba(236,235,230,0.05)', color: t.inkSoft, borderBottom: `1px dashed ${t.hair}`, display: 'flex', justifyContent: 'space-between' }}>
+                <span>--- {date} ---</span>
+                <span style={{ color: tot >= 0 ? t.ink : t.neg }}>{tot >= 0 ? '+' : ''}¥{yen(Math.abs(tot))}</span>
+              </div>
+              {list.map((tx, j) => {
+                const isInc = tx._t === 'income';
+                const isDel = deleting === tx.id;
+                return (
+                  <div key={tx.id || j} style={{ display: 'flex', alignItems: 'center', padding: '8px 10px', fontFamily: F.mono, fontSize: 11, borderBottom: `1px dashed ${t.hair}`, opacity: isDel ? 0.4 : 1, transition: 'opacity 0.2s' }}>
+                    <span style={{ flex: '0 0 52px', color: t.inkFaint, fontSize: 10 }}>{tx.date.slice(5)}</span>
+                    <span style={{ flex: 1, minWidth: 0, color: t.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontWeight: 700, color: isInc ? t.ink : t.neg }}>{isInc ? '+' : '−'}</span>{' '}{tx.label}
+                      {tx.sub ? <span style={{ color: t.inkFaint }}> · {tx.sub}</span> : ''}
+                    </span>
+                    <span style={{ flex: '0 0 78px', textAlign: 'right', fontWeight: 700, color: isInc ? t.ink : t.neg }}>{isInc ? '+' : '−'}¥{yen(tx.amount)}</span>
+                    <button onClick={() => doDelete(tx._t, tx.id)} disabled={isDel} style={{ flex: '0 0 22px', background: 'none', border: 'none', cursor: isDel ? 'default' : 'pointer', color: t.inkFaint, fontFamily: F.mono, fontSize: 12, padding: 0 }}>×</button>
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          );
+        })}
+        <div style={{ padding: '5px 10px', fontFamily: F.mono, fontSize: 9, color: t.inkFaint }}>END-OF-FILE · EOF · {allTxns.length} RECORDS</div>
+      </div>
+    </div>
+  );
+}
+
+function TaxScreen({ accent, appData }) {
+  const t = useTheme();
+  const { income = [], expenses = [] } = appData;
+  const now = new Date();
+  const [taxYear, setTaxYear] = React.useState(now.getFullYear());
+  const [salary, setSalary]   = React.useState(0);
+  const [withheld, setWithheld] = React.useState(0);
+
+  const yInc = income.filter(e => isY(e.date, taxYear)).reduce((s,e) => s+e.amount, 0);
+  const yExp = expenses.filter(e => isY(e.date, taxYear)).reduce((s,e) => s+e.amount, 0);
+  const misc = Math.max(0, yInc - yExp);
+
+  let salDed = 0;
+  if (salary > 0) {
+    if      (salary <= 1625000) salDed = 550000;
+    else if (salary <= 1800000) salDed = salary * 0.4 - 100000;
+    else if (salary <= 3600000) salDed = salary * 0.3 + 80000;
+    else if (salary <= 6600000) salDed = salary * 0.2 + 440000;
+    else if (salary <= 8500000) salDed = salary * 0.1 + 1100000;
+    else salDed = 1950000;
+  }
+  const salInc  = Math.max(0, salary - salDed);
+  const kihon   = 480000;
+  const taxable = Math.max(0, salInc + misc - kihon);
+
+  let tax = 0;
+  if      (taxable <= 1950000)  tax = taxable * 0.05;
+  else if (taxable <= 3300000)  tax = taxable * 0.10 - 97500;
+  else if (taxable <= 6950000)  tax = taxable * 0.20 - 427500;
+  else if (taxable <= 9000000)  tax = taxable * 0.23 - 636000;
+  else if (taxable <= 18000000) tax = taxable * 0.33 - 1536000;
+  else                          tax = taxable * 0.40 - 2796000;
+
+  const totalTax = Math.round(tax * 1.021);
+  const netTax   = Math.max(0, totalTax - withheld);
+  const refund   = Math.max(0, withheld - totalTax);
+  const needFile = misc > 200000 || (salary === 0 && taxable > 0);
+
+  const st = { padding: '7px 8px', border: `1px solid ${t.ink}`, background: t.surface, color: t.ink, fontFamily: F.mono, fontSize: 12, outline: 'none', width: '100%', WebkitAppearance: 'none', appearance: 'none' };
+  const Row = ({ k, v, hi }) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', fontFamily: F.mono, fontSize: 12, borderBottom: `1px dashed ${t.hair}` }}>
+      <span style={{ color: t.inkSoft }}>{k}</span>
+      <span style={{ fontWeight: 700, color: hi === 'neg' ? t.neg : hi === 'acc' ? accent : t.ink }}>{v}</span>
+    </div>
+  );
+
+  return (
+    <div style={{ paddingBottom: 16 }}>
+      <Stamp section="TAX-SIM" idx={5} />
+      <div style={{ height: 1, background: t.ink, margin: '12px 16px 0' }} />
+      <div style={{ padding: '14px 16px 0' }}>
+        <div style={{ fontFamily: F.mono, fontSize: 10, color: t.inkSoft, letterSpacing: 1.4 }}>## SIMULATOR</div>
+        <div style={{ fontFamily: F.mono, fontSize: 30, fontWeight: 700, letterSpacing: -1, lineHeight: 1, marginTop: 2, color: t.ink }}>税金試算_</div>
+      </div>
+      <div style={{ margin: '12px 16px 0', padding: '10px 12px', border: `1px solid ${t.hair}`, background: t.surface, fontFamily: F.mono, fontSize: 10, color: t.inkSoft, lineHeight: 1.7 }}>
+        {'// TikTok Lite アフィリエイト収入 → 雑所得として申告'}<br/>
+        {'// 給与収入がある場合、雑所得 > ¥200,000 で確定申告が必要'}<br/>
+        {'// 申告期間: 翌年 2/16 〜 3/15'}
+      </div>
+      <div style={{ margin: '12px 16px 0', border: `1px solid ${t.ink}` }}>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 4 }}>YEAR</div>
+          <select value={taxYear} onChange={e => setTaxYear(Number(e.target.value))} style={st}>
+            {[0,1,2,3].map(i => <option key={i} value={now.getFullYear()-i}>{now.getFullYear()-i}年</option>)}
+          </select>
+        </div>
+        <div style={{ padding: '8px 10px', borderBottom: `1px dashed ${t.hair}` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 4 }}>SALARY-INCOME · 給与年収（専業は 0）</div>
+          <input type="number" value={salary || ''} onChange={e => setSalary(Number(e.target.value)||0)} placeholder="0" min="0" inputMode="numeric" style={st}/>
+        </div>
+        <div style={{ padding: '8px 10px' }}>
+          <div style={{ fontFamily: F.mono, fontSize: 9.5, color: t.inkSoft, letterSpacing: 1.4, marginBottom: 4 }}>WITHHELD-TAX · 源泉徴収済み額（不明は 0）</div>
+          <input type="number" value={withheld || ''} onChange={e => setWithheld(Number(e.target.value)||0)} placeholder="0" min="0" inputMode="numeric" style={st}/>
+        </div>
+      </div>
+      <div style={{ margin: '12px 16px 0', border: `1px solid ${t.ink}` }}>
+        <div style={{ padding: '5px 10px', background: t.ink, color: t.invert, fontFamily: F.mono, fontSize: 9, letterSpacing: 1 }}>CALC-RESULT · {taxYear}</div>
+        <Row k={`TikTok収入 (${taxYear}年)`} v={`¥ ${yen(yInc)}`} />
+        <Row k="　− 必要経費" v={`¥ ${yen(yExp)}`} />
+        <Row k="　= 雑所得" v={`¥ ${yen(misc)}`} />
+        {salary > 0 && <Row k="給与所得（控除後）" v={`¥ ${yen(salInc)}`} />}
+        <Row k="基礎控除" v={`¥ ${yen(kihon)}`} />
+        <Row k="課税所得" v={`¥ ${yen(taxable)}`} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', fontFamily: F.mono, fontSize: 13, fontWeight: 700, background: t === themes.dark ? 'rgba(236,235,230,0.06)' : 'rgba(16,16,16,0.06)', borderBottom: withheld > 0 ? `1px dashed ${t.hair}` : 'none' }}>
+          <span style={{ color: t.inkSoft }}>所得税 + 復興税（概算）</span><span>¥ {yen(totalTax)}</span>
+        </div>
+        {withheld > 0 && (
+          <>
+            <Row k="源泉徴収済み" v={`¥ ${yen(withheld)}`} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px', fontFamily: F.mono, fontSize: 13, fontWeight: 700, background: t === themes.dark ? 'rgba(236,235,230,0.06)' : 'rgba(16,16,16,0.06)' }}>
+              <span style={{ color: t.inkSoft }}>{netTax > 0 ? '追加納付（目安）' : '還付見込み（目安）'}</span>
+              <span style={{ color: netTax > 0 ? t.neg : accent }}>¥ {yen(netTax > 0 ? netTax : refund)}</span>
+            </div>
+          </>
+        )}
+      </div>
+      <div style={{ margin: '12px 16px 0', padding: '12px', border: `1px solid ${needFile ? t.neg : t.hair}`, background: needFile ? (t === themes.dark ? 'rgba(255,138,122,0.07)' : 'rgba(183,29,16,0.05)') : t.surface, fontFamily: F.mono, fontSize: 11, lineHeight: 1.7 }}>
+        {needFile ? (
+          <><span style={{ color: t.neg, fontWeight: 700 }}>⚠ 確定申告が必要です（目安）</span><br/><span style={{ color: t.inkSoft }}>雑所得 ¥{yen(misc)} {'>'} ¥200,000<br/>翌年 2/16〜3/15 に申告してください</span></>
+        ) : (
+          <><span style={{ color: t.ink, fontWeight: 700 }}>✓ 確定申告は不要です（目安）</span><br/><span style={{ color: t.inkSoft }}>雑所得 ¥{yen(misc)} ≤ ¥200,000</span></>
+        )}
+      </div>
+      <div style={{ margin: '12px 16px 0', padding: '8px 12px', border: `1px solid ${t.hair}`, fontFamily: F.mono, fontSize: 9.5, color: t.inkFaint, lineHeight: 1.7 }}>
+        {'// この計算は概算です。青色申告・各種控除・住民税は含みません。'}<br/>
+        {'// 正確な税額は税理士または国税庁 e-Tax をご利用ください。'}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Shell
+// ─────────────────────────────────────────────────────────────
+
+const TWEAK_DEFAULTS = { "theme": "light", "accent": "#e8ff5a" };
+
+async function loadAppData(setAppData) {
+  try {
+    const data = await DB.getAllData();
+    setAppData({ ...data, loaded: true });
+  } catch(e) {
+    setAppData({ income: [], expenses: [], loaded: true });
+  }
+}
+
+function LoginScreen({ onLogin }) {
+  const t = useTheme();
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', gap: 24 }}>
+      <div>
+        <div style={{ fontFamily: F.mono, fontSize: 11, color: t.inkFaint, letterSpacing: 1.4, marginBottom: 6, textAlign: 'center' }}>// TikTok Lite 収支管理</div>
+        <div style={{ fontFamily: F.mono, fontSize: 36, fontWeight: 700, letterSpacing: -2, color: t.ink, textAlign: 'center' }}>帳簿_</div>
+      </div>
+      <div style={{ border: `1px solid ${t.hair}`, padding: '14px 16px', background: t.surface, width: '100%', fontFamily: F.mono, fontSize: 11, color: t.inkSoft, lineHeight: 1.8 }}>
+        Google アカウントでログインすると<br/>
+        データを Google スプレッドシートに<br/>
+        自動保存します。
+      </div>
+      <button onClick={onLogin} style={{ display: 'block', width: '100%', padding: '14px 16px', background: t.ink, color: t.invert, border: 'none', fontFamily: F.mono, fontSize: 13, fontWeight: 700, letterSpacing: 1, cursor: 'pointer', textAlign: 'left' }}>
+        $ google --login ▶
+      </button>
+    </div>
+  );
+}
+
+function SetupScreen() {
+  const t = useTheme();
+  return (
+    <div style={{ flex: 1, padding: '16px', fontFamily: F.mono, fontSize: 11, color: t.inkSoft, lineHeight: 1.9, overflowY: 'auto' }}>
+      <div style={{ fontWeight: 700, color: t.ink, fontSize: 14, marginBottom: 16 }}>// 初回セットアップ</div>
+      <div style={{ marginBottom: 12 }}>
+        Google Sheets API を使うには<br/>
+        OAuth 2.0 クライアント ID が必要です。
+      </div>
+      <div style={{ border: `1px solid ${t.hair}`, padding: '12px 14px', background: t.surface, lineHeight: 2 }}>
+        <div style={{ color: t.ink, fontWeight: 700, marginBottom: 6 }}>手順:</div>
+        <div>1. <a href="https://console.cloud.google.com" target="_blank" rel="noopener" style={{ color: t.ink }}>console.cloud.google.com</a> を開く</div>
+        <div>2. プロジェクトを作成（または選択）</div>
+        <div>3. 「APIとサービス」→「ライブラリ」→<br/>　 Google Sheets API を有効化</div>
+        <div>4. 「認証情報」→「認証情報を作成」→<br/>　 OAuth 2.0 クライアント ID</div>
+        <div>5. アプリの種類: ウェブアプリケーション</div>
+        <div>6. 承認済みの JavaScript 生成元に<br/>　 このページの URL を追加</div>
+        <div>7. 取得したクライアント ID を<br/>　 index.html の<br/>　 <span style={{ color: t.ink, fontWeight: 700 }}>GOOGLE_CLIENT_ID</span> に貼り付け</div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [tab, setTab] = React.useState('home');
+  const [tw, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [appData, setAppData] = React.useState({ income: [], expenses: [], loaded: false });
+  const [authState, setAuthState] = React.useState('init'); // init | setup | no_auth | ready
+
+  const theme  = themes[tw.theme] || themes.light;
+  const accent = tw.accent;
+
+  React.useEffect(() => {
+    if (GOOGLE_CLIENT_ID === 'PUT_YOUR_CLIENT_ID_HERE') {
+      setAuthState('setup');
+      return;
+    }
+    DB.init((loggedIn) => {
+      if (loggedIn) {
+        setAuthState('ready');
+        loadAppData(setAppData);
+      } else {
+        setAuthState(s => s !== 'ready' ? 'no_auth' : s);
+      }
+    }).then(() => {
+      setAuthState(s => s === 'init' ? 'no_auth' : s);
+    });
+  }, []);
+
+  const reload = () => {
+    setAppData(d => ({ ...d, loaded: false }));
+    loadAppData(setAppData);
+  };
+
+  const now    = new Date();
+  const DOW    = ['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()];
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+
+  if (authState === 'init') return (
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: theme.bg, fontFamily: F.mono, fontSize: 11, color: theme.inkFaint }}>
+      LOADING...
+    </div>
+  );
+
+  const screen = (() => {
+    if (authState === 'setup')   return <SetupScreen />;
+    if (authState === 'no_auth') return <LoginScreen onLogin={() => DB.login()} />;
+    switch (tab) {
+      case 'home':    return <HomeScreen    accent={accent} appData={appData} />;
+      case 'income':  return <IncomeScreen  accent={accent} onSaved={reload} />;
+      case 'expense': return <ExpenseScreen accent={accent} onSaved={reload} />;
+      case 'ledger':  return <LedgerScreen  accent={accent} appData={appData} onDelete={reload} />;
+      case 'tax':     return <TaxScreen     accent={accent} appData={appData} />;
+      default:        return null;
+    }
+  })();
+
+  return (
+    <ThemeCtx.Provider value={theme}>
+      <div style={{
+        position: 'fixed', inset: 0,
+        background: theme === themes.dark
+          ? 'radial-gradient(ellipse at center, #15181f 0%, #07090c 80%)'
+          : 'radial-gradient(ellipse at center, #f1efe9 0%, #d9d7d0 80%)',
+        display: 'flex', alignItems: 'stretch', justifyContent: 'center',
+        overflow: 'auto', transition: 'background 0.25s',
+      }}>
+        <div style={{
+          width: '100%', maxWidth: 460, background: theme.bg,
+          backgroundImage: gridBgFor(theme), color: theme.ink,
+          borderLeft: `1px solid ${theme.hair}`, borderRight: `1px solid ${theme.hair}`,
+          position: 'relative', minHeight: '100%', display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 16px 0', fontFamily: F.mono, fontSize: 9, letterSpacing: 1, color: theme.inkFaint }}>
+            <span>● ●● ●●●</span>
+            <span>{dateStr} · {DOW}</span>
+            <span>{authState === 'ready' ? 'SHEETS ●' : 'SHEETS ○'}</span>
+          </div>
+          <div style={{ flex: '1 1 auto', overflowY: 'auto', overflowX: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+            {screen}
+          </div>
+          {authState === 'ready' && <TabBar active={tab} onChange={setTab} />}
+        </div>
+        <div style={{ position: 'fixed', top: 20, left: 20, fontFamily: F.mono, fontSize: 10, letterSpacing: 1, color: theme.inkFaint, maxWidth: 220 }} className="rin-side-info">
+          <div style={{ fontWeight: 700, color: theme.ink }}>帳簿 · v2.0</div>
+          <div style={{ marginTop: 4 }}>// TikTok Lite 収支管理</div>
+          <div style={{ marginTop: 14, color: theme.inkSoft, lineHeight: 1.9 }}>
+            ─ <span style={{ color: theme.ink, fontWeight: 700 }}>[01]</span> ホーム・概要<br/>
+            ─ <span style={{ color: theme.ink, fontWeight: 700 }}>[02]</span> 収入を記録<br/>
+            ─ <span style={{ color: theme.ink, fontWeight: 700 }}>[03]</span> 支出を記録<br/>
+            ─ <span style={{ color: theme.ink, fontWeight: 700 }}>[04]</span> 取引履歴<br/>
+            ─ <span style={{ color: theme.ink, fontWeight: 700 }}>[05]</span> 税金試算
+          </div>
+        </div>
+      </div>
+
+      <TweaksPanel title="テーマ設定">
+        <TweakSection label="THEME">
+          <TweakRadio
+            label="mode"
+            value={tw.theme}
+            options={[{ value: 'light', label: 'LIGHT' }, { value: 'dark', label: 'DARK' }]}
+            onChange={v => setTweak('theme', v)}
+          />
+        </TweakSection>
+        <TweakSection label="ACCENT">
+          <TweakColor
+            label="hue"
+            value={accent}
+            options={['#e8ff5a','#ff8a4a','#7c5cff','#22d3a7','#FE2C55','#ffffff']}
+            onChange={v => setTweak('accent', v)}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </ThemeCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
