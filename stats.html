@@ -108,19 +108,12 @@
     .ctr-high b { color: #22c55e; }
     .ctr-mid  b { color: #f59e0b; }
     .ctr-low  b { color: #ef4444; }
-    .graph-btn {
-      flex-shrink: 0;
-      padding: 6px 14px;
-      background: #f2f2f7;
-      border: none;
-      border-radius: 8px;
-      font-size: 12px;
-      color: #3b82f6;
-      font-weight: 600;
-      cursor: pointer;
+    .pv-h-badge {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      color: #3b82f6; background: rgba(59,130,246,0.08);
+      padding: 1px 7px; border-radius: 20px; white-space: nowrap;
     }
-    .site-chart-wrap { display: none; padding: 0 16px 16px; height: 160px; position: relative; }
-    .site-chart-wrap.open { display: block; }
+    .pv-h-badge.zero { color: #bbb; background: #f5f5f5; }
     .copy-btn {
       flex-shrink: 0; padding: 6px 11px;
       background: #f2f2f7; border: none; border-radius: 8px;
@@ -282,7 +275,6 @@
     let pvByPath = {}, ctByPath = {};
     let hourLabels   = [];
     let estimatedCtPerHour = 0;
-    const siteCharts = {};
 
     // hub or セッションでログイン済みならスキップ
     const saved = sessionStorage.getItem('stats_user') || localStorage.getItem('hub_user');
@@ -419,24 +411,7 @@
       overallChart.update();
     }
 
-    function toggleChart(path, btn) {
-      const wrap   = btn.closest('.site-card').querySelector('.site-chart-wrap');
-      const isOpen = wrap.classList.contains('open');
-      if (isOpen) {
-        wrap.classList.remove('open');
-        btn.textContent = 'グラフ';
-        return;
-      }
-      wrap.classList.add('open');
-      btn.textContent = '閉じる';
-      if (!siteCharts[path]) {
-        const canvas = wrap.querySelector('canvas');
-        const data   = Object.values(pvByPath[path] || buildHourMap());
-        siteCharts[path] = new Chart(canvas, makeChartConfig(hourLabels, data));
-      }
-    }
-
-    function buildSiteList(stats) {
+function buildSiteList(stats) {
       const list   = document.getElementById('site-list');
       list.innerHTML = '';
       const sorted = [...stats].sort((a, b) => {
@@ -445,13 +420,19 @@
         return fb.localeCompare(fa);
       });
 
+      const curHourKey = hourLabels[hourLabels.length - 1];
+
       for (const r of sorted) {
-        const folder  = r.path.split('/')[1] ?? r.path;
-        const ctr     = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
-        const cls     = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
-        const eid     = r.path.replace(/\//g, '-');
+        const folder   = r.path.split('/')[1] ?? r.path;
+        const ctr      = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
+        const cls      = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
+        const eid      = r.path.replace(/\//g, '-');
         const thumbUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/a/${folder}/card.jpg`;
-        const card   = document.createElement('div');
+        const pvH      = pvByPath[r.path]?.[curHourKey] ?? 0;
+        const ctH      = ctByPath[r.path]?.[curHourKey] ?? 0;
+        const badgeCls = pvH > 0 ? '' : 'zero';
+        const badgeTxt = pvH > 0 ? `+${pvH} PV${ctH > 0 ? ' / +' + ctH + ' CT' : ''}` : `+0/h`;
+        const card     = document.createElement('div');
         card.className = 'site-card';
         card.innerHTML = `
           <div class="site-row">
@@ -462,13 +443,12 @@
                 <div class="site-num">PV <b>${r.pv.toLocaleString()}</b></div>
                 <div class="site-num">CT <b>${r.ct.toLocaleString()}</b></div>
                 <div class="site-num ${cls}">CTR <b>${ctr}%</b></div>
+                <span class="pv-h-badge ${badgeCls}">${badgeTxt}</span>
               </div>
             </div>
             <button class="copy-btn" onclick="copyUrl('${r.path}', this)">コピー</button>
-            <button class="graph-btn" onclick="toggleChart('${r.path}', this)">グラフ</button>
             <button class="url-btn" onclick="toggleEdit('${eid}')">URL</button>
           </div>
-          <div class="site-chart-wrap"><canvas></canvas></div>
           <div class="edit-wrap" id="edit-${eid}">
             <div class="edit-lbl">GitHub Token</div>
             <input type="password" class="edit-input edit-tok" placeholder="ghp_xxxx" value="${localStorage.getItem('gh_token') || ''}">
