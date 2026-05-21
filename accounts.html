@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accounts</title>
+  <style>
+    :root {
+      --accent: #a78bfa;
+      --accent2: #f472b6;
+      --bg: #f5f4f8;
+      --card: #fff;
+      --border: rgba(167,139,250,0.15);
+      --text: #1a1828;
+      --sub: #9090b8;
+      --dim: #b0aec8;
+      --danger: #ef4444;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 32px 16px;
+      background-image:
+        radial-gradient(ellipse 700px 500px at -10% -5%, rgba(167,139,250,0.13) 0%, transparent 65%),
+        radial-gradient(ellipse 500px 400px at 110% 110%, rgba(244,114,182,0.10) 0%, transparent 65%);
+    }
+    .page { max-width: 860px; margin: 0 auto; }
+
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: none; border: 1.5px solid var(--border);
+      color: var(--sub); padding: 7px 14px; border-radius: 9px;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+      text-decoration: none; transition: border-color 0.15s, color 0.15s;
+    }
+    .back-btn:hover { border-color: rgba(167,139,250,0.4); color: var(--text); }
+
+    .page-title {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; padding: 9px 18px;
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* Table */
+    .table-wrap {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; overflow: hidden;
+      box-shadow: 0 2px 16px rgba(120,80,200,0.06);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: #f8f7fc; padding: 11px 14px;
+      font-size: 11px; font-weight: 600; color: var(--sub);
+      text-align: left; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid rgba(167,139,250,0.07); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #faf9fd; }
+    td {
+      padding: 11px 14px; font-size: 13px; color: var(--text);
+      max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    td.id-col { font-weight: 600; color: #6d5bd0; }
+    td.secret { color: var(--dim); font-family: monospace; font-size: 12px; }
+    .actions { display: flex; gap: 6px; }
+    .action-btn {
+      background: none; border: 1px solid var(--border); color: var(--sub);
+      padding: 4px 10px; border-radius: 7px; font-size: 12px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .action-btn:hover { border-color: rgba(167,139,250,0.4); color: var(--text); }
+    .action-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+
+    .empty {
+      padding: 48px; text-align: center; color: var(--sub); font-size: 14px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,24,40,0.45); backdrop-filter: blur(4px);
+      z-index: 100; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card); border-radius: 22px;
+      padding: 32px 28px; width: 100%; max-width: 480px;
+      box-shadow: 0 20px 60px rgba(100,60,180,0.18);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-title {
+      font-size: 18px; font-weight: 800; margin-bottom: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--sub); margin-bottom: 5px; }
+    .field input {
+      width: 100%; background: #f8f7fc;
+      border: 1.5px solid rgba(167,139,250,0.15);
+      color: var(--text); padding: 10px 13px;
+      border-radius: 10px; font-size: 13px; outline: none;
+      transition: border-color 0.2s; font-family: monospace;
+    }
+    .field input:focus { border-color: rgba(167,139,250,0.5); }
+    .modal-actions {
+      display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;
+    }
+    .cancel-btn {
+      background: none; border: 1.5px solid var(--border); color: var(--sub);
+      padding: 10px 20px; border-radius: 10px; font-size: 14px;
+      cursor: pointer; font-family: inherit;
+    }
+    .cancel-btn:hover { border-color: rgba(167,139,250,0.4); color: var(--text); }
+    .save-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; padding: 10px 24px;
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .save-btn:hover { opacity: 0.88; }
+
+    .toggle-vis {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%); background: none; border: none;
+      cursor: pointer; color: var(--sub); font-size: 14px; padding: 2px 4px;
+    }
+    .field-wrap { position: relative; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="page-header">
+      <a class="back-btn" href="index.html">← Hub</a>
+      <div class="page-title">🔑 Accounts</div>
+      <button class="add-btn" onclick="openModal()">＋ 追加</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="accountTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Password</th>
+            <th>Email</th>
+            <th>Email Pass</th>
+            <th>2FA Key</th>
+            <th>Auth Token</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="7" class="empty">アカウントがありません</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">アカウント追加</div>
+      <input type="hidden" id="editIndex" value="">
+
+      <div class="field">
+        <label>ID（ユーザー名）</label>
+        <div class="field-wrap"><input type="text" id="fId" placeholder="@username" autocomplete="off"></div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="field-wrap">
+          <input type="password" id="fPassword" autocomplete="off">
+          <button class="toggle-vis" type="button" onclick="toggleVis('fPassword', this)">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <div class="field-wrap"><input type="text" id="fEmail" autocomplete="off"></div>
+      </div>
+      <div class="field">
+        <label>Email Password</label>
+        <div class="field-wrap">
+          <input type="password" id="fEmailPassword" autocomplete="off">
+          <button class="toggle-vis" type="button" onclick="toggleVis('fEmailPassword', this)">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>2FA Key (FaKey)</label>
+        <div class="field-wrap">
+          <input type="password" id="fFaKey" autocomplete="off" placeholder="TOTP シークレット">
+          <button class="toggle-vis" type="button" onclick="toggleVis('fFaKey', this)">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Auth Token</label>
+        <div class="field-wrap">
+          <input type="password" id="fAuthToken" autocomplete="off" placeholder="ct0 / auth_token">
+          <button class="toggle-vis" type="button" onclick="toggleVis('fAuthToken', this)">👁</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeModal()">キャンセル</button>
+        <button class="save-btn" onclick="saveAccount()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'hub_accounts';
+
+    function loadAccounts() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveAccounts(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function mask(str) {
+      if (!str) return '—';
+      if (str.length <= 4) return '••••';
+      return str.slice(0, 2) + '••••' + str.slice(-2);
+    }
+
+    function render() {
+      const list = loadAccounts();
+      const tbody = document.getElementById('tableBody');
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">アカウントがありません</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map((a, i) => `
+        <tr>
+          <td class="id-col">${esc(a.id || '—')}</td>
+          <td class="secret">${mask(a.password)}</td>
+          <td>${esc(a.email || '—')}</td>
+          <td class="secret">${mask(a.emailPassword)}</td>
+          <td class="secret">${mask(a.faKey)}</td>
+          <td class="secret">${mask(a.authToken)}</td>
+          <td>
+            <div class="actions">
+              <button class="action-btn" onclick="openModal(${i})">編集</button>
+              <button class="action-btn del" onclick="deleteAccount(${i})">削除</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function openModal(index) {
+      const overlay = document.getElementById('modalOverlay');
+      const fields = ['Id','Password','Email','EmailPassword','FaKey','AuthToken'];
+      fields.forEach(f => {
+        document.getElementById('f' + f).value = '';
+        const input = document.getElementById('f' + f);
+        if (input.type === 'password') input.type = 'password';
+      });
+      document.getElementById('editIndex').value = '';
+
+      if (index !== undefined) {
+        const list = loadAccounts();
+        const a = list[index];
+        document.getElementById('modalTitle').textContent = 'アカウント編集';
+        document.getElementById('editIndex').value = index;
+        document.getElementById('fId').value            = a.id            || '';
+        document.getElementById('fPassword').value      = a.password      || '';
+        document.getElementById('fEmail').value         = a.email         || '';
+        document.getElementById('fEmailPassword').value = a.emailPassword || '';
+        document.getElementById('fFaKey').value         = a.faKey         || '';
+        document.getElementById('fAuthToken').value     = a.authToken     || '';
+      } else {
+        document.getElementById('modalTitle').textContent = 'アカウント追加';
+      }
+
+      overlay.classList.add('open');
+      document.getElementById('fId').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    function saveAccount() {
+      const account = {
+        id:            document.getElementById('fId').value.trim(),
+        password:      document.getElementById('fPassword').value,
+        email:         document.getElementById('fEmail').value.trim(),
+        emailPassword: document.getElementById('fEmailPassword').value,
+        faKey:         document.getElementById('fFaKey').value.trim(),
+        authToken:     document.getElementById('fAuthToken').value.trim(),
+      };
+      if (!account.id) { document.getElementById('fId').focus(); return; }
+
+      const list = loadAccounts();
+      const idx  = document.getElementById('editIndex').value;
+      if (idx !== '') {
+        list[parseInt(idx)] = account;
+      } else {
+        list.push(account);
+      }
+      saveAccounts(list);
+      closeModal();
+      render();
+    }
+
+    function deleteAccount(index) {
+      const list = loadAccounts();
+      if (!confirm(`@${list[index]?.id || index} を削除しますか？`)) return;
+      list.splice(index, 1);
+      saveAccounts(list);
+      render();
+    }
+
+    function toggleVis(id, btn) {
+      const input = document.getElementById(id);
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      btn.textContent = isPass ? '🙈' : '👁';
+    }
+
+    // Close on overlay click
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Auth guard
+    if (!localStorage.getItem('hub_user')) {
+      location.href = 'index.html';
+    }
+
+    render();
+  </script>
+</body>
+</html>
