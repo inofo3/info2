@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADMIN · generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #ecebe6;
+      --surface: #f4f3ee;
+      --raise:   #faf9f4;
+      --ink:     #101010;
+      --inkSoft: rgba(16,16,16,0.55);
+      --inkFaint:rgba(16,16,16,0.30);
+      --hair:    rgba(16,16,16,0.18);
+      --accent:  #e8ff5a;
+      --ok:      #1a7a3a;
+      --warn:    #b78104;
+      --err:     #b71d10;
+      --mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--ink);
+      background-image:
+        repeating-linear-gradient(0deg,  transparent 0 23px, rgba(16,16,16,0.05) 23px 24px),
+        repeating-linear-gradient(90deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px);
+      padding: 16px 16px 56px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 480px; margin: 0 auto; }
+
+    /* ── Top stamp ── */
+    .stamp {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--inkSoft);
+    }
+    .stamp .badge { background: var(--ink); color: var(--bg); padding: 3px 6px; font-weight: 700; margin-right: 8px; }
+
+    /* ── Header block ── */
+    .head {
+      border-bottom: 1px solid var(--ink);
+      padding-bottom: 12px; margin-bottom: 18px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .head .meta { font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft); margin-bottom: 2px; }
+    .head .title { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; line-height: 1; }
+    #lastUpdated {
+      font-size: 10px; color: var(--inkSoft); letter-spacing: 1px;
+      display: none; text-align: right;
+    }
+    #lastUpdated::before { content: '// '; color: var(--inkFaint); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--ink);
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .card-title {
+      font-size: 10px; letter-spacing: 1.4px; font-weight: 700;
+      color: var(--ink); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title::before {
+      content: '#'; color: var(--inkSoft); font-weight: 400;
+    }
+    .card-title::after {
+      content: ''; flex: 1; border-top: 1px dashed var(--hair);
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 12px; }
+    .field:last-child { margin-bottom: 0; }
+    label {
+      display: block; font-size: 10px; letter-spacing: 1.2px;
+      color: var(--inkSoft); margin-bottom: 4px;
+    }
+    label::before { content: '> '; color: var(--inkFaint); }
+
+    input[type=text], input[type=password], input[type=url] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      padding: 9px 10px;
+      font-size: 13px; outline: none;
+      font-family: var(--mono); letter-spacing: 0.3px;
+    }
+    input[type=text]:focus, input[type=password]:focus, input[type=url]:focus {
+      box-shadow: inset 0 0 0 1px var(--ink);
+      background: var(--raise);
+    }
+    input::placeholder { color: var(--inkFaint); }
+
+    input[type=file] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px dashed var(--ink);
+      color: var(--inkSoft);
+      padding: 8px 10px;
+      font-size: 11px; cursor: pointer; outline: none;
+      font-family: var(--mono);
+    }
+    input[type=file]::file-selector-button {
+      background: var(--bg); color: var(--ink);
+      border: 1px solid var(--ink); padding: 5px 12px;
+      font-size: 10px; cursor: pointer; margin-right: 10px;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; transition: background 0.1s, color 0.1s;
+    }
+    input[type=file]::file-selector-button:hover { background: var(--ink); color: var(--bg); }
+
+    /* ── Sync ── */
+    .label-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+    .label-row label { margin-bottom: 0; }
+    .sync-badge {
+      font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px;
+      background: var(--accent); color: var(--ink);
+      padding: 1px 6px; display: none; white-space: nowrap;
+    }
+    .reset-link {
+      background: transparent; border: none; color: var(--inkSoft);
+      font-size: 10.5px; cursor: pointer; padding: 4px 0;
+      margin-top: 4px; display: none; font-family: var(--mono); letter-spacing: 0.5px;
+    }
+    .reset-link:hover { color: var(--ink); text-decoration: underline; }
+
+    /* ── Preview ── */
+    .preview { margin-top: 8px; display: none; }
+    .preview img {
+      width: 100%; height: auto;
+      border: 1px solid var(--ink); object-fit: contain; display: block;
+    }
+
+    /* ── Mark toggle ── */
+    .mark-toggle {
+      background: transparent; border: 1px solid var(--ink); color: var(--ink);
+      font-size: 11px; cursor: pointer; padding: 5px 10px;
+      margin-top: 8px; display: none; text-align: left;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .mark-toggle:hover { background: var(--ink); color: var(--bg); }
+    .mark-toggle.active { background: var(--accent); color: var(--ink); border-color: var(--ink); }
+
+    /* ── Mark panel ── */
+    .mark-panel {
+      margin-top: 8px;
+      background: var(--bg);
+      border: 1px solid var(--ink);
+      padding: 10px; display: none;
+    }
+    .mark-panel canvas {
+      display: block; width: 100%; height: auto;
+      margin-bottom: 10px; border: 1px solid var(--ink);
+    }
+    .mark-ctrl { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .mark-ctrl .lbl {
+      font-size: 10px; color: var(--inkSoft); width: 42px;
+      flex-shrink: 0; letter-spacing: 1px;
+    }
+    .mark-ctrl input[type=range] {
+      flex: 1; height: 18px;
+      -webkit-appearance: none; appearance: none; background: transparent; outline: none;
+    }
+    .mark-ctrl input[type=range]::-webkit-slider-runnable-track {
+      height: 1px; background: var(--ink);
+    }
+    .mark-ctrl input[type=range]::-moz-range-track {
+      height: 1px; background: var(--ink);
+    }
+    .mark-ctrl input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px; background: var(--accent);
+      border: 1px solid var(--ink); cursor: pointer;
+      margin-top: -7px; border-radius: 0;
+    }
+    .mark-ctrl input[type=range]::-moz-range-thumb {
+      width: 14px; height: 14px; background: var(--accent);
+      border: 1px solid var(--ink); cursor: pointer; border-radius: 0;
+    }
+    .mark-ctrl .val {
+      font-size: 10.5px; color: var(--ink); min-width: 36px;
+      text-align: right; font-weight: 700;
+    }
+    .mark-btns { display: flex; gap: 0; margin-top: 10px; }
+    .mark-btns button {
+      flex: 1; padding: 8px; font-size: 11px; cursor: pointer;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+      border: 1px solid var(--ink); margin-left: -1px;
+      transition: background 0.1s, color 0.1s;
+    }
+    .mark-btns button:first-child { margin-left: 0; }
+    .mark-btns .apply { background: var(--accent); color: var(--ink); }
+    .mark-btns .apply:hover { background: var(--ink); color: var(--accent); }
+    .mark-btns .clear { background: transparent; color: var(--ink); }
+    .mark-btns .clear:hover { background: var(--ink); color: var(--bg); }
+
+    /* ── Main button ── */
+    .btn {
+      width: 100%; padding: 12px 14px; cursor: pointer;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); font-family: var(--mono);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px; text-align: left;
+      margin-top: 14px; transition: background 0.1s, color 0.1s;
+    }
+    .btn:hover { background: var(--ink); color: var(--accent); }
+    .btn:active { background: var(--ink); color: var(--accent); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
+    .btn .arr { float: right; }
+
+    /* ── Status ── */
+    .status {
+      margin-top: 12px; padding: 8px 10px;
+      font-size: 11.5px; display: none; font-family: var(--mono);
+      border: 1px dashed var(--ink);
+    }
+    .status::before { content: '[..] '; color: var(--inkFaint); font-weight: 700; }
+    .status.ok  { color: var(--ok); border-color: var(--ok); }
+    .status.ok::before { content: '[OK] '; }
+    .status.err {
+      color: var(--err); border-color: var(--err);
+      white-space: pre-wrap; word-break: break-all; max-height: 240px; overflow-y: auto;
+    }
+    .status.err::before { content: '[ERR] '; }
+
+    /* ── Result URL ── */
+    #resultUrl { margin-top: 12px; display: none; }
+    .url-row { display: flex; gap: 0; align-items: stretch; margin-top: 4px; }
+    .url-row input {
+      flex: 1; color: var(--ok); font-weight: 500;
+      background: var(--raise);
+    }
+    .copy-url-btn {
+      flex-shrink: 0; padding: 0 14px; min-height: 38px;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); margin-left: -1px;
+      font-family: var(--mono); font-size: 11px; font-weight: 700;
+      letter-spacing: 0.5px; cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .copy-url-btn:hover { background: var(--ink); color: var(--accent); }
+
+    /* ── Foot ── */
+    .foot {
+      margin-top: 18px; padding-top: 10px;
+      border-top: 1px dashed var(--hair);
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--inkFaint); letter-spacing: 1.2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Top stamp -->
+    <div class="stamp">
+      <div><span class="badge">ADMIN</span>v1.0 · page generator</div>
+      <div id="stampDate"></div>
+    </div>
+
+    <header class="head">
+      <div>
+        <div class="meta">## /usr/local/admin</div>
+        <div class="title">GENERATOR_</div>
+      </div>
+      <div id="lastUpdated">last commit <span></span></div>
+    </header>
+
+    <div class="card">
+      <div class="card-title">AUTH</div>
+      <div class="field">
+        <label>github token</label>
+        <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">NEW / generate</div>
+
+      <div class="field">
+        <label>username</label>
+        <input type="text" id="username" placeholder="taro">
+      </div>
+      <div class="field">
+        <label>folder name</label>
+        <input type="text" id="folder" placeholder="20260430_1200">
+      </div>
+      <div class="field">
+        <label>title (ogp / page)</label>
+        <input type="text" id="title" placeholder="【速報】衝撃映像が話題に">
+      </div>
+
+      <div class="field">
+        <label>meta image → card.jpg</label>
+        <input type="file" id="metaImage" accept="image/*">
+        <div id="metaPreview" class="preview"><img></div>
+        <button type="button" class="mark-toggle" id="metaMarkToggle" onclick="toggleMarkPanel('meta')">[▸] play mark</button>
+        <div class="mark-panel" id="metaMarkPanel">
+          <canvas id="metaMarkCanvas"></canvas>
+          <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="metaMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="metaMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('meta')">$ apply ▶</button><button class="clear" onclick="clearMark('meta')">clear</button></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label>site image → thumb.jpg</label>
+          <span id="syncBadge" class="sync-badge">SYNC ⇆ META</span>
+        </div>
+        <input type="file" id="siteImage" accept="image/*">
+        <div id="sitePreview" class="preview"><img></div>
+        <button type="button" class="mark-toggle" id="siteMarkToggle" onclick="toggleMarkPanel('site')">[▸] play mark</button>
+        <div class="mark-panel" id="siteMarkPanel">
+          <canvas id="siteMarkCanvas"></canvas>
+          <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="siteMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="siteMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('site')">$ apply ▶</button><button class="clear" onclick="clearMark('site')">clear</button></div>
+        </div>
+        <button type="button" id="resetSyncBtn" class="reset-link" onclick="resetSync()">↩ reset to meta</button>
+      </div>
+
+      <div class="field">
+        <label>account name</label>
+        <input type="text" id="name" placeholder="速報ニュース">
+      </div>
+      <div class="field">
+        <label>destination url</label>
+        <input type="url" id="yturl" placeholder="https://...">
+      </div>
+
+      <button class="btn" id="submitBtn" onclick="generate()">$ generate &amp; commit <span class="arr">▶</span></button>
+      <div class="status" id="status"></div>
+      <div id="resultUrl">
+        <label>generated url</label>
+        <div class="url-row">
+          <input id="urlOutput" readonly onclick="this.select()">
+          <button class="copy-url-btn" id="copyUrlBtn" onclick="copyGenUrl()">COPY</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span>// admin.v1.0 · github contents api</span>
+      <span id="footTime"></span>
+    </div>
+
+  </div>
+
+  <script>
+    const OWNER  = 'inofo3';
+    const REPO   = 'info2';
+    const BRANCH = 'main';
+
+    // ── stamp date
+    (function () {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const dow = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+      const txt = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${dow} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      document.getElementById('stampDate').textContent = txt;
+      const ft = document.getElementById('footTime');
+      if (ft) ft.textContent = `// session ${txt}`;
+    })();
+
+    function genFolderName() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
+    }
+
+    function bindStorage(inputId, key) {
+      const el = document.getElementById(inputId);
+      const saved = localStorage.getItem(key);
+      if (saved) el.value = saved;
+      el.addEventListener('change', () => localStorage.setItem(key, el.value));
+    }
+
+    bindStorage('token', 'gh_token');
+    bindStorage('username', 'gh_username');
+    bindStorage('yturl', 'gh_yturl');
+    document.getElementById('folder').value = genFolderName();
+
+    async function showLastUpdated() {
+      const el = document.getElementById('lastUpdated');
+      try {
+        const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/commits?per_page=1&sha=${BRANCH}`);
+        if (!res.ok) return;
+        const [commit] = await res.json();
+        if (commit) {
+          el.querySelector('span').textContent = new Date(commit.commit.committer.date).toLocaleString('ja-JP');
+          el.style.display = 'block';
+        }
+      } catch {}
+    }
+    showLastUpdated();
+
+    function cropImage(file, w, h) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            const sr = img.width / img.height;
+            const dr = w / h;
+            let sx, sy, sw, sh;
+            if (sr > dr) {
+              sh = img.height; sw = sh * dr; sx = (img.width - sw) / 2; sy = 0;
+            } else {
+              sw = img.width; sh = sw / dr; sx = 0; sy = (img.height - sh) / 2;
+            }
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    let siteLinked = false;
+    let metaMarkedUrl = null, siteMarkedUrl = null;
+    let metaCroppedUrl = null, siteCroppedUrl = null;
+
+    function updateSyncUI() {
+      const hasMeta = !!document.getElementById('metaImage').files[0];
+      document.getElementById('syncBadge').style.display    = siteLinked ? 'inline-block' : 'none';
+      document.getElementById('resetSyncBtn').style.display = (!siteLinked && hasMeta) ? 'block' : 'none';
+      const siteToggle = document.getElementById('siteMarkToggle');
+      if (siteLinked) {
+        siteToggle.style.display = 'none';
+        document.getElementById('siteMarkPanel').style.display = 'none';
+      } else if (siteCroppedUrl) {
+        siteToggle.style.display = 'block';
+      }
+    }
+
+    document.getElementById('metaImage').addEventListener('change', async function() {
+      if (!this.files[0]) return;
+      await showPreview(this.files[0], 'metaPreview', 1200, 630);
+      siteLinked = true;
+      await showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSyncUI();
+    });
+
+    document.getElementById('siteImage').addEventListener('change', function() {
+      if (!this.files[0]) return;
+      siteLinked = false;
+      showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSyncUI();
+    });
+
+    function resetSync() {
+      const metaFile = document.getElementById('metaImage').files[0];
+      if (!metaFile) return;
+      siteLinked = true;
+      showPreview(metaFile, 'sitePreview', 1280, 720);
+      updateSyncUI();
+    }
+
+    async function showPreview(file, previewId, w, h) {
+      const wrap = document.getElementById(previewId);
+      if (!file) { wrap.style.display = 'none'; return; }
+      const dataUrl = await cropImage(file, w, h);
+      wrap.querySelector('img').src = dataUrl;
+      wrap.style.display = 'block';
+      if (previewId === 'metaPreview') {
+        metaCroppedUrl = dataUrl; metaMarkedUrl = null; resetMarkUI('meta');
+      } else if (previewId === 'sitePreview') {
+        siteCroppedUrl = dataUrl; siteMarkedUrl = null; resetMarkUI('site');
+      }
+    }
+
+    function resetMarkUI(type) {
+      const toggle = document.getElementById(type + 'MarkToggle');
+      const panel  = document.getElementById(type + 'MarkPanel');
+      toggle.textContent = '[▸] play mark';
+      toggle.classList.remove('active');
+      panel.style.display = 'none';
+      toggle.style.display = (type === 'site' && siteLinked) ? 'none' : 'block';
+    }
+
+    function toggleMarkPanel(type) {
+      const panel = document.getElementById(type + 'MarkPanel');
+      if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      renderMarkPreview(type);
+    }
+
+    function renderMarkPreview(type) {
+      const src = type === 'meta' ? metaCroppedUrl : siteCroppedUrl;
+      if (!src) return;
+      const canvas = document.getElementById(type + 'MarkCanvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        drawPlayMark(ctx, img.width, img.height,
+          parseFloat(document.getElementById(type + 'MarkSize').value),
+          parseInt(document.getElementById(type + 'MarkOpacity').value));
+      };
+      img.src = src;
+    }
+
+    function onMarkSlider(type) {
+      document.getElementById(type + 'MarkSizeVal').textContent    = document.getElementById(type + 'MarkSize').value + '%';
+      document.getElementById(type + 'MarkOpacityVal').textContent = document.getElementById(type + 'MarkOpacity').value + '%';
+      renderMarkPreview(type);
+    }
+
+    function drawPlayMark(ctx, w, h, sizePct, opacityPct) {
+      const minDim = Math.min(w, h);
+      const radius = minDim * (sizePct / 100);
+      const cx = w / 2;
+      const cy = h / 2;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur  = radius * 0.4;
+      ctx.fillStyle   = `rgba(0,0,0,${opacityPct / 100})`;
+      ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#fff';
+      const tri = radius * 0.42, ox = tri * 0.12;
+      ctx.beginPath();
+      ctx.moveTo(cx - tri * 0.55 + ox, cy - tri);
+      ctx.lineTo(cx - tri * 0.55 + ox, cy + tri);
+      ctx.lineTo(cx + tri + ox, cy);
+      ctx.closePath(); ctx.fill();
+    }
+
+    function renderMarkToUrl(srcUrl, sizePct, opacityPct) {
+      return new Promise(resolve => {
+        const tmp = document.createElement('canvas');
+        const tctx = tmp.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+          tmp.width = img.width; tmp.height = img.height;
+          tctx.drawImage(img, 0, 0);
+          drawPlayMark(tctx, img.width, img.height, sizePct, opacityPct);
+          resolve(tmp.toDataURL('image/jpeg', 0.9));
+        };
+        img.src = srcUrl;
+      });
+    }
+
+    async function applyMark(type) {
+      const canvas  = document.getElementById(type + 'MarkCanvas');
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      if (type === 'meta') {
+        metaMarkedUrl = dataUrl;
+        document.getElementById('metaPreview').querySelector('img').src = dataUrl;
+        if (siteLinked && siteCroppedUrl) {
+          siteMarkedUrl = await renderMarkToUrl(siteCroppedUrl,
+            parseFloat(document.getElementById('metaMarkSize').value),
+            parseInt(document.getElementById('metaMarkOpacity').value));
+          document.getElementById('sitePreview').querySelector('img').src = siteMarkedUrl;
+        }
+      } else {
+        siteMarkedUrl = dataUrl;
+        document.getElementById('sitePreview').querySelector('img').src = dataUrl;
+      }
+      const toggle = document.getElementById(type + 'MarkToggle');
+      toggle.textContent = '[✓] applied';
+      toggle.classList.add('active');
+      document.getElementById(type + 'MarkPanel').style.display = 'none';
+    }
+
+    function clearMark(type) {
+      if (type === 'meta') {
+        metaMarkedUrl = null;
+        if (metaCroppedUrl) document.getElementById('metaPreview').querySelector('img').src = metaCroppedUrl;
+      } else {
+        siteMarkedUrl = null;
+        if (siteCroppedUrl) document.getElementById('sitePreview').querySelector('img').src = siteCroppedUrl;
+      }
+      const toggle = document.getElementById(type + 'MarkToggle');
+      toggle.textContent = '[▸] play mark';
+      toggle.classList.remove('active');
+      document.getElementById(type + 'MarkPanel').style.display = 'none';
+    }
+
+    async function getFileSha(token, path) {
+      let res;
+      try {
+        res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ref=${BRANCH}&t=${Date.now()}`, {
+          headers: { Authorization: `token ${token}` }
+        });
+      } catch (e) {
+        throw new Error(`ネットワークエラー [SHA取得 ${path}]: ${e.message}`);
+      }
+      if (res.status === 404) return null;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(`SHA取得失敗 [${path}] (${res.status}): ${body.message || JSON.stringify(body)}`);
+      }
+      return (await res.json()).sha;
+    }
+
+    async function githubPut(token, path, body) {
+      const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
+      const headers = { Authorization: `token ${token}`, 'Content-Type': 'application/json' };
+      let res;
+      for (let i = 0; i < 3; i++) {
+        const sha = await getFileSha(token, path);
+        if (sha) body.sha = sha; else delete body.sha;
+        console.log(`[PUT試行${i+1}] ${path} SHA=${sha || 'なし'}`);
+        try {
+          res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+        } catch (e) {
+          throw new Error(`ネットワークエラー [PUT ${path}]: ${e.message}`);
+        }
+        if (res.status !== 409) break;
+        const errBody = await res.json().catch(() => ({}));
+        console.warn(`[PUT試行${i+1}] 409: ${errBody.message}`);
+      }
+      return res;
+    }
+
+    async function uploadImage(token, path, source, isOgp) {
+      const dataUrl = typeof source === 'string'
+        ? source
+        : await cropImage(source, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
+      const res = await githubPut(token, path, {
+        message: `Upload ${path}`,
+        content: dataUrl.split(',')[1],
+        branch: BRANCH
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const detail = [
+          `[画像アップロード失敗]`,
+          `ファイル: ${path}`,
+          `ステータス: ${res.status}`,
+          `GitHub: ${err.message || JSON.stringify(err)}`
+        ].join('\n');
+        throw new Error(detail);
+      }
+    }
+
+    async function updateFile(token, path, content, message) {
+      const res = await githubPut(token, path, {
+        message,
+        content: btoa(unescape(encodeURIComponent(content))),
+        branch: BRANCH
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const detail = [
+          `[ファイル生成失敗]`,
+          `ファイル: ${path}`,
+          `ステータス: ${res.status}`,
+          `GitHub: ${err.message || JSON.stringify(err)}`,
+          res.status === 409 ? `→ 3回リトライしてもSHA不一致。コンソールで詳細を確認してください。` : ''
+        ].filter(Boolean).join('\n');
+        throw new Error(detail);
+      }
+    }
+
+    function buildIndex(title, image) {
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:title" content="${title}">
+  <meta property="og:image" content="${image}">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:image" content="${image}">
+  <title>${title}</title>
+</head>
+<body>
+  <script>window.location.replace('./news.html');<\/script>
+</body>
+</html>`;
+    }
+
+    function buildNews(title, image, name, path) {
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      cursor: pointer;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 100px 20px 40px;
+    }
+    .profile-name {
+      font-size: 19px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 32px;
+      letter-spacing: 0.5px;
+    }
+    .video-wrap {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #111;
+      aspect-ratio: 16/9;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    }
+    .video-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile-name">${name}</div>
+    <div class="video-wrap"><img src="${image}" alt=""></div>
+  </div>
+  <script>
+    (function() {
+      var SB = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+      var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+      var PATH = '${path}';
+      function rpc(fn) {
+        fetch(SB + '/rest/v1/rpc/' + fn, {
+          method: 'POST',
+          headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_path: PATH }),
+          keepalive: true
+        }).catch(function(){});
+      }
+      rpc('increment_pv');
+      fetch('./link.txt').then(function(r){ return r.text(); }).then(function(url) {
+        document.body.onclick = function() {
+          rpc('increment_ct');
+          setTimeout(function(){ window.location.href = url.trim(); }, 100);
+        };
+      });
+    })();
+  <\/script>
+</body>
+</html>`;
+    }
+
+    function copyGenUrl() {
+      const url = document.getElementById('urlOutput').value;
+      if (!url) return;
+      const btn = document.getElementById('copyUrlBtn');
+      navigator.clipboard.writeText(url).then(() => {
+        btn.textContent = '[✓] OK';
+        setTimeout(() => { btn.textContent = 'COPY'; }, 1600);
+      });
+    }
+
+    async function generate() {
+      const token    = document.getElementById('token').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const folder   = document.getElementById('folder').value.trim();
+      const title    = document.getElementById('title').value.trim();
+      const metaFile     = document.getElementById('metaImage').files[0];
+      const siteFileRaw  = document.getElementById('siteImage').files[0];
+      const siteFile     = (siteLinked || !siteFileRaw) ? metaFile : siteFileRaw;
+      const name         = document.getElementById('name').value.trim();
+      const yturl        = document.getElementById('yturl').value.trim();
+      const status       = document.getElementById('status');
+      const btn          = document.getElementById('submitBtn');
+
+      if (!token || !username || !folder || !title || !metaFile || !name || !yturl) {
+        status.className = 'status err';
+        status.textContent = 'Token・ユーザー名・フォルダ名・タイトル・画像・名前・リンク先URLは必須です';
+        return;
+      }
+
+      const path = `${username}/${folder}`;
+      btn.disabled = true;
+      status.style.display = 'block';
+      document.getElementById('resultUrl').style.display = 'none';
+
+      const step = (msg) => {
+        status.className = 'status';
+        status.textContent = msg;
+        console.log('[Admin]', msg);
+      };
+
+      const metaUrl = `https://click-click.site/${path}/card.jpg`;
+      const siteUrl = `https://click-click.site/${path}/thumb.jpg`;
+
+      try {
+        step('① Token を確認中...');
+        const testRes = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, {
+          headers: { Authorization: `token ${token}` }
+        }).catch(e => { throw new Error(`ネットワークエラー [Token確認]: ${e.message}`); });
+        if (!testRes.ok) throw new Error(`Token が無効または権限不足 (${testRes.status})`);
+
+        step('② card.jpg をアップロード中...');
+        await uploadImage(token, `${path}/card.jpg`, metaMarkedUrl || metaFile, true);
+
+        step('③ thumb.jpg をアップロード中...');
+        await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false);
+
+        step('④ index.html を生成中...');
+        await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
+
+        step('⑤ news.html を生成中...');
+        await updateFile(token, `${path}/news.html`, buildNews(title, siteUrl, name, path), `Create ${path}/news.html`);
+
+        step('⑥ link.txt を生成中...');
+        await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
+
+        status.className = 'status ok';
+        status.textContent = '生成完了';
+        showLastUpdated();
+        document.getElementById('urlOutput').value = `https://click-click.site/${path}/`;
+        document.getElementById('resultUrl').style.display = 'block';
+        document.getElementById('folder').value = genFolderName();
+      } catch (e) {
+        status.className = 'status err';
+        status.textContent = e.message;
+        console.error(e);
+      }
+
+      btn.disabled = false;
+    }
+
+  </script>
+</body>
+</html>
