@@ -94,7 +94,11 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
       overflow: hidden;
     }
-    .site-row { display: flex; align-items: center; padding: 14px 16px; gap: 12px; }
+    .site-row { display: flex; align-items: center; padding: 12px 14px; gap: 10px; }
+    .site-thumb {
+      width: 52px; height: 52px; border-radius: 9px;
+      object-fit: cover; flex-shrink: 0; background: #f2f2f7;
+    }
     .site-info { flex: 1; min-width: 0; }
     .site-path { font-size: 13px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .site-path span { color: #aaa; margin: 0 4px; }
@@ -435,17 +439,23 @@
     function buildSiteList(stats) {
       const list   = document.getElementById('site-list');
       list.innerHTML = '';
-      const sorted = [...stats].sort((a, b) => b.pv - a.pv);
+      const sorted = [...stats].sort((a, b) => {
+        const fa = a.path.split('/')[1] ?? a.path;
+        const fb = b.path.split('/')[1] ?? b.path;
+        return fb.localeCompare(fa);
+      });
 
       for (const r of sorted) {
-        const folder = r.path.split('/')[1] ?? r.path;
-        const ctr    = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
-        const cls    = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
-        const eid    = r.path.replace(/\//g, '-');
+        const folder  = r.path.split('/')[1] ?? r.path;
+        const ctr     = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
+        const cls     = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
+        const eid     = r.path.replace(/\//g, '-');
+        const thumbUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/a/${folder}/card.jpg`;
         const card   = document.createElement('div');
         card.className = 'site-card';
         card.innerHTML = `
           <div class="site-row">
+            <img class="site-thumb" src="${thumbUrl}" loading="lazy" onerror="this.style.display='none'">
             <div class="site-info">
               <div class="site-path">${folder}</div>
               <div class="site-nums">
