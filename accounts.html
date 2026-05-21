@@ -105,6 +105,8 @@
     }
     .action-btn:hover { border-color: rgba(167,139,250,0.4); color: var(--text); }
     .action-btn.del:hover { border-color: var(--danger); color: var(--danger); }
+    .action-btn.copy { color: var(--sub); }
+    .action-btn.copy.copied { border-color: #22c55e; color: #22c55e; }
 
     .empty {
       padding: 48px; text-align: center; color: var(--sub); font-size: 14px;
@@ -298,6 +300,7 @@ user2:pass2:email2@example.com:emailpass2:FAKEY2:authtoken2"></textarea>
           <td class="secret">${mask(a.authToken)}</td>
           <td>
             <div class="actions">
+              <button class="action-btn copy" id="cpbtn-${i}" onclick="copyAccount(${i})">コピー</button>
               <button class="action-btn" onclick="openModal(${i})">編集</button>
               <button class="action-btn del" onclick="deleteAccount(${i})">削除</button>
             </div>
@@ -364,6 +367,18 @@ user2:pass2:email2@example.com:emailpass2:FAKEY2:authtoken2"></textarea>
       saveAccounts(list);
       closeModal();
       render();
+    }
+
+    function copyAccount(index) {
+      const list = loadAccounts();
+      const a = list[index];
+      const text = [a.id, a.password, a.email, a.emailPassword, a.faKey, a.authToken].join(':');
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById(`cpbtn-${index}`);
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('copied'); }, 1500);
+      });
     }
 
     function deleteAccount(index) {
