@@ -47,6 +47,7 @@
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
 
+    .btn-row { display: flex; gap: 8px; }
     .add-btn {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: #fff; border: none; padding: 9px 18px;
@@ -55,6 +56,24 @@
       transition: opacity 0.15s, transform 0.1s;
     }
     .add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .import-btn {
+      background: none; border: 1.5px solid var(--border); color: var(--sub);
+      padding: 9px 18px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
+    }
+    .import-btn:hover { border-color: rgba(167,139,250,0.4); color: var(--text); }
+
+    /* Import modal textarea */
+    .import-textarea {
+      width: 100%; min-height: 160px; background: #f8f7fc;
+      border: 1.5px solid rgba(167,139,250,0.15);
+      color: var(--text); padding: 10px 13px;
+      border-radius: 10px; font-size: 12px; font-family: monospace;
+      outline: none; resize: vertical; transition: border-color 0.2s;
+    }
+    .import-textarea:focus { border-color: rgba(167,139,250,0.5); }
+    .import-hint { font-size: 11px; color: var(--sub); margin-top: 6px; line-height: 1.5; }
+    .import-result { font-size: 12px; margin-top: 10px; color: #22c55e; display: none; }
 
     /* Table */
     .table-wrap {
@@ -149,7 +168,10 @@
     <div class="page-header">
       <a class="back-btn" href="index.html">← Hub</a>
       <div class="page-title">🔑 Accounts</div>
-      <button class="add-btn" onclick="openModal()">＋ 追加</button>
+      <div class="btn-row">
+        <button class="import-btn" onclick="openImport()">📋 一括インポート</button>
+        <button class="add-btn" onclick="openModal()">＋ 追加</button>
+      </div>
     </div>
 
     <div class="table-wrap">
@@ -169,6 +191,25 @@
           <tr><td colspan="7" class="empty">アカウントがありません</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay" id="importOverlay">
+    <div class="modal">
+      <div class="modal-title">📋 一括インポート</div>
+      <textarea class="import-textarea" id="importText"
+        placeholder="1行に1アカウント。コロン区切りで貼り付けてください。
+
+例:
+Mustafa26895688:ytz9nnpnbc:irdhchoa@reevalmail.com:fnhprnohA!4728:MX6B4XO4TXHNBFI7:f7bde004235805c3a18dd301fa9b3103a60f198c
+user2:pass2:email2@example.com:emailpass2:FAKEY2:authtoken2"></textarea>
+      <div class="import-hint">フォーマット: ID : Password : Email : EmailPassword : FaKey : AuthToken</div>
+      <div class="import-result" id="importResult"></div>
+      <div class="modal-actions">
+        <button class="cancel-btn" onclick="closeImport()">キャンセル</button>
+        <button class="save-btn" onclick="doImport()">インポート</button>
+      </div>
     </div>
   </div>
 
@@ -340,7 +381,55 @@
       btn.textContent = isPass ? '🙈' : '👁';
     }
 
+    function openImport() {
+      document.getElementById('importText').value = '';
+      document.getElementById('importResult').style.display = 'none';
+      document.getElementById('importOverlay').classList.add('open');
+      document.getElementById('importText').focus();
+    }
+
+    function closeImport() {
+      document.getElementById('importOverlay').classList.remove('open');
+    }
+
+    function doImport() {
+      const raw = document.getElementById('importText').value;
+      const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+      const list = loadAccounts();
+      let added = 0, skipped = 0;
+
+      for (const line of lines) {
+        const parts = line.split(':');
+        if (parts.length < 2) { skipped++; continue; }
+        // ID:Password:Email:EmailPassword:FaKey:AuthToken
+        // emailが @ を含む場合もコロン区切りには影響しない
+        const account = {
+          id:            parts[0]  || '',
+          password:      parts[1]  || '',
+          email:         parts[2]  || '',
+          emailPassword: parts[3]  || '',
+          faKey:         parts[4]  || '',
+          authToken:     parts[5]  || '',
+        };
+        if (!account.id) { skipped++; continue; }
+        list.push(account);
+        added++;
+      }
+
+      saveAccounts(list);
+      render();
+
+      const result = document.getElementById('importResult');
+      result.textContent = `✅ ${added}件インポート完了${skipped ? `（${skipped}件スキップ）` : ''}`;
+      result.style.display = 'block';
+
+      if (added > 0) setTimeout(closeImport, 1200);
+    }
+
     // Close on overlay click
+    document.getElementById('importOverlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeImport();
+    });
     document.getElementById('modalOverlay').addEventListener('click', e => {
       if (e.target === e.currentTarget) closeModal();
     });
