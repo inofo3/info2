@@ -3,193 +3,300 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hub</title>
+  <title>HUB · workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --accent: #a78bfa;
-      --accent2: #f472b6;
-      --bg: #f5f4f8;
-      --card: #fff;
-      --border: rgba(167,139,250,0.15);
-      --text: #1a1828;
-      --sub: #9090b8;
-      --dim: #b0aec8;
+      --bg:      #ecebe6;
+      --surface: #f4f3ee;
+      --ink:     #101010;
+      --inkSoft: rgba(16,16,16,0.55);
+      --inkFaint:rgba(16,16,16,0.30);
+      --hair:    rgba(16,16,16,0.18);
+      --rule:    #101010;
+      --accent:  #e8ff5a;
+      --neg:     #b71d10;
+      --ok:      #1a7a3a;
+      --mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: var(--mono);
       background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 16px;
+      color: var(--ink);
       background-image:
-        radial-gradient(ellipse 700px 500px at -10% -5%, rgba(167,139,250,0.13) 0%, transparent 65%),
-        radial-gradient(ellipse 500px 400px at 110% 110%, rgba(244,114,182,0.10) 0%, transparent 65%);
+        repeating-linear-gradient(0deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px),
+        repeating-linear-gradient(90deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px);
+      min-height: 100vh;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
     }
+
+    /* ── Top stamp bar ── */
+    .stamp {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 720px; margin: 0 auto 16px;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--inkSoft);
+    }
+    .stamp .badge {
+      background: var(--ink); color: var(--bg);
+      padding: 3px 6px; font-weight: 700; margin-right: 8px;
+    }
+    .stamp .right span + span { margin-left: 12px; }
 
     /* ── Auth ── */
-    .auth-wrap { width: 100%; max-width: 340px; }
-    .auth-logo {
-      font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 28px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    .auth-wrap { width: 100%; max-width: 380px; margin: 4vh auto 0; }
+    .h-section {
+      font-size: 10px; letter-spacing: 1.4px;
+      color: var(--inkSoft); margin-bottom: 4px;
     }
-    .auth-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 28px 24px;
-      box-shadow: 0 2px 20px rgba(120,80,200,0.07);
+    .h-title {
+      font-size: 38px; font-weight: 700; letter-spacing: -1px;
+      line-height: 1; margin-bottom: 14px; color: var(--ink);
     }
-    .tabs {
-      display: flex; background: #f5f4f8;
-      border-radius: 10px; padding: 3px; margin-bottom: 22px;
-    }
-    .tab {
-      flex: 1; padding: 8px; border: none; border-radius: 8px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      background: none; color: var(--sub); font-family: inherit; transition: all 0.15s;
-    }
-    .tab.active { background: #fff; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 
-    .afield { margin-bottom: 14px; }
-    .afield label { display: block; font-size: 11px; font-weight: 500; color: var(--sub); margin-bottom: 5px; }
+    .auth-card { border: 1px solid var(--ink); background: var(--surface); padding: 14px; }
+
+    .tabs { display: flex; gap: 0; margin-bottom: 16px; }
+    .tab {
+      flex: 1; padding: 7px 0; border: 1px solid var(--ink);
+      background: transparent; color: var(--ink); font-family: var(--mono);
+      font-size: 11px; cursor: pointer; font-weight: 400;
+      margin-left: -1px; text-align: center; letter-spacing: 0.5px;
+    }
+    .tab:first-child { margin-left: 0; }
+    .tab.active { background: var(--ink); color: var(--bg); font-weight: 700; }
+
+    .afield { margin-bottom: 12px; }
+    .afield label {
+      display: block; font-size: 10px; letter-spacing: 1.2px;
+      color: var(--inkSoft); margin-bottom: 4px;
+    }
+    .afield .inp {
+      display: flex; align-items: center; border: 1px solid var(--ink);
+      background: var(--bg);
+    }
+    .afield .prompt {
+      padding: 0 8px; font-family: var(--mono); font-size: 12px;
+      color: var(--inkSoft); font-weight: 700;
+    }
     .afield input {
-      width: 100%; background: #f8f7fc;
-      border: 1.5px solid rgba(167,139,250,0.15);
-      color: var(--text); padding: 11px 14px;
-      border-radius: 11px; font-size: 14px; outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s; font-family: inherit;
+      flex: 1; padding: 9px 8px 9px 0;
+      background: transparent; border: none; outline: none;
+      font-family: var(--mono); font-size: 13px; color: var(--ink);
+      letter-spacing: 0.5px;
     }
-    .afield input:focus {
-      border-color: rgba(167,139,250,0.5);
-      box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
-    }
+    .afield input::placeholder { color: var(--inkFaint); }
+
     .auth-btn {
-      width: 100%; padding: 13px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; font-size: 15px; font-weight: 600;
-      border: none; border-radius: 12px; cursor: pointer;
-      font-family: inherit; margin-top: 4px;
-      transition: opacity 0.15s, transform 0.1s;
+      width: 100%; padding: 12px; cursor: pointer;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); font-family: var(--mono);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      text-align: left; padding-left: 14px;
+      transition: background 0.1s;
     }
-    .auth-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-    .auth-btn:active { transform: translateY(0); }
-    .auth-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    .auth-err { font-size: 12px; color: #ef4444; text-align: center; margin-top: 12px; display: none; }
-    .auth-ok  { font-size: 12px; color: #22c55e; text-align: center; margin-top: 12px; display: none; }
+    .auth-btn:hover { background: var(--ink); color: var(--accent); }
+    .auth-btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
+    .auth-btn .arr { float: right; }
+
+    .auth-err, .auth-ok {
+      font-family: var(--mono); font-size: 11px; margin-top: 12px;
+      padding: 6px 10px; border: 1px dashed var(--hair); display: none;
+    }
+    .auth-err { color: var(--neg); border-color: var(--neg); }
+    .auth-ok  { color: var(--ok);  border-color: var(--ok); }
+
+    .auth-foot {
+      margin-top: 12px; text-align: center;
+      font-size: 9.5px; color: var(--inkFaint); letter-spacing: 1px;
+    }
 
     /* ── Hub ── */
-    .hub-wrap { display: none; width: 100%; max-width: 480px; }
-    .hub-header {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 36px;
+    .hub-wrap { display: none; width: 100%; max-width: 720px; margin: 4vh auto 0; }
+    .hub-head {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      border-bottom: 1px solid var(--ink); padding-bottom: 14px; margin-bottom: 24px;
     }
-    .hub-title {
-      font-size: 24px; font-weight: 800;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    .hub-id .meta {
+      font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft);
+      margin-bottom: 2px;
     }
-    .hub-user { font-size: 12px; color: var(--sub); margin-top: 3px; }
+    .hub-id .who {
+      font-size: 24px; font-weight: 700; letter-spacing: -0.5px;
+    }
+    .hub-id .who .at { color: var(--inkSoft); font-weight: 400; }
+
     .logout-btn {
-      background: none; border: 1.5px solid var(--border); color: var(--sub);
-      padding: 6px 14px; border-radius: 8px; font-size: 12px;
-      cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
+      background: transparent; color: var(--ink); border: 1px solid var(--ink);
+      padding: 6px 10px; font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.5px; cursor: pointer;
     }
-    .logout-btn:hover { border-color: rgba(167,139,250,0.4); color: var(--text); }
+    .logout-btn:hover { background: var(--ink); color: var(--bg); }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
     }
     a.card {
-      display: flex; flex-direction: column; gap: 10px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 22px; padding: 28px 24px;
-      text-decoration: none; color: inherit;
-      box-shadow: 0 2px 16px rgba(120,80,200,0.06);
-      transition: transform 0.15s, box-shadow 0.15s;
-      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 6px;
+      background: var(--surface); border: 1px solid var(--ink);
+      padding: 18px 16px; text-decoration: none; color: var(--ink);
+      margin: -1px 0 0 -1px; min-height: 152px;
+      position: relative;
+      transition: background 0.12s, color 0.12s;
     }
-    a.card::after {
-      content: ''; position: absolute; inset: 0; border-radius: 22px;
-      background: linear-gradient(135deg, rgba(167,139,250,0.06), rgba(244,114,182,0.06));
-      opacity: 0; transition: opacity 0.2s;
+    a.card:hover { background: var(--ink); color: var(--bg); }
+    a.card:hover .card-key { color: var(--accent); background: transparent; }
+    a.card:hover .card-meta { color: rgba(236,235,230,0.55); }
+    a.card:hover .card-arr { color: var(--accent); }
+
+    .card-key {
+      display: inline-block; align-self: flex-start;
+      font-size: 9.5px; letter-spacing: 1.4px; font-weight: 700;
+      background: var(--ink); color: var(--bg); padding: 2px 6px;
     }
-    a.card:hover { transform: translateY(-4px); box-shadow: 0 10px 36px rgba(120,80,200,0.13); }
-    a.card:hover::after { opacity: 1; }
-    .card-icon {
-      width: 42px; height: 42px;
-      background: linear-gradient(135deg, rgba(167,139,250,0.12), rgba(244,114,182,0.12));
-      border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; margin-top: 6px; }
+    .card-meta  { font-size: 11px; color: var(--inkSoft); margin-top: 6px; }
+    .card-arr { position: absolute; right: 14px; bottom: 14px; font-size: 16px; color: var(--inkSoft); }
+
+    .hub-foot {
+      margin-top: 22px; padding-top: 12px;
+      border-top: 1px dashed var(--hair);
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--inkFaint); letter-spacing: 1.2px;
     }
-    .card-title { font-size: 17px; font-weight: 700; color: var(--text); margin-top: 2px; }
-    .card-desc  { font-size: 12px; color: var(--sub); line-height: 1.5; }
   </style>
 </head>
 <body>
 
+  <!-- Top stamp -->
+  <div class="stamp">
+    <div><span class="badge">HUB</span>v1.0 · workspace</div>
+    <div class="right"><span id="stampDate"></span></div>
+  </div>
+
   <!-- Auth -->
   <div class="auth-wrap" id="authWrap">
-    <div class="auth-logo">✦ Hub</div>
+    <div class="h-section">## /usr/local/auth</div>
+    <div class="h-title">AUTH_</div>
     <div class="auth-card">
       <div class="tabs">
-        <button class="tab active" id="tabLogin"    onclick="showTab('login')">ログイン</button>
-        <button class="tab"        id="tabRegister" onclick="showTab('register')">新規登録</button>
+        <button class="tab active" id="tabLogin"    onclick="showTab('login')">[▸] LOGIN</button>
+        <button class="tab"        id="tabRegister" onclick="showTab('register')">REGISTER</button>
       </div>
 
       <div id="loginForm">
-        <div class="afield"><label>ユーザー名</label><input type="text" id="loginUser" autocomplete="username"></div>
-        <div class="afield"><label>PIN</label><input type="password" id="loginPin" autocomplete="current-password"></div>
-        <button class="auth-btn" id="loginBtn" onclick="login()">ログイン</button>
+        <div class="afield">
+          <label>username</label>
+          <div class="inp">
+            <span class="prompt">&gt;</span>
+            <input type="text" id="loginUser" autocomplete="username" placeholder="user_name">
+          </div>
+        </div>
+        <div class="afield">
+          <label>pin</label>
+          <div class="inp">
+            <span class="prompt">#</span>
+            <input type="password" id="loginPin" autocomplete="current-password" placeholder="••••">
+          </div>
+        </div>
+        <button class="auth-btn" id="loginBtn" onclick="login()">
+          $ hub login <span class="arr">▶</span>
+        </button>
       </div>
 
       <div id="registerForm" style="display:none">
-        <div class="afield"><label>ユーザー名</label><input type="text" id="regUser" autocomplete="username"></div>
-        <div class="afield"><label>PIN（4〜8桁の数字）</label><input type="password" id="regPin" autocomplete="new-password" maxlength="8"></div>
-        <div class="afield"><label>PIN（確認）</label><input type="password" id="regPin2" autocomplete="new-password" maxlength="8"></div>
-        <button class="auth-btn" id="registerBtn" onclick="register()">登録する</button>
+        <div class="afield">
+          <label>username</label>
+          <div class="inp">
+            <span class="prompt">&gt;</span>
+            <input type="text" id="regUser" autocomplete="username" placeholder="user_name">
+          </div>
+        </div>
+        <div class="afield">
+          <label>pin · 4-8 digits</label>
+          <div class="inp">
+            <span class="prompt">#</span>
+            <input type="password" id="regPin" autocomplete="new-password" maxlength="8" placeholder="••••">
+          </div>
+        </div>
+        <div class="afield">
+          <label>pin (confirm)</label>
+          <div class="inp">
+            <span class="prompt">#</span>
+            <input type="password" id="regPin2" autocomplete="new-password" maxlength="8" placeholder="••••">
+          </div>
+        </div>
+        <button class="auth-btn" id="registerBtn" onclick="register()">
+          $ hub register <span class="arr">▶</span>
+        </button>
       </div>
 
       <div class="auth-err" id="authErr"></div>
       <div class="auth-ok"  id="authOk"></div>
     </div>
+    <div class="auth-foot">// supabase rpc · pin verified server-side</div>
   </div>
 
   <!-- Hub -->
   <div class="hub-wrap" id="hubWrap">
-    <div class="hub-header">
-      <div>
-        <div class="hub-title">✦ Hub</div>
-        <div class="hub-user" id="hubUser"></div>
+    <div class="hub-head">
+      <div class="hub-id">
+        <div class="meta">## SESSION ACTIVE</div>
+        <div class="who"><span class="at">@</span><span id="hubUser"></span></div>
       </div>
-      <button class="logout-btn" onclick="logout()">ログアウト</button>
+      <button class="logout-btn" onclick="logout()">$ logout ↗</button>
     </div>
+
+    <div class="h-section" style="margin-bottom:6px;">## WORKSPACE / select module</div>
+
     <div class="grid">
       <a class="card" href="admin.html">
-        <div class="card-icon">⚙️</div>
-        <div class="card-title">Admin</div>
-        <div class="card-desc">ページ生成・画像編集</div>
+        <span class="card-key">[01] ADMIN</span>
+        <div class="card-title">ADMIN_</div>
+        <div class="card-meta">// page generator<br>// image editor</div>
+        <span class="card-arr">→</span>
       </a>
       <a class="card" href="stats.html">
-        <div class="card-icon">📊</div>
-        <div class="card-title">Stats</div>
-        <div class="card-desc">統計・アナリティクス</div>
+        <span class="card-key">[02] STATS</span>
+        <div class="card-title">STATS_</div>
+        <div class="card-meta">// pv / ct / ctr<br>// hourly analytics</div>
+        <span class="card-arr">→</span>
       </a>
       <a class="card" href="accounts.html">
-        <div class="card-icon">🔑</div>
-        <div class="card-title">Accounts</div>
-        <div class="card-desc">アカウント情報管理</div>
+        <span class="card-key">[03] ACCT</span>
+        <div class="card-title">ACCT_</div>
+        <div class="card-meta">// credentials<br>// account info</div>
+        <span class="card-arr">→</span>
       </a>
+    </div>
+
+    <div class="hub-foot">
+      <span>// hub.v1.0</span>
+      <span id="footTime"></span>
     </div>
   </div>
 
   <script>
     const SB  = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
     const KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+
+    // ── stamp date
+    (function () {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const dow = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+      const txt = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${dow} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      document.getElementById('stampDate').textContent = txt;
+      const ft = document.getElementById('footTime');
+      if (ft) ft.textContent = `// last seen ${txt}`;
+    })();
 
     // セッション復元
     const savedUser = localStorage.getItem('hub_user');
@@ -201,6 +308,9 @@
       document.getElementById('registerForm').style.display = isLogin ? 'none'  : 'block';
       document.getElementById('tabLogin').classList.toggle('active', isLogin);
       document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+      // refresh [▸] arrow
+      document.getElementById('tabLogin').textContent    = (isLogin ? '[▸] ' : '') + 'LOGIN';
+      document.getElementById('tabRegister').textContent = (!isLogin ? '[▸] ' : '') + 'REGISTER';
       hideMsg();
     }
 
@@ -216,12 +326,12 @@
     }
     function showErr(msg) {
       const el = document.getElementById('authErr');
-      el.textContent = msg; el.style.display = 'block';
+      el.textContent = '[ERR] ' + msg; el.style.display = 'block';
       document.getElementById('authOk').style.display = 'none';
     }
     function showOk(msg) {
       const el = document.getElementById('authOk');
-      el.textContent = msg; el.style.display = 'block';
+      el.textContent = '[OK] ' + msg; el.style.display = 'block';
       document.getElementById('authErr').style.display = 'none';
     }
 
