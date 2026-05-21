@@ -100,9 +100,10 @@
       object-fit: cover; flex-shrink: 0; background: #f2f2f7;
     }
     .site-info { flex: 1; min-width: 0; }
-    .site-path { font-size: 13px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .site-path span { color: #aaa; margin: 0 4px; }
-    .site-nums { display: flex; gap: 14px; margin-top: 4px; }
+    .site-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+    .site-path { font-size: 13px; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+    .site-btns { display: flex; gap: 5px; flex-shrink: 0; }
+    .site-nums { display: flex; flex-wrap: wrap; gap: 4px 12px; }
     .site-num { font-size: 12px; color: #888; }
     .site-num b { color: #111; font-weight: 600; }
     .ctr-high b { color: #22c55e; }
@@ -438,7 +439,13 @@ function buildSiteList(stats) {
           <div class="site-row">
             <img class="site-thumb" src="${thumbUrl}" loading="lazy" onerror="this.style.display='none'">
             <div class="site-info">
-              <div class="site-path">${folder}</div>
+              <div class="site-top">
+                <div class="site-path">${folder}</div>
+                <div class="site-btns">
+                  <button class="copy-btn" onclick="copyUrl('${r.path}', this)">コピー</button>
+                  <button class="url-btn" onclick="toggleEdit('${eid}')">URL</button>
+                </div>
+              </div>
               <div class="site-nums">
                 <div class="site-num">PV <b>${r.pv.toLocaleString()}</b></div>
                 <div class="site-num">CT <b>${r.ct.toLocaleString()}</b></div>
@@ -446,8 +453,6 @@ function buildSiteList(stats) {
                 <span class="pv-h-badge ${badgeCls}">${badgeTxt}</span>
               </div>
             </div>
-            <button class="copy-btn" onclick="copyUrl('${r.path}', this)">コピー</button>
-            <button class="url-btn" onclick="toggleEdit('${eid}')">URL</button>
           </div>
           <div class="edit-wrap" id="edit-${eid}">
             <div class="edit-lbl">GitHub Token</div>
