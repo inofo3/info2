@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="workspace.css"/>
   <style>
     :root {
       --bg:      #ecebe6;
@@ -260,13 +261,16 @@
     }
   </style>
 </head>
-<body>
+<body data-workspace="admin">
   <div class="wrap">
 
     <!-- Top stamp -->
     <div class="stamp">
       <div><span class="badge">ADMIN</span>v1.0 · page generator</div>
-      <div id="stampDate"></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="stampDate"></div>
+        <a class="workspace-link" href="index2.html">hub</a>
+      </div>
     </div>
 
     <header class="head">
