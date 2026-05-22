@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Accounts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="workspace.css">
   <style>
     :root {
       --accent: #a78bfa;
@@ -213,10 +217,10 @@
     }
   </style>
 </head>
-<body>
+<body data-workspace="accounts">
   <div class="page">
     <div class="page-header">
-      <a class="back-btn" href="index.html">← Hub</a>
+      <a class="back-btn" href="index2.html">← Hub</a>
       <div class="page-title">🔑 Accounts</div>
       <div class="btn-row">
         <button class="import-btn" onclick="openImport()">📋 インポート</button>
@@ -576,7 +580,7 @@ ID:Password:Email:EmailPassword:FaKey:AuthToken"></textarea>
     document.getElementById('importOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeImport(); });
     document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
-    if (!localStorage.getItem('hub_user')) location.href = 'index.html';
+    if (!localStorage.getItem('hub_user')) location.href = 'index2.html';
 
     render();
   </script>
