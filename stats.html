@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="workspace.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <style>
     :root {
@@ -231,12 +232,15 @@
     }
   </style>
 </head>
-<body>
+<body data-workspace="stats">
 
   <!-- Top stamp -->
   <div class="stamp">
     <div><span class="badge">STATS</span>v1.0 · analytics</div>
-    <div id="stampDate"></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div id="stampDate"></div>
+      <a class="workspace-link" href="index2.html">hub</a>
+    </div>
   </div>
 
   <!-- ログイン画面 -->
