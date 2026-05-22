@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HUB · workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="workspace.css"/>
+  <style>
+    :root {
+      --bg:      #ecebe6;
+      --surface: #f4f3ee;
+      --ink:     #101010;
+      --inkSoft: rgba(16,16,16,0.55);
+      --inkFaint:rgba(16,16,16,0.30);
+      --hair:    rgba(16,16,16,0.18);
+      --rule:    #101010;
+      --accent:  #e8ff5a;
+      --neg:     #b71d10;
+      --ok:      #1a7a3a;
+      --mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--ink);
+      background-image:
+        repeating-linear-gradient(0deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px),
+        repeating-linear-gradient(90deg, transparent 0 23px, rgba(16,16,16,0.05) 23px 24px);
+      min-height: 100vh;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Top stamp bar ── */
+    .stamp {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 720px; margin: 0 auto 16px;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--inkSoft);
+    }
+    .stamp .badge {
+      background: var(--ink); color: var(--bg);
+      padding: 3px 6px; font-weight: 700; margin-right: 8px;
+    }
+    .stamp .right span + span { margin-left: 12px; }
+
+    /* ── Auth ── */
+    .auth-wrap { width: 100%; max-width: 380px; margin: 4vh auto 0; }
+    .h-section {
+      font-size: 10px; letter-spacing: 1.4px;
+      color: var(--inkSoft); margin-bottom: 4px;
+    }
+    .h-title {
+      font-size: 38px; font-weight: 700; letter-spacing: -1px;
+      line-height: 1; margin-bottom: 14px; color: var(--ink);
+    }
+
+    .auth-card { border: 1px solid var(--ink); background: var(--surface); padding: 14px; }
+
+    .tabs { display: flex; gap: 0; margin-bottom: 16px; }
+    .tab {
+      flex: 1; padding: 7px 0; border: 1px solid var(--ink);
+      background: transparent; color: var(--ink); font-family: var(--mono);
+      font-size: 11px; cursor: pointer; font-weight: 400;
+      margin-left: -1px; text-align: center; letter-spacing: 0.5px;
+    }
+    .tab:first-child { margin-left: 0; }
+    .tab.active { background: var(--ink); color: var(--bg); font-weight: 700; }
+
+    .afield { margin-bottom: 12px; }
+    .afield label {
+      display: block; font-size: 10px; letter-spacing: 1.2px;
+      color: var(--inkSoft); margin-bottom: 4px;
+    }
+    .afield .inp {
+      display: flex; align-items: center; border: 1px solid var(--ink);
+      background: var(--bg);
+    }
+    .afield .prompt {
+      padding: 0 8px; font-family: var(--mono); font-size: 12px;
+      color: var(--inkSoft); font-weight: 700;
+    }
+    .afield input {
+      flex: 1; padding: 9px 8px 9px 0;
+      background: transparent; border: none; outline: none;
+      font-family: var(--mono); font-size: 13px; color: var(--ink);
+      letter-spacing: 0.5px;
+    }
+    .afield input::placeholder { color: var(--inkFaint); }
+
+    .auth-btn {
+      width: 100%; padding: 12px; cursor: pointer;
+      background: var(--accent); color: var(--ink);
+      border: 1px solid var(--ink); font-family: var(--mono);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      text-align: left; padding-left: 14px;
+      transition: background 0.1s;
+    }
+    .auth-btn:hover { background: var(--ink); color: var(--accent); }
+    .auth-btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
+    .auth-btn .arr { float: right; }
+
+    .auth-err, .auth-ok {
+      font-family: var(--mono); font-size: 11px; margin-top: 12px;
+      padding: 6px 10px; border: 1px dashed var(--hair); display: none;
+    }
+    .auth-err { color: var(--neg); border-color: var(--neg); }
+    .auth-ok  { color: var(--ok);  border-color: var(--ok); }
+
+    .auth-foot {
+      margin-top: 12px; text-align: center;
+      font-size: 9.5px; color: var(--inkFaint); letter-spacing: 1px;
+    }
+
+    /* ── Hub ── */
+    .hub-wrap { display: none; width: 100%; max-width: 720px; margin: 4vh auto 0; }
+    .hub-head {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      border-bottom: 1px solid var(--ink); padding-bottom: 14px; margin-bottom: 24px;
+    }
+    .hub-id .meta {
+      font-size: 10px; letter-spacing: 1.4px; color: var(--inkSoft);
+      margin-bottom: 2px;
+    }
+    .hub-id .who {
+      font-size: 24px; font-weight: 700; letter-spacing: -0.5px;
+    }
+    .hub-id .who .at { color: var(--inkSoft); font-weight: 400; }
+
+    .logout-btn {
+      background: transparent; color: var(--ink); border: 1px solid var(--ink);
+      padding: 6px 10px; font-family: var(--mono); font-size: 10px;
+      letter-spacing: 0.5px; cursor: pointer;
+    }
+    .logout-btn:hover { background: var(--ink); color: var(--bg); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0;
+    }
+    a.card {
+      display: flex; flex-direction: column; gap: 6px;
+      background: var(--surface); border: 1px solid var(--ink);
+      padding: 18px 16px; text-decoration: none; color: var(--ink);
+      margin: -1px 0 0 -1px; min-height: 152px;
+      position: relative;
+      transition: background 0.12s, color 0.12s;
+    }
+    a.card:hover { background: var(--ink); color: var(--bg); }
+    a.card:hover .card-key { color: var(--accent); background: transparent; }
+    a.card:hover .card-meta { color: rgba(236,235,230,0.55); }
+    a.card:hover .card-arr { color: var(--accent); }
+
+    .card-key {
+      display: inline-block; align-self: flex-start;
+      font-size: 9.5px; letter-spacing: 1.4px; font-weight: 700;
+      background: var(--ink); color: var(--bg); padding: 2px 6px;
+    }
+    .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; margin-top: 6px; }
+    .card-meta  { font-size: 11px; color: var(--inkSoft); margin-top: 6px; }
+    .card-arr { position: absolute; right: 14px; bottom: 14px; font-size: 16px; color: var(--inkSoft); }
+
+    .hub-foot {
+      margin-top: 22px; padding-top: 12px;
+      border-top: 1px dashed var(--hair);
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: var(--inkFaint); letter-spacing: 1.2px;
+    }
+  </style>
+</head>
+<body data-workspace="hub">
+
+  <!-- Top stamp -->
+  <div class="stamp">
+    <div><span class="badge">HUB</span>v1.0 · workspace</div>
+    <div class="right"><span id="stampDate"></span></div>
+  </div>
+
+  <!-- Auth -->
+  <div class="auth-wrap" id="authWrap">
+    <div class="h-section">## /usr/local/auth</div>
+    <div class="h-title">AUTH_</div>
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active" id="tabLogin"    onclick="showTab('login')">[▸] LOGIN</button>
+        <button class="tab"        id="tabRegister" onclick="showTab('register')">REGISTER</button>
+      </div>
+
+      <div id="loginForm">
+        <div class="afield">
+          <label>username</label>
+          <div class="inp">
+            <span class="prompt">&gt;</span>
+            <input type="text" id="loginUser" autocomplete="username" placeholder="user_name">
+          </div>
+        </div>
+        <div class="afield">
+          <label>pin</label>
+          <div class="inp">
+            <span class="prompt">#</span>
+            <input type="password" id="loginPin" autocomplete="current-password" placeholder="••••">
+          </div>
+        </div>
+        <button class="auth-btn" id="loginBtn" onclick="login()">
+          $ hub login <span class="arr">▶</span>
+        </button>
+      </div>
+
+      <div id="registerForm" style="display:none">
+        <div class="afield">
+          <label>username</label>
+          <div class="inp">
+            <span class="prompt">&gt;</span>
+            <input type="text" id="regUser" autocomplete="username" placeholder="user_name">
+          </div>
+        </div>
+        <div class="afield">
+          <label>pin · 4-8 digits</label>
+          <div class="inp">
+            <span class="prompt">#</span>
+            <input type="password" id="regPin" autocomplete="new-password" maxlength="8" placeholder="••••">
+          </div>
+        </div>
+        <div class="afield">
+          <label>pin (confirm)</label>
+          <div class="inp">
+            <span class="prompt">#</span>
+            <input type="password" id="regPin2" autocomplete="new-password" maxlength="8" placeholder="••••">
+          </div>
+        </div>
+        <button class="auth-btn" id="registerBtn" onclick="register()">
+          $ hub register <span class="arr">▶</span>
+        </button>
+      </div>
+
+      <div class="auth-err" id="authErr"></div>
+      <div class="auth-ok"  id="authOk"></div>
+    </div>
+    <div class="auth-foot">// supabase rpc · pin verified server-side</div>
+  </div>
+
+  <!-- Hub -->
+  <div class="hub-wrap" id="hubWrap">
+    <div class="hub-head">
+      <div class="hub-id">
+        <div class="meta">## SESSION ACTIVE</div>
+        <div class="who"><span class="at">@</span><span id="hubUser"></span></div>
+      </div>
+      <button class="logout-btn" onclick="logout()">$ logout ↗</button>
+    </div>
+
+    <div class="h-section" style="margin-bottom:6px;">## WORKSPACE / select module</div>
+
+    <div class="grid">
+      <a class="card" href="admin.html">
+        <span class="card-key">[01] ADMIN</span>
+        <div class="card-title">ADMIN_</div>
+        <div class="card-meta">// page generator<br>// image editor</div>
+        <span class="card-arr">→</span>
+      </a>
+      <a class="card" href="stats.html">
+        <span class="card-key">[02] STATS</span>
+        <div class="card-title">STATS_</div>
+        <div class="card-meta">// pv / ct / ctr<br>// hourly analytics</div>
+        <span class="card-arr">→</span>
+      </a>
+      <a class="card" href="accounts.html">
+        <span class="card-key">[03] ACCT</span>
+        <div class="card-title">ACCT_</div>
+        <div class="card-meta">// credentials<br>// account info</div>
+        <span class="card-arr">→</span>
+      </a>
+      <a class="card" href="index.html">
+        <span class="card-key">[04] 帳簿</span>
+        <div class="card-title">帳簿_</div>
+        <div class="card-meta">// TikTok Lite 収支<br>// Google Sheets 保存</div>
+        <span class="card-arr">→</span>
+      </a>
+    </div>
+
+    <div class="hub-foot">
+      <span>// hub.v1.0</span>
+      <span id="footTime"></span>
+    </div>
+  </div>
+
+  <script>
+    const SB  = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+    const KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+
+    // ── stamp date
+    (function () {
+      const d = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const dow = ['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()];
+      const txt = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} · ${dow} · ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      document.getElementById('stampDate').textContent = txt;
+      const ft = document.getElementById('footTime');
+      if (ft) ft.textContent = `// last seen ${txt}`;
+    })();
+
+    // セッション復元
+    const savedUser = localStorage.getItem('hub_user');
+    if (savedUser) showHub(savedUser);
+
+    function showTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('loginForm').style.display    = isLogin ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = isLogin ? 'none'  : 'block';
+      document.getElementById('tabLogin').classList.toggle('active', isLogin);
+      document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+      // refresh [▸] arrow
+      document.getElementById('tabLogin').textContent    = (isLogin ? '[▸] ' : '') + 'LOGIN';
+      document.getElementById('tabRegister').textContent = (!isLogin ? '[▸] ' : '') + 'REGISTER';
+      hideMsg();
+    }
+
+    function showHub(username) {
+      document.getElementById('authWrap').style.display = 'none';
+      document.getElementById('hubWrap').style.display  = 'block';
+      document.getElementById('hubUser').textContent    = username;
+    }
+
+    function hideMsg() {
+      document.getElementById('authErr').style.display = 'none';
+      document.getElementById('authOk').style.display  = 'none';
+    }
+    function showErr(msg) {
+      const el = document.getElementById('authErr');
+      el.textContent = '[ERR] ' + msg; el.style.display = 'block';
+      document.getElementById('authOk').style.display = 'none';
+    }
+    function showOk(msg) {
+      const el = document.getElementById('authOk');
+      el.textContent = '[OK] ' + msg; el.style.display = 'block';
+      document.getElementById('authErr').style.display = 'none';
+    }
+
+    function saveSession(username) {
+      localStorage.setItem('hub_user', username);
+      localStorage.setItem('gh_username', username);   // admin の username 欄に自動入力
+      sessionStorage.setItem('stats_user', username);  // stats に自動ログイン
+    }
+
+    async function login() {
+      const username = document.getElementById('loginUser').value.trim();
+      const pin      = document.getElementById('loginPin').value.trim();
+      const btn      = document.getElementById('loginBtn');
+      if (!username || !pin) return;
+      btn.disabled = true; hideMsg();
+      const res = await fetch(`${SB}/rest/v1/rpc/verify_pin`, {
+        method: 'POST',
+        headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_username: username, p_pin: pin })
+      });
+      const ok = await res.json();
+      if (ok === true) {
+        saveSession(username);
+        showHub(username);
+      } else {
+        showErr('ユーザー名またはPINが違います');
+      }
+      btn.disabled = false;
+    }
+
+    async function register() {
+      const username = document.getElementById('regUser').value.trim();
+      const pin      = document.getElementById('regPin').value.trim();
+      const pin2     = document.getElementById('regPin2').value.trim();
+      const btn      = document.getElementById('registerBtn');
+      if (!username || !pin) return;
+      if (pin !== pin2)           { showErr('PINが一致しません'); return; }
+      if (!/^\d{4,8}$/.test(pin)) { showErr('PINは4〜8桁の数字にしてください'); return; }
+      btn.disabled = true; hideMsg();
+      const res = await fetch(`${SB}/rest/v1/rpc/register_user`, {
+        method: 'POST',
+        headers: { apikey: KEY, Authorization: `Bearer ${KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_username: username, p_pin: pin })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result === true || result?.success !== false) {
+          saveSession(username);
+          showHub(username);
+        } else {
+          showErr(result?.message || 'そのユーザー名は既に使われています');
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showErr(err.message || '登録に失敗しました');
+      }
+      btn.disabled = false;
+    }
+
+    function logout() {
+      localStorage.removeItem('hub_user');
+      sessionStorage.removeItem('stats_user');
+      document.getElementById('hubWrap').style.display  = 'none';
+      document.getElementById('authWrap').style.display = 'block';
+      document.getElementById('loginPin').value = '';
+      hideMsg();
+    }
+
+    // Enter キー
+    document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPin').focus(); });
+    document.getElementById('loginPin').addEventListener('keydown',  e => { if (e.key === 'Enter') login(); });
+    document.getElementById('regPin').addEventListener('keydown',    e => { if (e.key === 'Enter') document.getElementById('regPin2').focus(); });
+    document.getElementById('regPin2').addEventListener('keydown',   e => { if (e.key === 'Enter') register(); });
+  </script>
+</body>
+</html>
