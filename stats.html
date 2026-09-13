@@ -597,7 +597,7 @@
         const ctr      = r.pv > 0 ? Math.round(r.ct / r.pv * 100) : 0;
         const cls      = ctr >= 30 ? 'ctr-high' : ctr >= 15 ? 'ctr-mid' : 'ctr-low';
         const eid      = r.path.replace(/\//g, '-');
-        const thumbUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/a/${folder}/card.jpg`;
+        const thumbUrl = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${r.path}/card.jpg`;
         const pvH      = pvByPath[r.path]?.[23] ?? 0;
         const ctH      = ctByPath[r.path]?.[23] ?? 0;
         const badgeCls = pvH > 0 ? '' : 'zero';
