@@ -292,11 +292,11 @@
     <div class="card">
       <div class="card-title">NEW / generate</div>
 
-      <div class="field">
+      <div class="field" style="display:none;">
         <label>username</label>
         <input type="text" id="username" placeholder="taro">
       </div>
-      <div class="field">
+      <div class="field" style="display:none;">
         <label>folder name</label>
         <input type="text" id="folder" placeholder="20260430_1200">
       </div>
@@ -306,9 +306,10 @@
       </div>
 
       <div class="field">
-        <label>meta image → card.jpg</label>
+        <label>image → card.jpg / thumb.jpg</label>
         <input type="file" id="metaImage" accept="image/*">
         <div id="metaPreview" class="preview"><img></div>
+        <div id="sitePreview" class="preview" style="display:none;"><img></div>
         <button type="button" class="mark-toggle" id="metaMarkToggle" onclick="toggleMarkPanel('meta')">[▸] play mark</button>
         <div class="mark-panel" id="metaMarkPanel">
           <canvas id="metaMarkCanvas"></canvas>
@@ -316,23 +317,6 @@
           <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="metaMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkOpacityVal">60%</span></div>
           <div class="mark-btns"><button class="apply" onclick="applyMark('meta')">$ apply ▶</button><button class="clear" onclick="clearMark('meta')">clear</button></div>
         </div>
-      </div>
-
-      <div class="field">
-        <div class="label-row">
-          <label>site image → thumb.jpg</label>
-          <span id="syncBadge" class="sync-badge">SYNC ⇆ META</span>
-        </div>
-        <input type="file" id="siteImage" accept="image/*">
-        <div id="sitePreview" class="preview"><img></div>
-        <button type="button" class="mark-toggle" id="siteMarkToggle" onclick="toggleMarkPanel('site')">[▸] play mark</button>
-        <div class="mark-panel" id="siteMarkPanel">
-          <canvas id="siteMarkCanvas"></canvas>
-          <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="siteMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkSizeVal">20%</span></div>
-          <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="siteMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkOpacityVal">60%</span></div>
-          <div class="mark-btns"><button class="apply" onclick="applyMark('site')">$ apply ▶</button><button class="clear" onclick="clearMark('site')">clear</button></div>
-        </div>
-        <button type="button" id="resetSyncBtn" class="reset-link" onclick="resetSync()">↩ reset to meta</button>
       </div>
 
       <div class="field">
@@ -366,6 +350,8 @@
     const OWNER  = 'inofo3';
     const REPO   = 'info2';
     const BRANCH = 'main';
+    const SB     = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+    const KEY    = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
 
     // ── stamp date
     (function () {
@@ -438,56 +424,26 @@
       });
     }
 
-    let siteLinked = false;
+    const siteLinked = true; // 画像は常にmeta/site共通の1枚から生成する
     let metaMarkedUrl = null, siteMarkedUrl = null;
     let metaCroppedUrl = null, siteCroppedUrl = null;
-
-    function updateSyncUI() {
-      const hasMeta = !!document.getElementById('metaImage').files[0];
-      document.getElementById('syncBadge').style.display    = siteLinked ? 'inline-block' : 'none';
-      document.getElementById('resetSyncBtn').style.display = (!siteLinked && hasMeta) ? 'block' : 'none';
-      const siteToggle = document.getElementById('siteMarkToggle');
-      if (siteLinked) {
-        siteToggle.style.display = 'none';
-        document.getElementById('siteMarkPanel').style.display = 'none';
-      } else if (siteCroppedUrl) {
-        siteToggle.style.display = 'block';
-      }
-    }
 
     document.getElementById('metaImage').addEventListener('change', async function() {
       if (!this.files[0]) return;
       await showPreview(this.files[0], 'metaPreview', 1200, 630);
-      siteLinked = true;
       await showPreview(this.files[0], 'sitePreview', 1280, 720);
-      updateSyncUI();
     });
-
-    document.getElementById('siteImage').addEventListener('change', function() {
-      if (!this.files[0]) return;
-      siteLinked = false;
-      showPreview(this.files[0], 'sitePreview', 1280, 720);
-      updateSyncUI();
-    });
-
-    function resetSync() {
-      const metaFile = document.getElementById('metaImage').files[0];
-      if (!metaFile) return;
-      siteLinked = true;
-      showPreview(metaFile, 'sitePreview', 1280, 720);
-      updateSyncUI();
-    }
 
     async function showPreview(file, previewId, w, h) {
       const wrap = document.getElementById(previewId);
-      if (!file) { wrap.style.display = 'none'; return; }
+      if (!file) return;
       const dataUrl = await cropImage(file, w, h);
       wrap.querySelector('img').src = dataUrl;
-      wrap.style.display = 'block';
       if (previewId === 'metaPreview') {
+        wrap.style.display = 'block';
         metaCroppedUrl = dataUrl; metaMarkedUrl = null; resetMarkUI('meta');
       } else if (previewId === 'sitePreview') {
-        siteCroppedUrl = dataUrl; siteMarkedUrl = null; resetMarkUI('site');
+        siteCroppedUrl = dataUrl; siteMarkedUrl = null;
       }
     }
 
@@ -496,8 +452,8 @@
       const panel  = document.getElementById(type + 'MarkPanel');
       toggle.textContent = '[▸] play mark';
       toggle.classList.remove('active');
+      toggle.style.display = 'block';
       panel.style.display = 'none';
-      toggle.style.display = (type === 'site' && siteLinked) ? 'none' : 'block';
     }
 
     function toggleMarkPanel(type) {
@@ -770,6 +726,23 @@
 </html>`;
     }
 
+    async function registerStatsRow(path) {
+      try {
+        await fetch(`${SB}/rest/v1/stats`, {
+          method: 'POST',
+          headers: {
+            apikey: KEY,
+            Authorization: `Bearer ${KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=ignore-duplicates'
+          },
+          body: JSON.stringify({ path, pv: 0, ct: 0 })
+        });
+      } catch (e) {
+        console.warn('[Admin] stats登録に失敗しました（無視して続行）', e);
+      }
+    }
+
     function copyGenUrl() {
       const url = document.getElementById('urlOutput').value;
       if (!url) return;
@@ -786,8 +759,7 @@
       const folder   = document.getElementById('folder').value.trim();
       const title    = document.getElementById('title').value.trim();
       const metaFile     = document.getElementById('metaImage').files[0];
-      const siteFileRaw  = document.getElementById('siteImage').files[0];
-      const siteFile     = (siteLinked || !siteFileRaw) ? metaFile : siteFileRaw;
+      const siteFile     = metaFile;
       const name         = document.getElementById('name').value.trim();
       const yturl        = document.getElementById('yturl').value.trim();
       const status       = document.getElementById('status');
@@ -834,6 +806,9 @@
 
         step('⑥ link.txt を生成中...');
         await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
+
+        step('⑦ 統計に登録中...');
+        await registerStatsRow(path);
 
         status.className = 'status ok';
         status.textContent = '生成完了';
