@@ -328,16 +328,32 @@
       </div>
 
       <div class="field">
-        <label>image → card.jpg / thumb.jpg</label>
+        <label id="metaImageLabel">image → card.jpg / thumb.jpg</label>
         <input type="file" id="metaImage" accept="image/*">
         <div id="metaPreview" class="preview"><img></div>
-        <div id="sitePreview" class="preview" style="display:none;"><img></div>
         <button type="button" class="mark-toggle" id="metaMarkToggle" onclick="toggleMarkPanel('meta')">[▸] play mark</button>
         <div class="mark-panel" id="metaMarkPanel">
           <canvas id="metaMarkCanvas"></canvas>
           <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="metaMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkSizeVal">20%</span></div>
           <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="metaMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('meta')"><span class="val" id="metaMarkOpacityVal">60%</span></div>
           <div class="mark-btns"><button class="apply" onclick="applyMark('meta')">$ apply ▶</button><button class="clear" onclick="clearMark('meta')">clear</button></div>
+        </div>
+      </div>
+
+      <div class="field" id="siteImageField" style="display:none;">
+        <div class="label-row">
+          <label>site image → thumb.jpg（TikTok画面内）</label>
+          <span id="syncBadge" class="sync-badge">SYNC ⇆ META</span>
+        </div>
+        <input type="file" id="siteImage" accept="image/*">
+        <div id="sitePreview" class="preview"><img></div>
+        <button type="button" id="resetSyncBtn" class="reset-link" onclick="resetSync()">↩ reset to meta</button>
+        <button type="button" class="mark-toggle" id="siteMarkToggle" onclick="toggleMarkPanel('site')">[▸] play mark</button>
+        <div class="mark-panel" id="siteMarkPanel">
+          <canvas id="siteMarkCanvas"></canvas>
+          <div class="mark-ctrl"><span class="lbl">SIZE</span><input type="range" id="siteMarkSize" min="6" max="20" value="20" step="0.5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkSizeVal">20%</span></div>
+          <div class="mark-ctrl"><span class="lbl">OPCT</span><input type="range" id="siteMarkOpacity" min="30" max="90" value="60" step="5" oninput="onMarkSlider('site')"><span class="val" id="siteMarkOpacityVal">60%</span></div>
+          <div class="mark-btns"><button class="apply" onclick="applyMark('site')">$ apply ▶</button><button class="clear" onclick="clearMark('site')">clear</button></div>
         </div>
       </div>
 
@@ -420,6 +436,18 @@
         b.classList.toggle('active', b.dataset.style === style);
       });
       localStorage.setItem('gh_pagestyle', style);
+      const isTikTok = style === 'tiktok';
+      document.getElementById('siteImageField').style.display = isTikTok ? 'block' : 'none';
+      document.getElementById('metaImageLabel').textContent = isTikTok
+        ? 'meta image → card.jpg（OGPリンクカード用）'
+        : 'image → card.jpg / thumb.jpg';
+      if (!isTikTok) {
+        // シンプル版に戻したらmeta画像へ強制同期する
+        siteLinked = true;
+        const metaFile = document.getElementById('metaImage').files[0];
+        if (metaFile) showPreview(metaFile, 'sitePreview', 1280, 720);
+        updateSyncUI();
+      }
     }
     setPageStyle(localStorage.getItem('gh_pagestyle') || 'tiktok');
 
@@ -465,23 +493,52 @@
       });
     }
 
-    const siteLinked = true; // 画像は常にmeta/site共通の1枚から生成する
+    var siteLinked = true; // trueの間はmeta画像がsite画像にも自動反映される（varで宣言し、初期化前のsetPageStyle呼び出しからの参照でもTDZエラーにならないようにする）
     let metaMarkedUrl = null, siteMarkedUrl = null;
     let metaCroppedUrl = null, siteCroppedUrl = null;
+
+    function updateSyncUI() {
+      const hasMeta = !!document.getElementById('metaImage').files[0];
+      document.getElementById('syncBadge').style.display    = siteLinked ? 'inline-block' : 'none';
+      document.getElementById('resetSyncBtn').style.display = (!siteLinked && hasMeta) ? 'block' : 'none';
+      const siteToggle = document.getElementById('siteMarkToggle');
+      if (siteLinked) {
+        siteToggle.style.display = 'none';
+        document.getElementById('siteMarkPanel').style.display = 'none';
+      } else if (siteCroppedUrl) {
+        siteToggle.style.display = 'block';
+      }
+    }
 
     document.getElementById('metaImage').addEventListener('change', async function() {
       if (!this.files[0]) return;
       await showPreview(this.files[0], 'metaPreview', 1200, 630);
-      await showPreview(this.files[0], 'sitePreview', 1280, 720);
+      if (siteLinked) await showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSyncUI();
     });
+
+    document.getElementById('siteImage').addEventListener('change', function() {
+      if (!this.files[0]) return;
+      siteLinked = false;
+      showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSyncUI();
+    });
+
+    function resetSync() {
+      const metaFile = document.getElementById('metaImage').files[0];
+      if (!metaFile) return;
+      siteLinked = true;
+      showPreview(metaFile, 'sitePreview', 1280, 720);
+      updateSyncUI();
+    }
 
     async function showPreview(file, previewId, w, h) {
       const wrap = document.getElementById(previewId);
       if (!file) return;
       const dataUrl = await cropImage(file, w, h);
       wrap.querySelector('img').src = dataUrl;
+      wrap.style.display = 'block';
       if (previewId === 'metaPreview') {
-        wrap.style.display = 'block';
         metaCroppedUrl = dataUrl; metaMarkedUrl = null; resetMarkUI('meta');
       } else if (previewId === 'sitePreview') {
         siteCroppedUrl = dataUrl; siteMarkedUrl = null;
@@ -493,7 +550,7 @@
       const panel  = document.getElementById(type + 'MarkPanel');
       toggle.textContent = '[▸] play mark';
       toggle.classList.remove('active');
-      toggle.style.display = 'block';
+      toggle.style.display = (type === 'site' && siteLinked) ? 'none' : 'block';
       panel.style.display = 'none';
     }
 
@@ -1027,7 +1084,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
       const folder   = document.getElementById('folder').value.trim();
       const title    = document.getElementById('title').value.trim();
       const metaFile     = document.getElementById('metaImage').files[0];
-      const siteFile     = metaFile;
+      const siteFileRaw  = document.getElementById('siteImage').files[0];
+      const siteFile     = (siteLinked || !siteFileRaw) ? metaFile : siteFileRaw;
       const name         = document.getElementById('name').value.trim();
       const yturl        = document.getElementById('yturl').value.trim();
       const yturl2       = document.getElementById('yturl2').value.trim();
