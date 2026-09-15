@@ -207,6 +207,19 @@
     .mark-btns .clear { background: transparent; color: var(--ink); }
     .mark-btns .clear:hover { background: var(--ink); color: var(--bg); }
 
+    /* ── Style toggle ── */
+    .style-btns { display: flex; gap: 0; }
+    .style-btns .style-btn {
+      flex: 1; padding: 9px; font-size: 11px; cursor: pointer;
+      font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
+      border: 1px solid var(--ink); margin-left: -1px;
+      background: transparent; color: var(--ink);
+      transition: background 0.1s, color 0.1s;
+    }
+    .style-btns .style-btn:first-child { margin-left: 0; }
+    .style-btns .style-btn.active { background: var(--accent); color: var(--ink); }
+    .style-btns .style-btn:not(.active):hover { background: var(--ink); color: var(--bg); }
+
     /* ── Main button ── */
     .btn {
       width: 100%; padding: 12px 14px; cursor: pointer;
@@ -306,6 +319,15 @@
       </div>
 
       <div class="field">
+        <label>page style</label>
+        <input type="hidden" id="pageStyle" value="tiktok">
+        <div class="style-btns" id="styleBtns">
+          <button type="button" class="style-btn active" data-style="tiktok" onclick="setPageStyle('tiktok')">TikTok風</button>
+          <button type="button" class="style-btn" data-style="simple" onclick="setPageStyle('simple')">シンプル(従来)</button>
+        </div>
+      </div>
+
+      <div class="field">
         <label>image → card.jpg / thumb.jpg</label>
         <input type="file" id="metaImage" accept="image/*">
         <div id="metaPreview" class="preview"><img></div>
@@ -391,6 +413,15 @@
       localStorage.setItem('gh_yturl2', yturl2El.value);
     }
     document.getElementById('folder').value = genFolderName();
+
+    function setPageStyle(style) {
+      document.getElementById('pageStyle').value = style;
+      document.querySelectorAll('#styleBtns .style-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.style === style);
+      });
+      localStorage.setItem('gh_pagestyle', style);
+    }
+    setPageStyle(localStorage.getItem('gh_pagestyle') || 'tiktok');
 
     async function showLastUpdated() {
       const el = document.getElementById('lastUpdated');
@@ -663,12 +694,111 @@
 </html>`;
     }
 
+    // シンプル版: プロフィール名 + 画像1枚だけの静止カード（従来のデザイン）
+    function buildNewsSimple(title, image, name, path, hasAlt) {
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: #fafafa;
+      min-height: 100vh;
+      cursor: pointer;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 100px 20px 40px;
+    }
+    .profile-name {
+      font-size: 19px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 32px;
+      letter-spacing: 0.5px;
+    }
+    .video-wrap {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #111;
+      aspect-ratio: 16/9;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    }
+    .video-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile-name">${name}</div>
+    <div class="video-wrap"><img src="${image}" alt=""></div>
+  </div>
+  <script>
+    (function() {
+      var SB = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+      var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+      var PATH = '${path}';
+      var HAS_ALT = ${hasAlt ? 'true' : 'false'};
+      function rpc(fn) {
+        fetch(SB + '/rest/v1/rpc/' + fn, {
+          method: 'POST',
+          headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_path: PATH }),
+          keepalive: true
+        }).catch(function(){});
+      }
+      function fetchCt() {
+        return fetch(SB + '/rest/v1/stats?path=eq.' + encodeURIComponent(PATH) + '&select=ct', {
+          headers: { apikey: KEY, Authorization: 'Bearer ' + KEY }
+        }).then(function(r){ return r.json(); })
+          .then(function(rows){ return (rows[0] && rows[0].ct) || 0; })
+          .catch(function(){ return 0; });
+      }
+      rpc('increment_pv');
+      var url = null, altUrl = null, fired = false;
+      Promise.all([
+        fetch('./link.txt').then(function(r){ return r.text(); }),
+        HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).catch(function(){ return ''; }) : Promise.resolve('')
+      ]).then(function(vals) {
+        url = vals[0].trim();
+        altUrl = vals[1].trim();
+      });
+      document.body.onclick = function() {
+        if (fired || !url) return;
+        fired = true;
+        rpc('increment_ct');
+        var go = function(target) {
+          setTimeout(function(){ window.location.href = target; }, 100);
+        };
+        if (altUrl) {
+          fetchCt().then(function(ct) {
+            go((ct > 200 && Math.random() < 0.1) ? altUrl : url);
+          });
+        } else {
+          go(url);
+        }
+      };
+    })();
+  <\/script>
+</body>
+</html>`;
+    }
+
     function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function fmtN(n) { return n.toLocaleString('en-US'); }
 
-    // TikTokの「おすすめ」フィードを模した全画面カード。画像1枚をあたかも
+    // TikTok版: TikTokの「おすすめ」フィードを模した全画面カード。画像1枚をあたかも
     // 一時停止中の動画のように見せ、画面全体がタップ即遷移のリンクになる。
-    function buildNews(title, image, name, path, hasAlt) {
+    function buildNewsTikTok(title, image, name, path, hasAlt) {
       const handle   = '@' + name.replace(/\s+/g, '');
       const likes    = randInt(800, 15000);
       const comments = randInt(Math.max(5, Math.round(likes * 0.005)), Math.max(20, Math.round(likes * 0.02)));
@@ -941,7 +1071,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
         await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
 
         step('⑤ news.html を生成中...');
-        await updateFile(token, `${path}/news.html`, buildNews(title, siteUrl, name, path, !!yturl2), `Create ${path}/news.html`);
+        const pageStyle = document.getElementById('pageStyle').value;
+        const buildFn = pageStyle === 'simple' ? buildNewsSimple : buildNewsTikTok;
+        await updateFile(token, `${path}/news.html`, buildFn(title, siteUrl, name, path, !!yturl2), `Create ${path}/news.html`);
 
         step('⑥ link.txt を生成中...');
         await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
