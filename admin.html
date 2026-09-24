@@ -232,6 +232,34 @@
     .btn:active { background: var(--ink); color: var(--accent); }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; background: var(--hair); color: var(--inkSoft); }
     .btn .arr { float: right; }
+    .btn-ghost { background: transparent; color: var(--ink); margin-top: 8px; }
+    .btn-ghost:hover { background: var(--ink); color: var(--bg); }
+
+    /* ── Preview modal ── */
+    .pv-overlay {
+      display: none; position: fixed; inset: 0; z-index: 10000;
+      background: rgba(16,16,16,0.72);
+      align-items: center; justify-content: center; padding: 24px 16px;
+    }
+    .pv-overlay.open { display: flex; }
+    .pv-box { display: flex; flex-direction: column; align-items: center; gap: 10px; max-height: 100%; }
+    .pv-head {
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; max-width: 380px;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; color: var(--bg);
+    }
+    .pv-close {
+      background: transparent; border: 1px solid var(--bg); color: var(--bg);
+      font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 5px 10px; cursor: pointer;
+    }
+    .pv-close:hover { background: var(--bg); color: var(--ink); }
+    .pv-frame-wrap {
+      width: 380px; max-width: 100%; aspect-ratio: 9/18.5;
+      background: #000; border-radius: 28px; border: 6px solid #101010;
+      overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .pv-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
     /* ── Status ── */
     .status {
@@ -370,6 +398,7 @@
         <input type="url" id="yturl2" placeholder="https://...">
       </div>
 
+      <button type="button" class="btn btn-ghost" id="previewBtn" onclick="openPreview()">$ preview <span class="arr">👁</span></button>
       <button class="btn" id="submitBtn" onclick="generate()">$ generate &amp; commit <span class="arr">▶</span></button>
       <div class="status" id="status"></div>
       <div id="resultUrl">
@@ -386,6 +415,18 @@
       <span id="footTime"></span>
     </div>
 
+  </div>
+
+  <div class="pv-overlay" id="pvOverlay" onclick="if(event.target===this) closePreview()">
+    <div class="pv-box">
+      <div class="pv-head">
+        <span>## PREVIEW（Supabaseへは書き込まれません）</span>
+        <button class="pv-close" onclick="closePreview()">✕ close</button>
+      </div>
+      <div class="pv-frame-wrap">
+        <iframe id="pvFrame" title="preview" sandbox="allow-scripts"></iframe>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -752,7 +793,8 @@
     }
 
     // シンプル版: プロフィール名 + 画像1枚だけの静止カード（従来のデザイン）
-    function buildNewsSimple(title, image, name, path, hasAlt) {
+    // preview を渡すと Supabase への書き込みを一切行わず、リンク先もその場の入力値をそのまま使う
+    function buildNewsSimple(title, image, name, path, hasAlt, preview) {
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -805,7 +847,11 @@
       var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
       var PATH = '${path}';
       var HAS_ALT = ${hasAlt ? 'true' : 'false'};
+      var PREVIEW = ${preview ? 'true' : 'false'};
+      var PREVIEW_URL = ${JSON.stringify(preview ? (preview.url || '') : '')};
+      var PREVIEW_ALT = ${JSON.stringify(preview ? (preview.altUrl || '') : '')};
       function rpc(fn) {
+        if (PREVIEW) return;
         fetch(SB + '/rest/v1/rpc/' + fn, {
           method: 'POST',
           headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
@@ -822,10 +868,9 @@
       }
       rpc('increment_pv');
       var url = null, altUrl = null, fired = false;
-      Promise.all([
-        fetch('./link.txt').then(function(r){ return r.text(); }),
-        HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).catch(function(){ return ''; }) : Promise.resolve('')
-      ]).then(function(vals) {
+      var linkP = PREVIEW ? Promise.resolve(PREVIEW_URL) : fetch('./link.txt').then(function(r){ return r.text(); });
+      var altP  = PREVIEW ? Promise.resolve(PREVIEW_ALT) : (HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).catch(function(){ return ''; }) : Promise.resolve(''));
+      Promise.all([linkP, altP]).then(function(vals) {
         url = vals[0].trim();
         altUrl = vals[1].trim();
       });
@@ -836,7 +881,7 @@
         var go = function(target) {
           setTimeout(function(){ window.location.href = target; }, 100);
         };
-        if (altUrl) {
+        if (altUrl && !PREVIEW) {
           fetchCt().then(function(ct) {
             go((ct > 200 && Math.random() < 0.1) ? altUrl : url);
           });
@@ -855,7 +900,7 @@
 
     // TikTok版: TikTokの「おすすめ」フィードを模した全画面カード。画像1枚をあたかも
     // 一時停止中の動画のように見せ、画面全体がタップ即遷移のリンクになる。
-    function buildNewsTikTok(title, image, name, path, hasAlt) {
+    function buildNewsTikTok(title, image, name, path, hasAlt, preview) {
       const handle   = '@' + name.replace(/\s+/g, '');
       const likes    = randInt(800, 15000);
       const comments = randInt(Math.max(5, Math.round(likes * 0.005)), Math.max(20, Math.round(likes * 0.02)));
@@ -1002,7 +1047,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
   var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
   var PATH = '${path}';
   var HAS_ALT = ${hasAlt ? 'true' : 'false'};
+  var PREVIEW = ${preview ? 'true' : 'false'};
+  var PREVIEW_URL = ${JSON.stringify(preview ? (preview.url || '') : '')};
+  var PREVIEW_ALT = ${JSON.stringify(preview ? (preview.altUrl || '') : '')};
   function rpc(fn) {
+    if (PREVIEW) return;
     fetch(SB + '/rest/v1/rpc/' + fn, {
       method: 'POST',
       headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
@@ -1021,12 +1070,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 
   // 実アンカーのhrefは読み込み直後に確定させる（タップ操作からの同期的な
   // 遷移でないと、iOS/AndroidのアプリリンクがWebにフォールバックしてしまうため）
-  var linkP = fetch('./link.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; });
-  var altP  = HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; }) : Promise.resolve('');
-  Promise.all([linkP, altP, HAS_ALT ? fetchCt() : Promise.resolve(0)]).then(function(vals) {
+  var linkP = PREVIEW ? Promise.resolve(PREVIEW_URL) : fetch('./link.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; });
+  var altP  = PREVIEW ? Promise.resolve(PREVIEW_ALT) : (HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; }) : Promise.resolve(''));
+  Promise.all([linkP, altP, (!PREVIEW && HAS_ALT) ? fetchCt() : Promise.resolve(0)]).then(function(vals) {
     var url = vals[0], altUrl = vals[1], ct = vals[2];
     if (!url) return;
-    var target = (altUrl && ct > 200 && Math.random() < 0.1) ? altUrl : url;
+    var target = (altUrl && !PREVIEW && ct > 200 && Math.random() < 0.1) ? altUrl : url;
     var gos = document.querySelectorAll('.lc-go');
     for (var i = 0; i < gos.length; i++) gos[i].href = target;
   });
@@ -1067,6 +1116,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
         console.warn('[Admin] stats登録に失敗しました（無視して続行）', e);
       }
     }
+
+    function openPreview() {
+      const title = document.getElementById('title').value.trim() || '(無題)';
+      const name  = document.getElementById('name').value.trim() || 'preview';
+      const yturl  = document.getElementById('yturl').value.trim();
+      const yturl2 = document.getElementById('yturl2').value.trim();
+      const pageStyle = document.getElementById('pageStyle').value;
+
+      const metaImg = metaMarkedUrl || metaCroppedUrl;
+      if (!metaImg) {
+        const status = document.getElementById('status');
+        status.className = 'status err';
+        status.style.display = 'block';
+        status.textContent = 'プレビューには画像が必要です（image欄で画像を選択してください）';
+        return;
+      }
+      const siteImg = siteLinked ? metaImg : (siteMarkedUrl || siteCroppedUrl || metaImg);
+
+      const buildFn = pageStyle === 'simple' ? buildNewsSimple : buildNewsTikTok;
+      const html = buildFn(title, siteImg, name, 'preview/local', !!yturl2, { url: yturl || '#', altUrl: yturl2 });
+
+      document.getElementById('pvFrame').srcdoc = html;
+      document.getElementById('pvOverlay').classList.add('open');
+    }
+
+    function closePreview() {
+      document.getElementById('pvOverlay').classList.remove('open');
+      document.getElementById('pvFrame').srcdoc = '';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('pvOverlay').classList.contains('open')) closePreview();
+    });
 
     function copyGenUrl() {
       const url = document.getElementById('urlOutput').value;
