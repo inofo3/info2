@@ -926,7 +926,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 .lc-go{cursor:pointer;}
 .lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
 .tk{position:relative;width:100%;min-height:100dvh;max-width:500px;margin:0 auto;overflow:hidden;background:#000;}
-.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.tk-media-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(36px) brightness(.55) saturate(1.15);transform:scale(1.2);display:block;}
+.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;}
 .tk-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;width:66px;height:66px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;}
 .tk-play svg{width:32px;height:32px;margin-left:3px;}
 .tk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 24%,transparent 52%,rgba(0,0,0,.78) 100%);pointer-events:none;}
@@ -977,6 +978,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 <body>
 
 <div class="tk">
+  <img class="tk-media-bg" src="${image}" alt="" aria-hidden="true">
   <img class="tk-media" src="${image}" alt="">
   <span class="tk-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
   <div class="tk-shade"></div>
