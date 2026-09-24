@@ -483,11 +483,17 @@
         ? 'meta image → card.jpg（OGPリンクカード用）'
         : 'image → card.jpg / thumb.jpg';
       if (!isTikTok) {
-        // シンプル版に戻したらmeta画像へ強制同期する
+        // シンプル版に戻したらmeta画像へ強制同期する（トリミングあり）
         siteLinked = true;
         const metaFile = document.getElementById('metaImage').files[0];
-        if (metaFile) showPreview(metaFile, 'sitePreview', 1280, 720);
+        if (metaFile) updateSitePreview(metaFile);
         updateSyncUI();
+      } else {
+        // TikTok風に切り替えたら、既に選択済みの画像をトリミングなしで再計算する
+        const srcFile = siteLinked
+          ? document.getElementById('metaImage').files[0]
+          : document.getElementById('siteImage').files[0];
+        if (srcFile) updateSitePreview(srcFile);
       }
     }
     setPageStyle(localStorage.getItem('gh_pagestyle') || 'tiktok');
@@ -534,9 +540,45 @@
       });
     }
 
+    // トリミングせず、maxW×maxHに収まるように縮小するだけ（写真を全部見せたい場合用）
+    // dataUrlに加え、実際の出力サイズ(w,h)も返す（カードの縦横比をこの写真に合わせるため）
+    function fitImage(file, maxW, maxH) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+            const w = Math.max(1, Math.round(img.width * scale));
+            const h = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.9), w, h });
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function siteFitMode() {
+      return document.getElementById('pageStyle').value === 'tiktok' ? 'contain' : 'cover';
+    }
+
+    function updateSitePreview(file) {
+      if (!file) return Promise.resolve();
+      return siteFitMode() === 'contain'
+        ? showPreview(file, 'sitePreview', 1280, 1280, 'contain')
+        : showPreview(file, 'sitePreview', 1280, 720, 'cover');
+    }
+
     var siteLinked = true; // trueの間はmeta画像がsite画像にも自動反映される（varで宣言し、初期化前のsetPageStyle呼び出しからの参照でもTDZエラーにならないようにする）
     let metaMarkedUrl = null, siteMarkedUrl = null;
     let metaCroppedUrl = null, siteCroppedUrl = null;
+    let siteImgW = 16, siteImgH = 9; // TikTok風カードの縦横比をこの写真の実寸に合わせる
 
     function updateSyncUI() {
       const hasMeta = !!document.getElementById('metaImage').files[0];
@@ -554,14 +596,14 @@
     document.getElementById('metaImage').addEventListener('change', async function() {
       if (!this.files[0]) return;
       await showPreview(this.files[0], 'metaPreview', 1200, 630);
-      if (siteLinked) await showPreview(this.files[0], 'sitePreview', 1280, 720);
+      if (siteLinked) await updateSitePreview(this.files[0]);
       updateSyncUI();
     });
 
     document.getElementById('siteImage').addEventListener('change', function() {
       if (!this.files[0]) return;
       siteLinked = false;
-      showPreview(this.files[0], 'sitePreview', 1280, 720);
+      updateSitePreview(this.files[0]);
       updateSyncUI();
     });
 
@@ -569,14 +611,22 @@
       const metaFile = document.getElementById('metaImage').files[0];
       if (!metaFile) return;
       siteLinked = true;
-      showPreview(metaFile, 'sitePreview', 1280, 720);
+      updateSitePreview(metaFile);
       updateSyncUI();
     }
 
-    async function showPreview(file, previewId, w, h) {
+    async function showPreview(file, previewId, w, h, mode) {
       const wrap = document.getElementById(previewId);
       if (!file) return;
-      const dataUrl = await cropImage(file, w, h);
+      let dataUrl;
+      if (mode === 'contain') {
+        const fit = await fitImage(file, w, h);
+        dataUrl = fit.dataUrl;
+        if (previewId === 'sitePreview') { siteImgW = fit.w; siteImgH = fit.h; }
+      } else {
+        dataUrl = await cropImage(file, w, h);
+        if (previewId === 'sitePreview') { siteImgW = w; siteImgH = h; }
+      }
       wrap.querySelector('img').src = dataUrl;
       wrap.style.display = 'block';
       if (previewId === 'metaPreview') {
@@ -732,10 +782,12 @@
       return res;
     }
 
-    async function uploadImage(token, path, source, isOgp) {
+    async function uploadImage(token, path, source, isOgp, mode) {
       const dataUrl = typeof source === 'string'
         ? source
-        : await cropImage(source, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
+        : mode === 'contain'
+          ? (await fitImage(source, 1280, 1280)).dataUrl
+          : await cropImage(source, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
       const res = await githubPut(token, path, {
         message: `Upload ${path}`,
         content: dataUrl.split(',')[1],
@@ -794,7 +846,7 @@
 
     // シンプル版: プロフィール名 + 画像1枚だけの静止カード（従来のデザイン）
     // preview を渡すと Supabase への書き込みを一切行わず、リンク先もその場の入力値をそのまま使う
-    function buildNewsSimple(title, image, name, path, hasAlt, preview) {
+    function buildNewsSimple(title, image, name, path, hasAlt, preview, imgW, imgH) {
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -900,12 +952,16 @@
 
     // TikTok版: TikTokの「おすすめ」フィードを模した全画面カード。画像1枚をあたかも
     // 一時停止中の動画のように見せ、画面全体がタップ即遷移のリンクになる。
-    function buildNewsTikTok(title, image, name, path, hasAlt, preview) {
+    function buildNewsTikTok(title, image, name, path, hasAlt, preview, imgW, imgH) {
       const handle   = '@' + name.replace(/\s+/g, '');
       const likes    = randInt(800, 15000);
       const comments = randInt(Math.max(5, Math.round(likes * 0.005)), Math.max(20, Math.round(likes * 0.02)));
       const shares   = randInt(Math.max(10, Math.round(likes * 0.02)), Math.max(40, Math.round(likes * 0.08)));
       const bookmarks= randInt(Math.max(10, Math.round(likes * 0.02)), Math.max(40, Math.round(likes * 0.06)));
+      // カードの縦横比を写真そのものに合わせる。ただし極端な横長写真だと
+      // 上下のUI（タブ・キャプション・ナビ）が潰れて壊れて見えるので上限だけ設ける
+      let arW = imgW || 9, arH = imgH || 16;
+      if (arW / arH > 1.4) { arW = 1.4; arH = 1; }
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -922,12 +978,11 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans','Noto Sans JP',sans-serif;overflow-x:hidden;overscroll-behavior:none;background:#000;color:#fff;}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans','Noto Sans JP',sans-serif;overflow-x:hidden;overscroll-behavior:none;background:#000;color:#fff;min-height:100dvh;display:flex;align-items:center;justify-content:center;}
 .lc-go{cursor:pointer;}
 .lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
-.tk{position:relative;width:100%;min-height:100dvh;max-width:500px;margin:0 auto;overflow:hidden;background:#000;}
-.tk-media-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(36px) brightness(.55) saturate(1.15);transform:scale(1.2);display:block;}
-.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;}
+.tk{position:relative;width:min(500px, calc(100dvh * ${arW} / ${arH}));aspect-ratio:${arW}/${arH};margin:0 auto;overflow:hidden;background:#000;}
+.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
 .tk-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;width:66px;height:66px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;}
 .tk-play svg{width:32px;height:32px;margin-left:3px;}
 .tk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 24%,transparent 52%,rgba(0,0,0,.78) 100%);pointer-events:none;}
@@ -978,7 +1033,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 <body>
 
 <div class="tk">
-  <img class="tk-media-bg" src="${image}" alt="" aria-hidden="true">
   <img class="tk-media" src="${image}" alt="">
   <span class="tk-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
   <div class="tk-shade"></div>
@@ -1134,10 +1188,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
         status.textContent = 'プレビューには画像が必要です（image欄で画像を選択してください）';
         return;
       }
-      const siteImg = siteLinked ? metaImg : (siteMarkedUrl || siteCroppedUrl || metaImg);
+      // siteCroppedUrl/siteMarkedUrl は siteLinked の状態に合わせて常にpage styleごとの
+      // 正しいモード（TikTok風ならトリミングなし）で再計算されているので、これを優先して使う
+      const siteImg = siteMarkedUrl || siteCroppedUrl || metaImg;
 
       const buildFn = pageStyle === 'simple' ? buildNewsSimple : buildNewsTikTok;
-      const html = buildFn(title, siteImg, name, 'preview/local', !!yturl2, { url: yturl || '#', altUrl: yturl2 });
+      const html = buildFn(title, siteImg, name, 'preview/local', !!yturl2, { url: yturl || '#', altUrl: yturl2 }, siteImgW, siteImgH);
 
       document.getElementById('pvFrame').srcdoc = html;
       document.getElementById('pvOverlay').classList.add('open');
@@ -1195,6 +1251,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 
       const metaUrl = `https://click-click.site/${path}/card.jpg`;
       const siteUrl = `https://click-click.site/${path}/thumb.jpg`;
+      const pageStyle = document.getElementById('pageStyle').value;
 
       try {
         step('① Token を確認中...');
@@ -1207,15 +1264,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
         await uploadImage(token, `${path}/card.jpg`, metaMarkedUrl || metaFile, true);
 
         step('③ thumb.jpg をアップロード中...');
-        await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false);
+        await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false, pageStyle === 'tiktok' ? 'contain' : 'cover');
 
         step('④ index.html を生成中...');
         await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
 
         step('⑤ news.html を生成中...');
-        const pageStyle = document.getElementById('pageStyle').value;
         const buildFn = pageStyle === 'simple' ? buildNewsSimple : buildNewsTikTok;
-        await updateFile(token, `${path}/news.html`, buildFn(title, siteUrl, name, path, !!yturl2), `Create ${path}/news.html`);
+        await updateFile(token, `${path}/news.html`, buildFn(title, siteUrl, name, path, !!yturl2, null, siteImgW, siteImgH), `Create ${path}/news.html`);
 
         step('⑥ link.txt を生成中...');
         await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
