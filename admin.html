@@ -352,6 +352,7 @@
         <div class="style-btns" id="styleBtns">
           <button type="button" class="style-btn active" data-style="tiktok" onclick="setPageStyle('tiktok')">TikTok風</button>
           <button type="button" class="style-btn" data-style="simple" onclick="setPageStyle('simple')">シンプル(従来)</button>
+          <button type="button" class="style-btn" data-style="github" onclick="setPageStyle('github')">github.io風</button>
         </div>
       </div>
 
@@ -541,7 +542,6 @@
     }
 
     // トリミングせず、maxW×maxHに収まるように縮小するだけ（写真を全部見せたい場合用）
-    // dataUrlに加え、実際の出力サイズ(w,h)も返す（カードの縦横比をこの写真に合わせるため）
     function fitImage(file, maxW, maxH) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -554,7 +554,7 @@
             const canvas = document.createElement('canvas');
             canvas.width = w; canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            resolve({ dataUrl: canvas.toDataURL('image/jpeg', 0.9), w, h });
+            resolve(canvas.toDataURL('image/jpeg', 0.9));
           };
           img.onerror = reject;
           img.src = e.target.result;
@@ -578,7 +578,6 @@
     var siteLinked = true; // trueの間はmeta画像がsite画像にも自動反映される（varで宣言し、初期化前のsetPageStyle呼び出しからの参照でもTDZエラーにならないようにする）
     let metaMarkedUrl = null, siteMarkedUrl = null;
     let metaCroppedUrl = null, siteCroppedUrl = null;
-    let siteImgW = 16, siteImgH = 9; // TikTok風カードの縦横比をこの写真の実寸に合わせる
 
     function updateSyncUI() {
       const hasMeta = !!document.getElementById('metaImage').files[0];
@@ -618,15 +617,7 @@
     async function showPreview(file, previewId, w, h, mode) {
       const wrap = document.getElementById(previewId);
       if (!file) return;
-      let dataUrl;
-      if (mode === 'contain') {
-        const fit = await fitImage(file, w, h);
-        dataUrl = fit.dataUrl;
-        if (previewId === 'sitePreview') { siteImgW = fit.w; siteImgH = fit.h; }
-      } else {
-        dataUrl = await cropImage(file, w, h);
-        if (previewId === 'sitePreview') { siteImgW = w; siteImgH = h; }
-      }
+      const dataUrl = mode === 'contain' ? await fitImage(file, w, h) : await cropImage(file, w, h);
       wrap.querySelector('img').src = dataUrl;
       wrap.style.display = 'block';
       if (previewId === 'metaPreview') {
@@ -786,7 +777,7 @@
       const dataUrl = typeof source === 'string'
         ? source
         : mode === 'contain'
-          ? (await fitImage(source, 1280, 1280)).dataUrl
+          ? await fitImage(source, 1280, 1280)
           : await cropImage(source, isOgp ? 1200 : 1280, isOgp ? 630 : 720);
       const res = await githubPut(token, path, {
         message: `Upload ${path}`,
@@ -846,7 +837,7 @@
 
     // シンプル版: プロフィール名 + 画像1枚だけの静止カード（従来のデザイン）
     // preview を渡すと Supabase への書き込みを一切行わず、リンク先もその場の入力値をそのまま使う
-    function buildNewsSimple(title, image, name, path, hasAlt, preview, imgW, imgH) {
+    function buildNewsSimple(title, image, name, path, hasAlt, preview) {
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -952,16 +943,12 @@
 
     // TikTok版: TikTokの「おすすめ」フィードを模した全画面カード。画像1枚をあたかも
     // 一時停止中の動画のように見せ、画面全体がタップ即遷移のリンクになる。
-    function buildNewsTikTok(title, image, name, path, hasAlt, preview, imgW, imgH) {
+    function buildNewsTikTok(title, image, name, path, hasAlt, preview) {
       const handle   = '@' + name.replace(/\s+/g, '');
       const likes    = randInt(800, 15000);
       const comments = randInt(Math.max(5, Math.round(likes * 0.005)), Math.max(20, Math.round(likes * 0.02)));
       const shares   = randInt(Math.max(10, Math.round(likes * 0.02)), Math.max(40, Math.round(likes * 0.08)));
       const bookmarks= randInt(Math.max(10, Math.round(likes * 0.02)), Math.max(40, Math.round(likes * 0.06)));
-      // カードの縦横比を写真そのものに合わせる。ただし極端な横長写真だと
-      // 上下のUI（タブ・キャプション・ナビ）が潰れて壊れて見えるので上限だけ設ける
-      let arW = imgW || 9, arH = imgH || 16;
-      if (arW / arH > 1.4) { arW = 1.4; arH = 1; }
       return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -978,11 +965,12 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans','Noto Sans JP',sans-serif;overflow-x:hidden;overscroll-behavior:none;background:#000;color:#fff;min-height:100dvh;display:flex;align-items:center;justify-content:center;}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans','Noto Sans JP',sans-serif;overflow-x:hidden;overscroll-behavior:none;background:#000;color:#fff;}
 .lc-go{cursor:pointer;}
 .lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
-.tk{position:relative;width:min(500px, calc(100dvh * ${arW} / ${arH}));aspect-ratio:${arW}/${arH};margin:0 auto;overflow:hidden;background:#000;}
-.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.tk{position:relative;width:100%;min-height:100dvh;max-width:500px;margin:0 auto;overflow:hidden;background:#000;}
+.tk-media-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(36px) brightness(.55) saturate(1.15);transform:scale(1.2);display:block;}
+.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;}
 .tk-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;width:66px;height:66px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;}
 .tk-play svg{width:32px;height:32px;margin-left:3px;}
 .tk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 24%,transparent 52%,rgba(0,0,0,.78) 100%);pointer-events:none;}
@@ -1033,6 +1021,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 <body>
 
 <div class="tk">
+  <img class="tk-media-bg" src="${image}" alt="" aria-hidden="true">
   <img class="tk-media" src="${image}" alt="">
   <span class="tk-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
   <div class="tk-shade"></div>
@@ -1156,6 +1145,159 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
 </html>`;
     }
 
+    // github.io版: GitHub Pages の個人ブログ（README/Markdown風）を模した記事ページ。
+    // GitHubのロゴや公式UIは使わず、白背景の記事レイアウトだけを再現する。画面全体がタップ即遷移のリンク。
+    function buildNewsGithub(title, image, name, path, hasAlt, preview) {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const date = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      const slug = name.replace(/\s+/g, '').toLowerCase();
+      const readMin = randInt(2, 6);
+      return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>${title} | ${name}</title>
+<meta property="og:title" content="${title}">
+<meta property="og:image" content="${image}">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:image" content="${image}">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans JP','Hiragino Sans',Helvetica,Arial,sans-serif;background:#fff;color:#1f2328;line-height:1.6;font-size:16px;}
+a{color:#0969da;text-decoration:none;}
+.lc-go{cursor:pointer;}
+.lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
+.gh-head{border-bottom:1px solid #d1d9e0;}
+.gh-head-in{max-width:760px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.gh-site{font-weight:600;font-size:17px;color:#1f2328;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gh-nav{display:flex;gap:16px;font-size:14px;color:#59636e;flex:0 0 auto;}
+.gh-main{max-width:760px;margin:0 auto;padding:28px 16px 48px;}
+.gh-crumb{font-size:13px;color:#59636e;margin-bottom:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+.gh-h1{font-size:28px;font-weight:600;line-height:1.3;padding-bottom:10px;border-bottom:1px solid #d1d9e0;margin-bottom:12px;word-break:auto-phrase;overflow-wrap:break-word;}
+.gh-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:13px;color:#59636e;margin-bottom:22px;}
+.gh-av{width:22px;height:22px;border-radius:50%;object-fit:cover;background:#eaeef2;vertical-align:middle;margin-right:6px;}
+.gh-tag{display:inline-block;padding:0 9px;font-size:12px;line-height:20px;border-radius:2em;background:#ddf4ff;color:#0969da;font-weight:500;}
+.gh-fig{display:block;position:relative;border:1px solid #d1d9e0;border-radius:6px;overflow:hidden;background:#f6f8fa;aspect-ratio:16/9;margin-bottom:8px;}
+.gh-fig img{width:100%;height:100%;object-fit:cover;display:block;}
+.gh-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.gh-play svg{width:30px;height:30px;margin-left:3px;}
+.gh-cap{font-size:12px;color:#59636e;margin-bottom:22px;}
+.gh-p{margin-bottom:16px;}
+.gh-bq{border-left:.25em solid #d1d9e0;padding:0 1em;color:#59636e;margin-bottom:16px;}
+.gh-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;background:#f6f8fa;border-radius:6px;padding:14px 16px;margin-bottom:22px;overflow-x:auto;color:#1f2328;}
+.gh-code .k{color:#cf222e;}.gh-code .s{color:#0a3069;}
+.gh-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;font-size:15px;font-weight:600;border-radius:6px;background:#1f883d;color:#fff;border:1px solid rgba(31,35,40,.15);}
+.gh-btn svg{width:16px;height:16px;}
+.gh-foot{border-top:1px solid #d1d9e0;}
+.gh-foot-in{max-width:760px;margin:0 auto;padding:18px 16px 28px;font-size:12px;color:#59636e;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+@media (max-width:480px){.gh-h1{font-size:23px;}.gh-nav{gap:12px;font-size:13px;}}
+</style>
+</head>
+<body>
+
+<header class="gh-head">
+  <div class="gh-head-in">
+    <a href="#" class="lc-go gh-site">${name}</a>
+    <nav class="gh-nav"><a href="#" class="lc-go">Posts</a><a href="#" class="lc-go">About</a></nav>
+  </div>
+</header>
+
+<main class="gh-main">
+  <div class="gh-crumb">${slug}.github.io / posts / ${date}</div>
+  <h1 class="gh-h1">${title}</h1>
+  <div class="gh-meta">
+    <span><img class="gh-av" src="${image}" alt="">${name}</span>
+    <span>${date}</span>
+    <span>${readMin} min read</span>
+    <span class="gh-tag">news</span>
+  </div>
+
+  <a href="#" class="lc-go gh-fig">
+    <img src="${image}" alt="">
+    <span class="gh-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
+  </a>
+  <div class="gh-cap">▲ タップで動画を再生</div>
+
+  <p class="gh-p">${title}</p>
+  <blockquote class="gh-bq"><p>詳細は動画で確認できます。</p></blockquote>
+  <pre class="gh-code"><span class="k">$</span> open <span class="s">"${date}.mp4"</span></pre>
+
+  <a href="#" class="lc-go gh-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>動画を見る</a>
+</main>
+
+<footer class="gh-foot">
+  <div class="gh-foot-in"><span>© ${d.getFullYear()} ${name}</span><span>Powered by Jekyll</span></div>
+</footer>
+
+<a href="#" class="lc-go lc-tapall" aria-label="${title}"></a>
+<script>
+(function() {
+  var SB = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+  var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+  var PATH = '${path}';
+  var HAS_ALT = ${hasAlt ? 'true' : 'false'};
+  var PREVIEW = ${preview ? 'true' : 'false'};
+  var PREVIEW_URL = ${JSON.stringify(preview ? (preview.url || '') : '')};
+  var PREVIEW_ALT = ${JSON.stringify(preview ? (preview.altUrl || '') : '')};
+  function rpc(fn) {
+    if (PREVIEW) return;
+    fetch(SB + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_path: PATH }),
+      keepalive: true
+    }).catch(function(){});
+  }
+  function fetchCt() {
+    return fetch(SB + '/rest/v1/stats?path=eq.' + encodeURIComponent(PATH) + '&select=ct', {
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY }
+    }).then(function(r){ return r.json(); })
+      .then(function(rows){ return (rows[0] && rows[0].ct) || 0; })
+      .catch(function(){ return 0; });
+  }
+  rpc('increment_pv');
+
+  // 実アンカーのhrefは読み込み直後に確定させる（TikTok版と同じ理由）
+  var linkP = PREVIEW ? Promise.resolve(PREVIEW_URL) : fetch('./link.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; });
+  var altP  = PREVIEW ? Promise.resolve(PREVIEW_ALT) : (HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; }) : Promise.resolve(''));
+  Promise.all([linkP, altP, (!PREVIEW && HAS_ALT) ? fetchCt() : Promise.resolve(0)]).then(function(vals) {
+    var url = vals[0], altUrl = vals[1], ct = vals[2];
+    if (!url) return;
+    var target = (altUrl && !PREVIEW && ct > 200 && Math.random() < 0.1) ? altUrl : url;
+    var gos = document.querySelectorAll('.lc-go');
+    for (var i = 0; i < gos.length; i++) gos[i].href = target;
+  });
+
+  var sent = false;
+  function track() {
+    if (sent) return;
+    sent = true;
+    rpc('increment_ct');
+  }
+  var gos = document.querySelectorAll('.lc-go');
+  for (var j = 0; j < gos.length; j++) {
+    gos[j].addEventListener('click', track, { capture: true });
+  }
+  document.addEventListener('touchstart', function(e) {
+    if (e.target.closest && e.target.closest('.lc-go')) track();
+  }, { passive: true, capture: true });
+})();
+<\/script>
+</body>
+</html>`;
+    }
+
+    function pickBuildFn(style) {
+      if (style === 'simple') return buildNewsSimple;
+      if (style === 'github') return buildNewsGithub;
+      return buildNewsTikTok;
+    }
+
     async function registerStatsRow(path) {
       try {
         await fetch(`${SB}/rest/v1/stats`, {
@@ -1192,8 +1334,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
       // 正しいモード（TikTok風ならトリミングなし）で再計算されているので、これを優先して使う
       const siteImg = siteMarkedUrl || siteCroppedUrl || metaImg;
 
-      const buildFn = pageStyle === 'simple' ? buildNewsSimple : buildNewsTikTok;
-      const html = buildFn(title, siteImg, name, 'preview/local', !!yturl2, { url: yturl || '#', altUrl: yturl2 }, siteImgW, siteImgH);
+      const buildFn = pickBuildFn(pageStyle);
+      const html =buildFn(title, siteImg, name, 'preview/local', !!yturl2, { url: yturl || '#', altUrl: yturl2 });
 
       document.getElementById('pvFrame').srcdoc = html;
       document.getElementById('pvOverlay').classList.add('open');
@@ -1270,8 +1412,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
         await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
 
         step('⑤ news.html を生成中...');
-        const buildFn = pageStyle === 'simple' ? buildNewsSimple : buildNewsTikTok;
-        await updateFile(token, `${path}/news.html`, buildFn(title, siteUrl, name, path, !!yturl2, null, siteImgW, siteImgH), `Create ${path}/news.html`);
+        const buildFn = pickBuildFn(pageStyle);
+        await updateFile(token, `${path}/news.html`, buildFn(title, siteUrl, name, path, !!yturl2), `Create ${path}/news.html`);
 
         step('⑥ link.txt を生成中...');
         await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
