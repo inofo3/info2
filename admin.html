@@ -1675,6 +1675,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 </html>`;
     }
 
+    function buildNewsXSmall(title, image, name, path, hasAlt, preview) {
+      return buildXCommon(title, image, name, path, hasAlt, preview, false);
+    }
     function buildNewsXLarge(title, image, name, path, hasAlt, preview) {
       return buildXCommon(title, image, name, path, hasAlt, preview, true);
     }
