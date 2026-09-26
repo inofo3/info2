@@ -1757,6 +1757,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
       const token    = document.getElementById('token').value.trim();
       const username = document.getElementById('username').value.trim();
       const folder   = document.getElementById('folder').value.trim();
+      const pageStyle = document.getElementById('pageStyle').value;
       const titleRaw = document.getElementById('title').value.trim();
       const title    = (pageStyle === 'gofile' || pageStyle === 'gofile-large') ? titleRaw + ' · Gofile' : titleRaw;
       const metaFile     = document.getElementById('metaImage').files[0];
@@ -1787,7 +1788,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 
       const metaUrl = `https://click-click.site/${path}/card.jpg`;
       const siteUrl = `https://click-click.site/${path}/thumb.jpg`;
-      const pageStyle = document.getElementById('pageStyle').value;
 
       try {
         step('① Token を確認中...');
