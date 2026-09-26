@@ -1341,7 +1341,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 /* Main content */
 .gf-main{padding:12px;display:flex;flex-direction:column;gap:8px;}
 /* Folder card */
-.gf-folder-card{background:#202c48;border-radius:12px;padding:16px;}
+.gf-folder-card{background:#202c48;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.08);}
 .gf-fc-row{display:flex;align-items:center;gap:12px;}
 .gf-folder-ico-wrap{width:40px;height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border-radius:10px;}
 .gf-folder-ico-wrap svg{width:24px;height:24px;}
@@ -1359,12 +1359,12 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .gf-dots-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#64748b;}
 .gf-dots-btn svg{width:18px;height:18px;}
 /* Toolbar */
-.gf-toolbar{background:#202c48;border-radius:12px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;}
+.gf-toolbar{background:#202c48;border-radius:12px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,0.08);}
 .gf-cb{display:flex;align-items:center;justify-content:center;color:#475569;}
 .gf-tb-right{display:flex;gap:18px;align-items:center;}
 .gf-tb-right svg{width:18px;height:18px;color:#475569;}
 /* File row */
-.gf-file{background:#202c48;border-radius:12px;overflow:hidden;}
+.gf-file{background:#202c48;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
 .gf-file-head{display:flex;align-items:flex-start;gap:10px;padding:13px 14px 9px;}
 .gf-file-cb{display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:2px;color:#475569;}
 .gf-vid-ico{width:28px;height:28px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
@@ -1375,8 +1375,8 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .gf-file-meta svg{width:12px;height:12px;flex:0 0 auto;}
 .gf-file-dots{width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#64748b;}
 .gf-file-dots svg{width:17px;height:17px;}
-.gf-thumb-wrap{margin:0 14px 0 50px;}
-.gf-thumb-wrap img{width:100%;display:block;border-radius:6px;}
+.gf-thumb-wrap{margin:0 14px 0 50px;max-height:240px;overflow:hidden;border-radius:6px;}
+.gf-thumb-wrap img{width:100%;display:block;max-height:240px;object-fit:cover;}
 .gf-file-caption{padding:7px 14px 14px 50px;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style>
 </head>
