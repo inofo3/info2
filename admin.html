@@ -1316,11 +1316,11 @@ a{color:#0969da;text-decoration:none;}
 <meta name="theme-color" content="#162036">
 <title>Gofile</title>
 <meta property="og:title" content="${title}">
-<meta property="og:image" content="${image}">
+<meta property="og:image" content="https://click-click.site/Gofile.png">
 <meta property="og:type" content="article">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="${title}">
-<meta name="twitter:image" content="${image}">
+<meta name="twitter:image" content="https://click-click.site/Gofile.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1682,10 +1682,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
       return buildXCommon(title, image, name, path, hasAlt, preview, true);
     }
 
+    function buildNewsGofileLarge(title, image, name, path, hasAlt, preview) {
+      const html = buildNewsGofile(title, image, name, path, hasAlt, preview);
+      return html.replace('aspect-ratio:16/9', 'aspect-ratio:4/3');
+    }
+
     function pickBuildFn(style) {
       if (style === 'simple') return buildNewsSimple;
-      if (style === 'gofile') return buildNewsXSmall;
-      if (style === 'gofile-large') return buildNewsXLarge;
+      if (style === 'gofile') return buildNewsGofile;
+      if (style === 'gofile-large') return buildNewsGofileLarge;
       return buildNewsTikTok;
     }
 
@@ -1801,7 +1806,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
         await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false, pageStyle === 'tiktok' ? 'contain' : 'cover');
 
         step('④ index.html を生成中...');
-        await updateFile(token, `${path}/index.html`, buildIndex(title, metaUrl), `Create ${path}/index.html`);
+        const indexOgpImage = (pageStyle === 'gofile' || pageStyle === 'gofile-large') ? 'https://click-click.site/Gofile.png' : metaUrl;
+        await updateFile(token, `${path}/index.html`, buildIndex(title, indexOgpImage), `Create ${path}/index.html`);
 
         step('⑤ news.html を生成中...');
         const buildFn = pickBuildFn(pageStyle);
