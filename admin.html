@@ -1331,51 +1331,53 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
 /* Nav */
 .gf-wrap{max-width:100%;overflow-x:hidden;}
-.gf-nav{display:flex;align-items:center;gap:3px;padding:0 4px;height:56px;background:#162036;border-bottom:1px solid rgba(255,255,255,0.06);}
-.gf-nav-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#94a3b8;flex:0 0 auto;}
-.gf-nav-icon svg{width:20px;height:20px;}
-.gf-navtitle{font-size:15px;font-weight:600;color:#e2e8f0;padding:0 6px;flex:1;}
+.gf-nav{display:flex;align-items:center;gap:8px;padding:0 12px;height:56px;background:#162036;border-bottom:1px solid rgba(255,255,255,0.07);}
+.gf-nav-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#94a3b8;flex:0 0 auto;}
+.gf-nav-icon svg{width:22px;height:22px;}
+.gf-navtitle{font-size:20px;font-weight:700;color:#f1f5f9;padding:0 2px;flex:1;letter-spacing:-0.3px;}
 /* Ad */
-.gf-ad{padding:8px 16px;background:#162036;font-size:13px;color:#64748b;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);}
-.gf-ad a{color:#3080ff;text-decoration:none;}
+.gf-ad{padding:9px 16px;background:#162036;font-size:13.5px;color:#64748b;text-align:center;border-bottom:1px solid rgba(255,255,255,0.07);}
+.gf-ad a{color:#60a5fa;text-decoration:underline;text-underline-offset:2px;}
 /* Main content */
 .gf-main{padding:12px;display:flex;flex-direction:column;gap:8px;}
 /* Folder card */
-.gf-folder-card{background:#202c48;border-radius:12px;padding:14px 16px;}
+.gf-folder-card{background:#202c48;border-radius:12px;padding:16px;}
 .gf-fc-row{display:flex;align-items:center;gap:12px;}
-.gf-folder-ico{width:44px;height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
-.gf-folder-ico svg{width:42px;height:38px;}
+.gf-folder-ico-wrap{width:40px;height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border-radius:10px;}
+.gf-folder-ico-wrap svg{width:24px;height:24px;}
 .gf-fc-body{flex:1;min-width:0;}
-.gf-fc-name{font-size:15px;font-weight:600;color:#e2e8f0;margin-bottom:3px;}
-.gf-fc-meta{display:flex;align-items:center;gap:5px;font-size:12px;color:#64748b;margin-bottom:3px;}
-.gf-fc-meta svg{width:12px;height:12px;flex:0 0 auto;}
-.gf-fc-items{display:flex;align-items:center;gap:5px;font-size:12px;color:#64748b;margin-bottom:7px;}
-.gf-fc-items svg{width:12px;height:12px;flex:0 0 auto;}
-.gf-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px 2px 7px;border-radius:999px;background:rgba(48,128,255,0.12);color:#3080ff;font-size:11.5px;font-weight:500;border:1px solid rgba(48,128,255,0.2);}
-.gf-badge svg{width:12px;height:12px;}
-.gf-fc-acts{display:flex;gap:6px;align-items:center;flex:0 0 auto;}
-.gf-ibt{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.08);}
-.gf-ibt svg{width:16px;height:16px;color:#94a3b8;}
+.gf-fc-name{font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;}
+.gf-fc-meta{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#64748b;margin-bottom:4px;}
+.gf-fc-meta svg{width:13px;height:13px;flex:0 0 auto;}
+.gf-fc-items{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#64748b;margin-bottom:9px;}
+.gf-fc-items svg{width:13px;height:13px;flex:0 0 auto;}
+.gf-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 7px;border-radius:999px;background:rgba(96,165,250,0.1);color:#60a5fa;font-size:12px;font-weight:500;border:1px solid rgba(96,165,250,0.25);}
+.gf-badge svg{width:13px;height:13px;}
+.gf-fc-acts{display:flex;gap:4px;align-items:center;flex:0 0 auto;}
+.gf-ibt{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.1);}
+.gf-ibt svg{width:17px;height:17px;color:#94a3b8;}
+.gf-dots-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#64748b;}
+.gf-dots-btn svg{width:18px;height:18px;}
 /* Toolbar */
-.gf-toolbar{background:#202c48;border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-.gf-cb{width:17px;height:17px;border:1.5px solid #334155;border-radius:4px;background:transparent;}
-.gf-tb-right{display:flex;gap:16px;align-items:center;}
-.gf-tb-right svg{width:17px;height:17px;color:#475569;}
+.gf-toolbar{background:#202c48;border-radius:12px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;}
+.gf-cb{display:flex;align-items:center;justify-content:center;color:#475569;}
+.gf-tb-right{display:flex;gap:18px;align-items:center;}
+.gf-tb-right svg{width:18px;height:18px;color:#475569;}
 /* File row */
 .gf-file{background:#202c48;border-radius:12px;overflow:hidden;}
-.gf-file-head{display:flex;align-items:flex-start;gap:10px;padding:12px 12px 8px;}
-.gf-file-cb{width:17px;height:17px;border:1.5px solid #334155;border-radius:4px;flex:0 0 auto;margin-top:3px;}
-.gf-vid-ico{width:30px;height:30px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
-.gf-vid-ico svg{width:30px;height:30px;}
+.gf-file-head{display:flex;align-items:flex-start;gap:10px;padding:13px 14px 9px;}
+.gf-file-cb{display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-top:2px;color:#475569;}
+.gf-vid-ico{width:28px;height:28px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;}
+.gf-vid-ico svg{width:28px;height:28px;}
 .gf-file-body{flex:1;min-width:0;}
-.gf-file-name{font-size:13.5px;font-weight:500;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
-.gf-file-meta{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#64748b;}
-.gf-file-meta svg{width:11px;height:11px;flex:0 0 auto;}
-.gf-file-dots{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
-.gf-file-dots svg{width:16px;height:16px;color:#475569;}
-.gf-thumb-wrap{margin:0 12px 0 52px;}
-.gf-thumb-wrap img{width:100%;display:block;border-radius:8px;object-fit:cover;}
-.gf-file-caption{padding:6px 12px 13px 52px;font-size:11.5px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gf-file-name{font-size:14px;font-weight:500;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.gf-file-meta{display:flex;align-items:center;gap:7px;font-size:12px;color:#64748b;}
+.gf-file-meta svg{width:12px;height:12px;flex:0 0 auto;}
+.gf-file-dots{width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#64748b;}
+.gf-file-dots svg{width:17px;height:17px;}
+.gf-thumb-wrap{margin:0 14px 0 50px;}
+.gf-thumb-wrap img{width:100%;display:block;border-radius:6px;}
+.gf-file-caption{padding:7px 14px 14px 50px;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style>
 </head>
 <body>
@@ -1388,7 +1390,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 <div class="gf-main">
   <div class="gf-folder-card">
     <div class="gf-fc-row">
-      <div class="gf-folder-ico">
+      <div class="gf-folder-ico-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
       </div>
       <div class="gf-fc-body">
@@ -1410,14 +1412,14 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
         <a href="#" class="lc-go gf-ibt">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
         </a>
-        <div class="gf-ibt">
+        <div class="gf-dots-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
         </div>
       </div>
     </div>
   </div>
   <div class="gf-toolbar">
-    <div class="gf-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344"/><path d="m9 11 3 3L22 4"/></svg></div>
+    <div class="gf-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344"/><path d="m9 11 3 3L22 4"/></svg></div>
     <div class="gf-tb-right">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h20"/><path d="M6 12h12"/><path d="M9 19h6"/></svg>
@@ -1428,7 +1430,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   </div>
   <div class="gf-file">
     <div class="gf-file-head">
-      <div class="gf-file-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><rect width="18" height="18" x="3" y="3" rx="2"/></svg></div>
+      <div class="gf-file-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect width="18" height="18" x="3" y="3" rx="2"/></svg></div>
       <div class="gf-vid-ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z"/></svg>
       </div>
