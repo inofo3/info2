@@ -1675,19 +1675,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
 </html>`;
     }
 
-    function buildNewsGofileLarge(title, image, name, path, hasAlt, preview) {
-      // gofile-largeはthumb-wrapのaspect-ratioを縦長に変えたバリアント
-      const html = buildNewsGofile(title, image, name, path, hasAlt, preview);
-      return html.replace(
-        '.gf-thumb-wrap{display:block;margin:8px 20px 0;background:#000;aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:8px;border:0.5px solid rgba(255,255,255,0.3);}',
-        '.gf-thumb-wrap{display:block;margin:8px 20px 0;background:#000;aspect-ratio:4/3;position:relative;overflow:hidden;border-radius:8px;border:0.5px solid rgba(255,255,255,0.3);}'
-      );
+    function buildNewsXLarge(title, image, name, path, hasAlt, preview) {
+      return buildXCommon(title, image, name, path, hasAlt, preview, true);
     }
 
     function pickBuildFn(style) {
       if (style === 'simple') return buildNewsSimple;
-      if (style === 'gofile') return buildNewsGofile;
-      if (style === 'gofile-large') return buildNewsGofileLarge;
+      if (style === 'gofile') return buildNewsXSmall;
+      if (style === 'gofile-large') return buildNewsXLarge;
       return buildNewsTikTok;
     }
 
