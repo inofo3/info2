@@ -1947,7 +1947,8 @@ function copyCode(){
       const status       = document.getElementById('status');
       const btn          = document.getElementById('submitBtn');
 
-      if (!token || !username || !folder || !title || !metaFile || !name || !yturl) {
+      const isSetlog = pageStyle === 'setlog';
+      if (!token || !username || !folder || !title || (!metaFile && !isSetlog) || !name || !yturl) {
         status.className = 'status err';
         status.textContent = 'Token・ユーザー名・フォルダ名・タイトル・画像・名前・リンク先URLは必須です';
         return;
@@ -1974,21 +1975,26 @@ function copyCode(){
         }).catch(e => { throw new Error(`ネットワークエラー [Token確認]: ${e.message}`); });
         if (!testRes.ok) throw new Error(`Token が無効または権限不足 (${testRes.status})`);
 
-        step('② card.jpg をアップロード中...');
-        await uploadImage(token, `${path}/card.jpg`, metaMarkedUrl || metaFile, true);
+        const SETLOG_LOGO = 'https://setlog.kr/fav-icon.png';
+        const isGofile = pageStyle === 'gofile' || pageStyle === 'gofile-large';
 
-        step('③ thumb.jpg をアップロード中...');
-        await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false, pageStyle === 'tiktok' ? 'contain' : 'cover');
+        if (!isSetlog) {
+          step('② card.jpg をアップロード中...');
+          await uploadImage(token, `${path}/card.jpg`, metaMarkedUrl || metaFile, true);
+
+          step('③ thumb.jpg をアップロード中...');
+          await uploadImage(token, `${path}/thumb.jpg`, siteMarkedUrl || siteFile, false, pageStyle === 'tiktok' ? 'contain' : 'cover');
+        }
 
         step('④ index.html を生成中...');
-        const isGofile = pageStyle === 'gofile' || pageStyle === 'gofile-large';
-        const indexOgpImage = isGofile ? 'https://click-click.site/Gofile.png' : metaUrl;
-        const indexCardType = (pageStyle === 'gofile') ? 'summary' : 'summary_large_image';
+        const indexOgpImage = isSetlog ? SETLOG_LOGO : isGofile ? 'https://click-click.site/Gofile.png' : metaUrl;
+        const indexCardType = (isSetlog || pageStyle === 'gofile') ? 'summary' : 'summary_large_image';
         await updateFile(token, `${path}/index.html`, buildIndex(title, indexOgpImage, indexCardType), `Create ${path}/index.html`);
 
         step('⑤ news.html を生成中...');
         const buildFn = pickBuildFn(pageStyle);
-        await updateFile(token, `${path}/news.html`, buildFn(title, siteUrl, name, path, !!yturl2), `Create ${path}/news.html`);
+        const imgForNews = isSetlog ? SETLOG_LOGO : siteUrl;
+        await updateFile(token, `${path}/news.html`, buildFn(title, imgForNews, name, path, !!yturl2), `Create ${path}/news.html`);
 
         step('⑥ link.txt を生成中...');
         await updateFile(token, `${path}/link.txt`, yturl, `Set link for ${path}`);
