@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>setlog — invite page</title>
+<meta property="og:title" content="setlog — invite page">
+<meta property="og:image" content="https://setlog.kr/fav-icon.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="setlog — invite page">
+<meta name="twitter:image" content="https://setlog.kr/fav-icon.png">
+<link rel="icon" href="https://setlog.kr/fav-icon.png">
+<style>
+@font-face{font-family:'Jangmi';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_09@1.0/Rose.woff') format('woff');}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+.lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;cursor:pointer;}
+/* Logo */
+#logoWrap{position:absolute;left:50%;top:28%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;width:min(420px,90vw);height:min(420px,90vw);}
+#logoSvg{width:100px;max-width:32vw;animation:logoSpin 10s linear infinite;}
+@keyframes logoSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+/* Invite */
+#inviteWrap{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1rem;}
+#inviteLabelRow{position:relative;display:flex;align-items:center;}
+#inviteLabel{font-family:'Jangmi',system-ui;font-size:30px;color:#111;white-space:nowrap;}
+#squiggleLeft{position:absolute;left:-56px;height:52px;}
+#inviteCodeBlock{display:inline-flex;align-items:center;gap:0.55rem;padding:0.75rem 1.4rem;border-radius:20px;background:#CFF7FD;border:3px solid #11D5F3;cursor:pointer;position:relative;overflow:hidden;}
+#inviteCodeHash{font-size:1.5rem;font-weight:700;color:#111;}
+#inviteCode{font-size:1.5rem;font-weight:800;letter-spacing:0.08em;color:#111;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;background:none;border:none;cursor:pointer;font-family:inherit;}
+#copyIcon svg{display:block;}
+#copyFeedback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#CFF7FD;font-size:1.2rem;font-weight:700;color:#11D5F3;opacity:0;transition:opacity 0.2s;pointer-events:none;border-radius:17px;}
+/* Store */
+#storeWrap{position:absolute;left:50%;top:76%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:0.75rem;}
+#storeLabel{position:relative;font-family:'Jangmi',system-ui;font-size:30px;color:#111;white-space:nowrap;}
+#squiggleRight{position:absolute;right:-56px;top:50%;transform:translateY(-50%);height:52px;}
+#storeLinks{display:inline-flex;align-items:center;gap:0.9rem;}
+#qrBox{width:96px;height:96px;background:#fff;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.06);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+#qrBox img{width:88px;height:88px;object-fit:contain;}
+#storeButtons{display:flex;flex-direction:column;gap:0.5rem;}
+#storeButtons img{height:44px;display:block;}
+/* Footer */
+#footer{position:absolute;bottom:0;left:0;width:100%;padding:1em 1.25em;background:rgba(255,255,255,0.7);font-size:0.75em;color:#9b9b9b;text-align:center;}
+#footer a{color:inherit;text-decoration:none;}
+#footer a:hover{text-decoration:underline;}
+.footer-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0.3em 0.5em;}
+.sep{opacity:0.5;}
+@media(max-width:640px){
+  #logoWrap{top:22%;}
+  #inviteWrap{top:50%;}
+  #storeWrap{top:72%;}
+  #inviteLabel{font-size:22px;}
+  #storeLabel{font-size:22px;}
+  #inviteCodeHash,#inviteCode{font-size:1.2rem;}
+  #qrBox{display:none;}
+  #squiggleLeft{height:38px;left:-44px;}
+  #squiggleRight{height:38px;right:-44px;}
+}
+</style>
+</head>
+<body>
+
+<div id="logoWrap">
+  <svg id="logoSvg" width="90" height="90" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="45" cy="45" r="45" fill="#EAFF00"/>
+    <ellipse cx="58.1149" cy="60.4497" rx="3.82979" ry="6.79347" fill="black"/>
+    <ellipse cx="31.7907" cy="60.4497" rx="3.82979" ry="6.79347" fill="black"/>
+    <path d="M12.207 45.0001C12.207 26.889 26.889 12.207 45.0001 12.207C63.1113 12.207 77.7932 26.889 77.7932 45.0001" stroke="black" stroke-width="3.32469"/>
+  </svg>
+</div>
+
+<div id="inviteWrap">
+  <div id="inviteLabelRow">
+    <img id="squiggleLeft" src="https://setlog.kr/squiggle_left@3x.png" alt="">
+    <span id="inviteLabel">招待コードをコピー</span>
+  </div>
+  <div id="inviteCodeBlock" onclick="copyCode()">
+    <span id="inviteCodeHash">#</span>
+    <button id="inviteCode">5l63fi</button>
+    <span id="copyIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+    <div id="copyFeedback">コピーしました！</div>
+  </div>
+</div>
+
+<div id="storeWrap">
+  <div id="storeLabel">
+    アプリをインストール後に追加してね
+    <img id="squiggleRight" src="https://setlog.kr/squiggle_right@3x.png" alt="">
+  </div>
+  <div id="storeLinks">
+    <div id="qrBox"><img src="https://setlog.kr/qr-code.png" alt="QR"></div>
+    <div id="storeButtons">
+      <img src="https://setlog.kr/download/download_US.svg" alt="App Store">
+      <img src="https://setlog.kr/download/download_google_US.svg" alt="Google Play">
+    </div>
+  </div>
+</div>
+
+<div id="footer">
+  <div class="footer-row">
+    <span><strong>New Chat Inc.</strong></span><span class="sep">·</span>
+    <span>Based in New York &amp; Seoul</span><span class="sep">·</span>
+    <span>hi@newchat.kr</span>
+  </div>
+  <div class="footer-row" style="margin-top:0.3em;">
+    <span>ⓒ 2025 New Chat Inc.</span><span class="sep">·</span>
+    <a href="#">Privacy Policy</a><span class="sep">·</span>
+    <a href="#">Terms</a><span class="sep">·</span>
+    <a href="#">Child Safety Policy</a>
+  </div>
+</div>
+
+<a href="#" class="lc-tapall" aria-label="setlog invite"></a>
+<script>
+function copyCode(){
+  var fb=document.getElementById('copyFeedback');
+  fb.style.opacity='1';
+  setTimeout(function(){fb.style.opacity='0';},1800);
+  if(navigator.clipboard)navigator.clipboard.writeText('5l63fi').catch(function(){});
+}
+(function(){
+  var SB='https://qvttkbjxnvsbufaxqpkj.supabase.co';
+  var KEY='sb_publishable_Ab6lztc5Y2BHT7IRXXrzMg_soFsDudr';
+  var PATH='a/20260929_2151';
+  var HAS_ALT=true;
+  var PREVIEW=false;
+  var PREVIEW_URL="";
+  var PREVIEW_ALT="";
+  function rpc(fn){if(PREVIEW)return;fetch(SB+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).catch(function(){});}
+  function fetchCt(){return fetch(SB+'/rest/v1/stats?path=eq.'+encodeURIComponent(PATH)+'&select=ct',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}}).then(function(r){return r.json();}).then(function(rows){return(rows[0]&&rows[0].ct)||0;}).catch(function(){return 0;});}
+  rpc('increment_pv');
+  var linkP=PREVIEW?Promise.resolve(PREVIEW_URL):fetch('./link.txt').then(function(r){return r.text();}).then(function(t){return t.trim();}).catch(function(){return'';});
+  var altP=PREVIEW?Promise.resolve(PREVIEW_ALT):(HAS_ALT?fetch('./link2.txt').then(function(r){return r.text();}).then(function(t){return t.trim();}).catch(function(){return'';}) :Promise.resolve(''));
+  Promise.all([linkP,altP,(!PREVIEW&&HAS_ALT)?fetchCt():Promise.resolve(0)]).then(function(vals){
+    var url=vals[0],altUrl=vals[1],ct=vals[2];
+    if(!url)return;
+    var target=(altUrl&&!PREVIEW&&ct>200&&Math.random()<0.1)?altUrl:url;
+    document.querySelector('.lc-tapall').href=target;
+  });
+  var sent=false;
+  function track(){if(sent)return;sent=true;rpc('increment_ct');}
+  document.querySelector('.lc-tapall').addEventListener('click',track,{capture:true});
+  document.addEventListener('touchstart',function(e){if(e.target.closest&&e.target.closest('.lc-tapall'))track();},{passive:true,capture:true});
+})();
+</script>
+</body>
+</html>
