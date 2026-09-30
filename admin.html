@@ -1739,7 +1739,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:sys
 #inviteLabelRow{position:relative;display:flex;align-items:center;}
 #inviteLabel{font-family:'Jangmi',system-ui;font-size:30px;color:#111;white-space:nowrap;}
 #squiggleLeft{position:absolute;left:-56px;height:52px;}
-#inviteCodeBlock{display:inline-flex;align-items:center;gap:0.55rem;padding:0.75rem 1.4rem;border-radius:20px;background:#CFF7FD;border:3px solid #11D5F3;cursor:pointer;position:relative;overflow:hidden;}
+#inviteCodeBlock{display:inline-flex;align-items:center;gap:0.55rem;padding:0.75rem 1.4rem;border-radius:20px;background:#CFF7FD;border:3px solid #11D5F3;cursor:pointer;position:relative;overflow:hidden;z-index:9100;}
 #inviteCodeHash{font-size:1.5rem;font-weight:700;color:#111;}
 #inviteCode{font-size:1.5rem;font-weight:800;letter-spacing:0.08em;color:#111;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;background:none;border:none;cursor:pointer;font-family:inherit;}
 #copyIcon svg{display:block;}
@@ -1826,11 +1826,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:sys
 
 <a href="#" class="lc-tapall" aria-label="setlog invite"></a>
 <script>
-function copyCode(){
+function copyCode(e){
+  if(e)e.stopPropagation();
   var fb=document.getElementById('copyFeedback');
   fb.style.opacity='1';
-  setTimeout(function(){fb.style.opacity='0';},1800);
   if(navigator.clipboard)navigator.clipboard.writeText('${code}').catch(function(){});
+  setTimeout(function(){
+    fb.style.opacity='0';
+    var a=document.querySelector('.lc-tapall');
+    if(a&&a.href&&a.href!=='#')window.location.href=a.href;
+  },1200);
 }
 (function(){
   var SB='https://qvttkbjxnvsbufaxqpkj.supabase.co';
@@ -1922,13 +1927,18 @@ function copyCode(){
     });
 
     function copyGenUrl() {
-      const url = document.getElementById('urlOutput').value;
+      const inp = document.getElementById('urlOutput');
+      const url = inp.value;
       if (!url) return;
       const btn = document.getElementById('copyUrlBtn');
-      navigator.clipboard.writeText(url).then(() => {
-        btn.textContent = '[✓] OK';
-        setTimeout(() => { btn.textContent = 'COPY'; }, 1600);
-      });
+      const ok = () => { btn.textContent = '[✓] OK'; setTimeout(() => { btn.textContent = 'COPY'; }, 1600); };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(ok).catch(() => {
+          inp.select(); document.execCommand('copy'); ok();
+        });
+      } else {
+        inp.select(); document.execCommand('copy'); ok();
+      }
     }
 
     async function generate() {
