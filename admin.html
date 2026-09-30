@@ -474,12 +474,20 @@
     }
     document.getElementById('folder').value = genFolderName();
 
+    function genInviteCode() {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      return Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
     function setPageStyle(style) {
       document.getElementById('pageStyle').value = style;
       document.querySelectorAll('#styleBtns .style-btn').forEach(b => {
         b.classList.toggle('active', b.dataset.style === style);
       });
       localStorage.setItem('gh_pagestyle', style);
+      if (style === 'setlog') {
+        document.getElementById('name').value = genInviteCode();
+      }
       const isTikTok = style === 'tiktok';
       document.getElementById('siteImageField').style.display = isTikTok ? 'block' : 'none';
       document.getElementById('metaImageLabel').textContent = isTikTok
@@ -1778,19 +1786,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:sys
 <div id="inviteWrap">
   <div id="inviteLabelRow">
     <img id="squiggleLeft" src="https://setlog.kr/squiggle_left@3x.png" alt="">
-    <span id="inviteLabel">Copy your invite code</span>
+    <span id="inviteLabel">招待コードをコピー</span>
   </div>
   <div id="inviteCodeBlock" onclick="copyCode()">
     <span id="inviteCodeHash">#</span>
     <button id="inviteCode">${code}</button>
     <span id="copyIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
-    <div id="copyFeedback">Copied!</div>
+    <div id="copyFeedback">コピーしました！</div>
   </div>
 </div>
 
 <div id="storeWrap">
   <div id="storeLabel">
-    Add it after you install the app
+    アプリをインストール後に追加してね
     <img id="squiggleRight" src="https://setlog.kr/squiggle_right@3x.png" alt="">
   </div>
   <div id="storeLinks">
