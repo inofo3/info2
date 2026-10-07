@@ -359,11 +359,34 @@
 
     function copyUrl(path, btn) {
       const url = `https://click-click.site/${path}/`;
-      navigator.clipboard.writeText(url).then(() => {
+      const ok = () => {
         btn.textContent = '[✓] OK';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1600);
-      });
+      };
+      // タップ直後に同期でコピーする（iOS Safari・アプリ内ブラウザ・http/file:// では
+      // navigator.clipboard が無いか失敗するため、execCommand を先に試す）
+      if (legacyCopy(url)) { ok(); return; }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(ok).catch(() => window.prompt('コピーしてください', url));
+      } else {
+        window.prompt('コピーしてください', url);
+      }
+    }
+
+    function legacyCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      let done = false;
+      try { done = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      return done;
     }
 
     function toggleEdit(eid) {
