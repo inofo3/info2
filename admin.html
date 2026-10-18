@@ -932,7 +932,7 @@
       document.body.onclick = function() {
         if (fired || !url) return;
         fired = true;
-        rpc('increment_ct');
+        rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;
         var go = function(target) {
           setTimeout(function(){ window.location.href = target; }, 100);
         };
@@ -1142,7 +1142,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
   function track() {
     if (sent) return;
     sent = true;
-    rpc('increment_ct');
+    rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;
   }
   var gos = document.querySelectorAll('.lc-go');
   for (var j = 0; j < gos.length; j++) {
@@ -1289,7 +1289,7 @@ a{color:#0969da;text-decoration:none;}
   function track() {
     if (sent) return;
     sent = true;
-    rpc('increment_ct');
+    rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;
   }
   var gos = document.querySelectorAll('.lc-go');
   for (var j = 0; j < gos.length; j++) {
@@ -1505,7 +1505,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   function track() {
     if (sent) return;
     sent = true;
-    rpc('increment_ct');
+    rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;
   }
   var gos = document.querySelectorAll('.lc-go');
   for (var j = 0; j < gos.length; j++) {
@@ -1554,7 +1554,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     for(var i=0;i<gos.length;i++)gos[i].href=target;
   });
   var sent=false;
-  function track(){if(sent)return;sent=true;rpc('increment_ct');}
+  function track(){if(sent)return;sent=true;rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;}
   var gos=document.querySelectorAll('.lc-go');
   for(var j=0;j<gos.length;j++)gos[j].addEventListener('click',track,{capture:true});
   document.addEventListener('touchstart',function(e){if(e.target.closest&&e.target.closest('.lc-go'))track();},{passive:true,capture:true});
@@ -1857,7 +1857,7 @@ function copyCode(e){
     document.querySelector('.lc-tapall').href=target;
   });
   var sent=false;
-  function track(){if(sent)return;sent=true;rpc('increment_ct');}
+  function track(){if(sent)return;sent=true;rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;}
   document.querySelector('.lc-tapall').addEventListener('click',track,{capture:true});
   document.addEventListener('touchstart',function(e){if(e.target.closest&&e.target.closest('.lc-tapall'))track();},{passive:true,capture:true});
 })();
