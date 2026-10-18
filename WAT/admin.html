@@ -756,7 +756,7 @@
       rpc('increment_pv');
       fetch('./link.txt').then(function(r){ return r.text(); }).then(function(url) {
         document.body.onclick = function() {
-          rpc('increment_ct');
+          rpc('increment_ct');(function(){if(PREVIEW)return;if(window.__xgo)return;window.__xgo=1;var g=function(){fetch(SB+'/rest/v1/rpc/increment_go',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({p_path:PATH}),keepalive:true}).then(function(r){if(!r.ok)throw 0;}).catch(function(){fetch(SB+'/rest/v1/events',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({path:PATH,type:'go'}),keepalive:true}).catch(function(){});});};document.addEventListener('visibilitychange',function(){if(document.hidden)g();},{once:true});window.addEventListener('pagehide',g,{once:true});})();;
           setTimeout(function(){ window.location.href = url.trim(); }, 100);
         };
       });
