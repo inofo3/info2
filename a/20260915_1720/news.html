@@ -11,80 +11,83 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ヤマトリノ逮捕">
 <meta name="twitter:image" content="https://click-click.site/a/20260915_1720/thumb.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=TikTok+Sans:opsz,wght@12..36,400..700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans','Noto Sans JP',sans-serif;overflow-x:hidden;overscroll-behavior:none;background:#000;color:#fff;}
-.lc-go{cursor:pointer;}
-.lc-tapall{position:fixed;inset:0;z-index:9000;display:block;background:transparent;}
-.tk{position:relative;width:100%;min-height:100dvh;max-width:500px;margin:0 auto;overflow:hidden;background:#000;}
-.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
-.tk-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none;width:66px;height:66px;border-radius:50%;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;}
-.tk-play svg{width:32px;height:32px;margin-left:3px;}
-.tk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 24%,transparent 52%,rgba(0,0,0,.78) 100%);pointer-events:none;}
-.tk-appbar{position:relative;z-index:4;display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);text-decoration:none;color:#fff;}
-.tk-logo{width:32px;height:32px;border-radius:8px;background:#000;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border:1px solid rgba(255,255,255,.18);}
-.tk-logo svg{width:19px;height:19px;}
-.tk-appname{font-size:14px;font-weight:800;line-height:1.25;display:block;}
-.tk-appsub{font-size:11.5px;color:rgba(255,255,255,.66);display:block;}
-.tk-appsp{flex:1;}
-.tk-open{background:#FE2C55;color:#fff;font-weight:800;font-size:14px;padding:8px 18px;border-radius:8px;white-space:nowrap;flex:0 0 auto;}
-.tk-top{position:relative;z-index:3;display:flex;align-items:center;justify-content:center;gap:20px;padding:14px 12px 0;}
-.tk-tab{font-size:16px;font-weight:700;color:rgba(255,255,255,.62);white-space:nowrap;}
-.tk-tab.on{color:#fff;font-weight:800;position:relative;}
-.tk-tab.on::after{content:'';position:absolute;left:50%;bottom:-7px;translate:-50% 0;width:26px;height:3px;border-radius:2px;background:#fff;}
-.tk-search{position:absolute;right:14px;top:14px;width:22px;height:22px;color:#fff;}
-.tk-rail{position:absolute;right:10px;bottom:104px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:17px;}
-.tk-act{display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;text-decoration:none;}
-.tk-act svg{width:33px;height:33px;filter:drop-shadow(0 1px 3px rgba(0,0,0,.55));}
-.tk-n{font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.6);}
-.tk-av{position:relative;margin-bottom:7px;display:block;}
-.tk-av img{width:46px;height:46px;border-radius:50%;object-fit:cover;border:1.5px solid #fff;display:block;background:#333;}
-.tk-plus{position:absolute;left:50%;bottom:-9px;translate:-50% 0;width:20px;height:20px;border-radius:50%;background:#FE2C55;display:flex;align-items:center;justify-content:center;}
-.tk-plus svg{width:12px;height:12px;filter:none;}
-.tk-disc{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2b2b2b,#111);display:flex;align-items:center;justify-content:center;animation:tkspin 4s linear infinite;border:1px solid rgba(255,255,255,.15);}
-.tk-disc img{width:22px;height:22px;border-radius:50%;object-fit:cover;}
-@keyframes tkspin{to{transform:rotate(360deg);}}
-.tk-meta{position:absolute;left:12px;right:76px;bottom:84px;z-index:3;color:#fff;}
-.tk-user{font-size:16px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.6);margin-bottom:6px;display:block;text-decoration:none;color:#fff;}
-.tk-cap{font-size:14px;line-height:1.55;text-shadow:0 1px 3px rgba(0,0,0,.6);word-break:auto-phrase;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-.tk-music{display:flex;align-items:center;gap:7px;margin-top:9px;font-size:13px;overflow:hidden;}
-.tk-music svg{width:15px;height:15px;flex:0 0 auto;}
-.tk-mtrack{white-space:nowrap;overflow:hidden;flex:1;min-width:0;}
-.tk-mtrack span{display:inline-block;animation:tkflow 10s linear infinite;text-shadow:0 1px 3px rgba(0,0,0,.6);}
-@keyframes tkflow{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-.tk-prog{position:absolute;left:0;right:0;bottom:64px;height:2px;background:rgba(255,255,255,.25);z-index:3;}
-.tk-prog::before{content:'';position:absolute;left:0;top:0;bottom:0;width:34%;background:#fff;}
-.tk-bot{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;align-items:center;justify-content:space-around;padding:9px 6px calc(9px + env(safe-area-inset-bottom,0px));background:#000;}
-.tk-bi{display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(255,255,255,.62);font-size:10px;font-weight:600;}
-.tk-bi.on{color:#fff;}
-.tk-bi svg{width:22px;height:22px;}
-.tk-add{width:44px;height:29px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;position:relative;}
-.tk-add::before{content:'';position:absolute;left:-3px;top:0;bottom:0;width:12px;border-radius:8px 0 0 8px;background:#25F4EE;}
-.tk-add::after{content:'';position:absolute;right:-3px;top:0;bottom:0;width:12px;border-radius:0 8px 8px 0;background:#FE2C55;}
-.tk-add svg{position:relative;z-index:2;width:17px;height:17px;color:#000;}
-@media (prefers-reduced-motion:reduce){.tk-disc{animation:none;}.tk-mtrack span{animation:none;}}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:"TikTok Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Yu Gothic",sans-serif;font-optical-sizing:auto;font-kerning:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-size-adjust:100%;-webkit-text-size-adjust:100%;overflow-x:hidden;overscroll-behavior:none;background:#000;color:#fff}
+.lc-go{cursor:pointer}
+.lc-tapall{position:fixed;inset:0;z-index:1500;display:block;background:transparent}
+.tk{--sheet:398px;position:relative;width:100%;min-height:100dvh;max-width:500px;margin:0 auto;overflow:hidden;background:#000}
+.tk-media-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(36px) brightness(.55) saturate(1.15);transform:scale(1.2);display:block}
+.tk-media{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.tk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,transparent 26%,transparent 55%,rgba(0,0,0,.72) 100%);pointer-events:none;z-index:1}
+.tk-dim{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4;pointer-events:none}
+.tk-appbar{position:fixed;left:50%;top:0;transform:translateX(-50%);z-index:1;width:100%;max-width:500px;height:56px;display:flex;align-items:center;gap:8px;padding:4px 12px;background:rgba(0,0,0,.6);text-decoration:none;color:#fff}
+.tk-logo{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.tk-logo svg{width:20px;height:20px;display:block}
+.tk-apptext{display:flex;flex-direction:column;min-width:0}
+.tk-appname{display:block;height:17px;line-height:0;letter-spacing:0}.tk-appname svg{width:72px;height:17px;display:block}
+.tk-appsub{font-size:14px;font-weight:400;line-height:17px;letter-spacing:0;color:rgba(255,255,255,.9);display:block;margin-top:2px;white-space:nowrap}
+.tk-appsp{flex:1}
+.tk-open{position:fixed;right:12px;top:10px;z-index:3000;display:flex;align-items:center;justify-content:center;height:36px;padding:0 12px;background:rgba(254,44,85,.22);color:rgba(255,255,255,.52);font-weight:400;font-size:12px;line-height:16px;letter-spacing:0;margin:0;border-radius:8px;white-space:nowrap;text-decoration:none}
+.tk-rail{position:absolute;right:8px;top:25%;z-index:3;display:flex;flex-direction:column;align-items:center;gap:18px}
+.tk-act{display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;text-decoration:none}
+.tk-act svg{width:34px;height:34px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.tk-n{font-size:12.5px;font-weight:600;letter-spacing:-.1px;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+.tk-av{position:relative;margin-bottom:7px;display:block}
+.tk-av img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:1.5px solid #fff;display:block;background:#333}
+.tk-plus{position:absolute;left:50%;bottom:-10px;translate:-50% 0;width:22px;height:22px;border-radius:50%;background:#FE2C55;display:flex;align-items:center;justify-content:center}
+.tk-plus svg{width:13px;height:13px;filter:none}
+.tk-disc{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#2b2b2b,#111);display:flex;align-items:center;justify-content:center;animation:tkspin 4s linear infinite;border:1px solid rgba(255,255,255,.15)}
+.tk-disc img{width:24px;height:24px;border-radius:50%;object-fit:cover}
+@keyframes tkspin{to{transform:rotate(360deg)}}
+.tk-meta{position:absolute;left:12px;right:78px;bottom:calc(var(--sheet) + 24px);z-index:3;color:#fff}
+.tk-user{font-size:17px;font-weight:600;letter-spacing:-.2px;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.5);margin-bottom:6px;display:block;text-decoration:none;color:#fff}
+.tk-cap{font-size:15px;font-weight:400;line-height:1.4;letter-spacing:0;text-shadow:0 1px 2px rgba(0,0,0,.5);word-break:auto-phrase;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tk-music{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;letter-spacing:-.1px;overflow:hidden}
+.tk-music svg{width:16px;height:16px;flex:0 0 auto}
+.tk-mtrack{white-space:nowrap;overflow:hidden;flex:1;min-width:0}
+.tk-mtrack span{display:inline-block;animation:tkflow 10s linear infinite;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+@keyframes tkflow{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk-sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:2000;width:100%;max-width:500px;height:var(--sheet);background:#fff;border-radius:32px 32px 0 0;padding-top:50px;box-sizing:border-box;box-shadow:0 -8px 32px rgba(0,0,0,.18);animation:tkup .36s cubic-bezier(.22,.9,.3,1) both}
+@keyframes tkup{from{transform:translate(-50%,100%)}to{transform:translate(-50%,0)}}
+.tk-sheet-icon{position:absolute;left:50%;top:-32px;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:#000;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:1}
+.tk-sheet-icon svg{width:34px;height:34px;display:block}
+.tk-sheet-card{width:calc(100% - 40px);margin:0 auto 16px;background:#F8F8F8;border-radius:24px;padding:24px 16px 0;text-align:center;box-sizing:border-box}
+.tk-sheet-title{font-size:24px;line-height:30px;font-weight:700;color:#202020;letter-spacing:-.2px;text-align:center}
+.tk-sheet-desc{font-size:14px;line-height:18px;font-weight:400;color:rgba(0,0,0,.48);margin:10px 0 20px;text-align:center;padding:0 8px}
+.tk-tips{display:flex;align-items:center;justify-content:center;gap:16px;height:140px;margin-bottom:20px;position:relative}
+.tk-tip{position:relative;width:64px;height:64px;background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(0,0,0,.08);flex:0 0 auto}
+.tk-tip::after{content:'';position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:7px solid #fff}
+.tk-tip-heart{transform:rotate(-7deg)}
+.tk-tip-comment{transform:rotate(7deg)}
+.tk-tip svg{width:25px;height:25px;display:block}
+.tk-phone{position:relative;width:88px;height:132px;border-radius:14px;border:3px solid #fff;background:#000;overflow:hidden;display:block;flex:0 0 auto;box-shadow:0 6px 16px rgba(0,0,0,.16)}
+.tk-phone img{width:100%;height:100%;object-fit:cover;display:block}
+.tk-phone-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
+.tk-phone-play svg{width:12px;height:12px;margin-left:1px}
+.tk-cta{display:flex;align-items:center;justify-content:center;width:calc(100% + 32px);margin:0 -16px;height:52px;border-radius:100px;background:#FE2C55;color:#fff;font-size:16px;font-weight:600;letter-spacing:0;text-decoration:none;line-height:1}
+@media (max-width:360px){.tk-sheet-title{font-size:21px;line-height:27px}.tk-tips{gap:10px}.tk-phone{width:78px;height:117px}.tk-tip{width:56px;height:56px}}
+@media (prefers-reduced-motion:reduce){.tk-disc{animation:none}.tk-mtrack span{animation:none}.tk-sheet{animation:none}}
 </style>
 </head>
 <body>
-
 <div class="tk">
+  <img class="tk-media-bg" src="https://click-click.site/a/20260915_1720/thumb.jpg" alt="" aria-hidden="true">
   <img class="tk-media" src="https://click-click.site/a/20260915_1720/thumb.jpg" alt="">
-  <span class="tk-play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>
   <div class="tk-shade"></div>
+  <div class="tk-dim"></div>
 
-  <a href="#" class="lc-go tk-appbar">
-    <span class="tk-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.2 2h2.6c.2 1.6 1.1 3 2.4 3.8.7.4 1.5.7 2.3.8v2.7c-1.7 0-3.3-.5-4.7-1.4v6.6c0 3.4-2.7 6.1-6.1 6.1S6.6 17.9 6.6 14.5s2.7-6.1 6.1-6.1c.3 0 .6 0 .9.1v2.8c-.3-.1-.6-.2-.9-.2-1.9 0-3.4 1.5-3.4 3.4s1.5 3.4 3.4 3.4 3.4-1.5 3.4-3.4V2z" fill="#25F4EE" transform="translate(-1,1)"/><path d="M16.2 2h2.6c.2 1.6 1.1 3 2.4 3.8.7.4 1.5.7 2.3.8v2.7c-1.7 0-3.3-.5-4.7-1.4v6.6c0 3.4-2.7 6.1-6.1 6.1S6.6 17.9 6.6 14.5s2.7-6.1 6.1-6.1c.3 0 .6 0 .9.1v2.8c-.3-.1-.6-.2-.9-.2-1.9 0-3.4 1.5-3.4 3.4s1.5 3.4 3.4 3.4 3.4-1.5 3.4-3.4V2z" fill="#FE2C55" transform="translate(1,-1)"/><path d="M16.2 2h2.6c.2 1.6 1.1 3 2.4 3.8.7.4 1.5.7 2.3.8v2.7c-1.7 0-3.3-.5-4.7-1.4v6.6c0 3.4-2.7 6.1-6.1 6.1S6.6 17.9 6.6 14.5s2.7-6.1 6.1-6.1c.3 0 .6 0 .9.1v2.8c-.3-.1-.6-.2-.9-.2-1.9 0-3.4 1.5-3.4 3.4s1.5 3.4 3.4 3.4 3.4-1.5 3.4-3.4V2z" fill="#fff"/></svg></span>
-    <span><span class="tk-appname">TikTok</span><span class="tk-appsub">アプリで開く</span></span>
+  <div class="tk-appbar">
+    <span class="tk-logo"><svg font-size="20px" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><g clip-path="url(#Icon_Color-TikTok_Logo_Light_svg__a)" fill-rule="evenodd" clip-rule="evenodd"><path d="M32.37 2.73c-.23-.87-.35-1.79-.35-2.73h-7.85v31.2a6.5 6.5 0 0 1-6.49 6.51 6.5 6.5 0 0 1-6.48-6.51 6.5 6.5 0 0 1 8.53-6.18V16.6A14.71 14.71 0 0 0 3 31.2c0 8.14 6.57 14.74 14.68 14.74 8 0 14.5-6.41 14.69-14.4V15.58a18.64 18.64 0 0 0 10.58 3.28v-7.89c-5.1 0-9.37-3.5-10.58-8.24Z" fill="#25F4EE"></path><path d="M34.41 4.79c-.22-.87-.34-1.79-.34-2.73h-7.85v31.2a6.5 6.5 0 0 1-6.49 6.51 6.5 6.5 0 0 1-6.49-6.51 6.5 6.5 0 0 1 8.54-6.19v-8.41a14.71 14.71 0 0 0-16.73 14.6C5.05 41.4 11.62 48 19.73 48c8 0 14.5-6.42 14.68-14.4V17.64A18.64 18.64 0 0 0 45 20.9v-7.88c-5.1 0-9.38-3.5-10.59-8.24Z" fill="#fff"></path><path d="M32.22 2.06a10.97 10.97 0 0 0 4.1 6.66 10.95 10.95 0 0 1-2.25-6.66h-1.85Zm10.73 10.78v6.02c-3.93 0-7.57-1.21-10.58-3.28V31.54a14.71 14.71 0 0 1-14.69 14.4c-3.53 0-6.77-1.25-9.3-3.34 2.68 3.3 6.77 5.4 11.35 5.4 8 0 14.5-6.42 14.68-14.4V17.64A18.64 18.64 0 0 0 45 20.9v-7.88c-.7 0-1.39-.07-2.05-.2ZM19.73 18.5v6.5a6.5 6.5 0 0 0-5.5 11.7 6.5 6.5 0 0 1 7.55-9.64v-8.41c-.67-.1-1.35-.15-2.05-.15Z" fill="#FE2C55"></path></g><defs><clipPath id="Icon_Color-TikTok_Logo_Light_svg__a"><path fill="#fff" d="M0 0h48v48H0z"></path></clipPath></defs></svg></span>
+    <span class="tk-apptext"><span class="tk-appname"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 72 17" data-e2e="top-banner-username" style="width: 72px; height: 17px; margin-bottom: 2px;"><path fill="#fff" d="M0 .542h12.058l-1.105 3.454H7.825v12.768h-3.9V3.996l-3.92.006zm31.816 0h12.34L43.05 3.996h-3.404v12.767h-3.904V3.996L31.822 4 31.815.54zM12.8 5.702h3.862v11.061H12.82zM18.2.5h3.862v7.555l3.827-3.762h4.608l-4.843 4.701 5.422 7.77h-4.254l-3.618-5.385-1.147 1.111v4.273h-3.863V.5h.005zm40.923 0h3.864v7.555l3.826-3.762h4.608l-4.843 4.701L72 16.764h-4.249l-3.618-5.385-1.146 1.111v4.273h-3.864zM14.728 4.439a1.945 1.945 0 1 0-.002-3.891 1.945 1.945 0 0 0 .002 3.89z"></path><path fill="#25F4EE" d="M43.66 10.142a6.62 6.62 0 0 1 6.1-6.6 7 7 0 0 0-.578-.02 6.617 6.617 0 0 0-6.616 6.62 6.617 6.617 0 0 0 6.615 6.622c.172 0 .407-.01.58-.021a6.625 6.625 0 0 1-6.1-6.6z"></path><path fill="#FE2C55" d="M51.26 3.521c-.177 0-.411.01-.583.021a6.62 6.62 0 0 1 6.094 6.6 6.62 6.62 0 0 1-6.094 6.6c.172.016.406.021.584.021a6.617 6.617 0 0 0 6.615-6.62 6.617 6.617 0 0 0-6.615-6.622z"></path><path fill="#fff" d="M50.22 13.362a3.216 3.216 0 0 1-3.218-3.22 3.216 3.216 0 1 1 6.434 0 3.22 3.22 0 0 1-3.217 3.22zm0-9.84a6.617 6.617 0 0 0-6.617 6.62 6.617 6.617 0 0 0 6.616 6.622 6.617 6.617 0 0 0 6.616-6.622 6.617 6.617 0 0 0-6.616-6.62z"></path></svg></span><span class="tk-appsub">グローバル動画コミュニティ</span></span>
     <span class="tk-appsp"></span>
-    <span class="tk-open">アプリで開く</span>
-  </a>
-
-  <div class="tk-top">
-    <span class="tk-tab">フォロー中</span>
-    <span class="tk-tab on">おすすめ</span>
-    <svg class="tk-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4" stroke-linecap="round"/></svg>
   </div>
+
+  <a href="#" class="lc-go tk-open">ウェブで続ける</a>
 
   <div class="tk-rail">
     <a href="#" class="lc-go tk-act">
@@ -121,14 +124,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Hiragino Sans',
     </div>
   </div>
 
-  <div class="tk-prog"></div>
-
-  <div class="tk-bot">
-    <span class="tk-bi on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>ホーム</span>
-    <span class="tk-bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.3 2.9-5.6 6.5-5.6s6.5 2.3 6.5 5.6"/><path d="M17 8.5h5M19.5 6v5" stroke-linecap="round"/></svg>フレンド</span>
-    <span class="tk-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></span>
-    <span class="tk-bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 7l9 6 9-6" stroke-linecap="round" stroke-linejoin="round"/></svg>受信箱</span>
-    <span class="tk-bi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8.5" r="3.6"/><path d="M4.5 20c0-3.5 3.3-5.8 7.5-5.8s7.5 2.3 7.5 5.8"/></svg>プロフィール</span>
+  <div class="tk-sheet" role="dialog" aria-modal="true" aria-label="TikTokでこの動画を見よう">
+    <div class="tk-sheet-icon"><svg font-size="20px" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><g clip-path="url(#Icon_Color-TikTok_Logo_Light_svg__a)" fill-rule="evenodd" clip-rule="evenodd"><path d="M32.37 2.73c-.23-.87-.35-1.79-.35-2.73h-7.85v31.2a6.5 6.5 0 0 1-6.49 6.51 6.5 6.5 0 0 1-6.48-6.51 6.5 6.5 0 0 1 8.53-6.18V16.6A14.71 14.71 0 0 0 3 31.2c0 8.14 6.57 14.74 14.68 14.74 8 0 14.5-6.41 14.69-14.4V15.58a18.64 18.64 0 0 0 10.58 3.28v-7.89c-5.1 0-9.37-3.5-10.58-8.24Z" fill="#25F4EE"></path><path d="M34.41 4.79c-.22-.87-.34-1.79-.34-2.73h-7.85v31.2a6.5 6.5 0 0 1-6.49 6.51 6.5 6.5 0 0 1-6.49-6.51 6.5 6.5 0 0 1 8.54-6.19v-8.41a14.71 14.71 0 0 0-16.73 14.6C5.05 41.4 11.62 48 19.73 48c8 0 14.5-6.42 14.68-14.4V17.64A18.64 18.64 0 0 0 45 20.9v-7.88c-5.1 0-9.38-3.5-10.59-8.24Z" fill="#fff"></path><path d="M32.22 2.06a10.97 10.97 0 0 0 4.1 6.66 10.95 10.95 0 0 1-2.25-6.66h-1.85Zm10.73 10.78v6.02c-3.93 0-7.57-1.21-10.58-3.28V31.54a14.71 14.71 0 0 1-14.69 14.4c-3.53 0-6.77-1.25-9.3-3.34 2.68 3.3 6.77 5.4 11.35 5.4 8 0 14.5-6.42 14.68-14.4V17.64A18.64 18.64 0 0 0 45 20.9v-7.88c-.7 0-1.39-.07-2.05-.2ZM19.73 18.5v6.5a6.5 6.5 0 0 0-5.5 11.7 6.5 6.5 0 0 1 7.55-9.64v-8.41c-.67-.1-1.35-.15-2.05-.15Z" fill="#FE2C55"></path></g><defs><clipPath id="Icon_Color-TikTok_Logo_Light_svg__a"><path fill="#fff" d="M0 0h48v48H0z"></path></clipPath></defs></svg></div>
+    <div class="tk-sheet-card">
+      <div class="tk-sheet-title">TikTokでこの動画を見よう</div>
+      <div class="tk-sheet-desc">日本国内のコンテンツを今すぐにもっと<br>見よう。</div>
+      <div class="tk-tips">
+        <span class="tk-tip tk-tip-heart">
+          <svg viewBox="0 0 24 24" fill="#FE2C55"><path d="M12 21s-8.5-5.2-8.5-11A5 5 0 0 1 12 6.5 5 5 0 0 1 20.5 10c0 5.8-8.5 11-8.5 11z"/></svg>
+        </span>
+        <a href="#" class="lc-go tk-phone"><img src="https://click-click.site/a/20260915_1720/thumb.jpg" alt=""><span class="tk-phone-play"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span></a>
+        <span class="tk-tip tk-tip-comment">
+          <svg viewBox="0 0 25 25" fill="none"><path d="M12.5 2C6.2 2 1 6 1 11.2c0 3 1.7 5.7 4.3 7.4L4 23l4.1-1.6c1.3.4 2.8.6 4.4.6 6.3 0 11.5-4 11.5-9.2S18.8 2 12.5 2Z" fill="#00ABF4"/><circle cx="7.4" cy="11.5" r="1.35" fill="#fff"/><circle cx="12.5" cy="11.5" r="1.35" fill="#fff"/><circle cx="17.6" cy="11.5" r="1.35" fill="#fff"/></svg>
+        </span>
+      </div>
+      <a href="#" class="lc-go tk-cta">今すぐ見る</a>
+    </div>
   </div>
 </div>
 
