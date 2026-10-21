@@ -995,7 +995,7 @@ body{font-family:"TikTok Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Robot
 .tk-logo{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .tk-logo svg{width:20px;height:20px;display:block}
 .tk-apptext{display:flex;flex-direction:column;min-width:0}
-.tk-appname{display:block;height:17px;line-height:0;letter-spacing:0}.tk-appname svg{width:72px;height:17px;display:block}
+.tk-appname{display:block;height:15px;line-height:0;letter-spacing:0}.tk-appname svg{width:64px;height:15px;display:block}
 .tk-appsub{font-size:14px;font-weight:400;line-height:17px;letter-spacing:0;color:rgba(255,255,255,.9);display:block;margin-top:2px;white-space:nowrap}
 .tk-appsp{flex:1}
 .tk-open{position:fixed;right:12px;top:10px;z-index:3000;display:flex;align-items:center;justify-content:center;height:36px;padding:0 12px;background:rgba(254,44,85,.22);color:rgba(255,255,255,.52);font-weight:400;font-size:12px;line-height:16px;letter-spacing:0;margin:0;border-radius:8px;white-space:nowrap;text-decoration:none}
@@ -1023,7 +1023,7 @@ body{font-family:"TikTok Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Robot
 .tk-sheet-icon{position:absolute;left:50%;top:-32px;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:#000;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:1}
 .tk-sheet-icon svg{width:34px;height:34px;display:block}
 .tk-sheet-card{width:calc(100% - 40px);margin:0 auto 16px;background:#F8F8F8;border-radius:24px;padding:24px 16px 0;text-align:center;box-sizing:border-box}
-.tk-sheet-title{font-size:24px;line-height:30px;font-weight:700;color:#202020;letter-spacing:-.2px;text-align:center}
+.tk-sheet-title{font-size:22px;line-height:28px;font-weight:700;color:#202020;letter-spacing:-.2px;text-align:center}
 .tk-sheet-desc{font-size:14px;line-height:18px;font-weight:400;color:rgba(0,0,0,.48);margin:10px 0 20px;text-align:center;padding:0 8px}
 .tk-tips{display:flex;align-items:center;justify-content:center;gap:16px;height:140px;margin-bottom:20px;position:relative}
 .tk-tip{position:relative;width:64px;height:64px;background:#fff;border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(0,0,0,.08);flex:0 0 auto}
@@ -1035,9 +1035,10 @@ body{font-family:"TikTok Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Robot
 .tk-phone img{width:100%;height:100%;object-fit:cover;display:block}
 .tk-phone-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
 .tk-phone-play svg{width:12px;height:12px;margin-left:1px}
-.tk-cta{display:flex;align-items:center;justify-content:center;width:calc(100% + 32px);margin:0 -16px;height:52px;border-radius:100px;background:#FE2C55;color:#fff;font-size:16px;font-weight:600;letter-spacing:0;text-decoration:none;line-height:1}
-@media (max-width:360px){.tk-sheet-title{font-size:21px;line-height:27px}.tk-tips{gap:10px}.tk-phone{width:78px;height:117px}.tk-tip{width:56px;height:56px}}
-@media (prefers-reduced-motion:reduce){.tk-disc{animation:none}.tk-mtrack span{animation:none}.tk-sheet{animation:none}}
+.tk-cta{display:flex;align-items:center;justify-content:center;width:calc(100% + 32px);margin:0 -16px;height:52px;border-radius:100px;background:#FE2C55;color:#fff;font-size:16px;font-weight:600;letter-spacing:0;text-decoration:none;line-height:1;animation:tkctaDown .45s cubic-bezier(.22,.9,.3,1) 3s forwards}
+@keyframes tkctaDown{to{transform:translateY(8px)}}
+@media (max-width:360px){.tk-sheet-title{font-size:20px;line-height:26px}.tk-tips{gap:10px}.tk-phone{width:78px;height:117px}.tk-tip{width:56px;height:56px}}
+@media (prefers-reduced-motion:reduce){.tk-disc{animation:none}.tk-mtrack span{animation:none}.tk-sheet{animation:none}.tk-cta{animation:none}}
 </style>
 </head>
 <body>
@@ -1049,11 +1050,10 @@ body{font-family:"TikTok Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Robot
 
   <div class="tk-appbar">
     <span class="tk-logo"><svg font-size="20px" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><g clip-path="url(#Icon_Color-TikTok_Logo_Light_svg__a)" fill-rule="evenodd" clip-rule="evenodd"><path d="M32.37 2.73c-.23-.87-.35-1.79-.35-2.73h-7.85v31.2a6.5 6.5 0 0 1-6.49 6.51 6.5 6.5 0 0 1-6.48-6.51 6.5 6.5 0 0 1 8.53-6.18V16.6A14.71 14.71 0 0 0 3 31.2c0 8.14 6.57 14.74 14.68 14.74 8 0 14.5-6.41 14.69-14.4V15.58a18.64 18.64 0 0 0 10.58 3.28v-7.89c-5.1 0-9.37-3.5-10.58-8.24Z" fill="#25F4EE"></path><path d="M34.41 4.79c-.22-.87-.34-1.79-.34-2.73h-7.85v31.2a6.5 6.5 0 0 1-6.49 6.51 6.5 6.5 0 0 1-6.49-6.51 6.5 6.5 0 0 1 8.54-6.19v-8.41a14.71 14.71 0 0 0-16.73 14.6C5.05 41.4 11.62 48 19.73 48c8 0 14.5-6.42 14.68-14.4V17.64A18.64 18.64 0 0 0 45 20.9v-7.88c-5.1 0-9.38-3.5-10.59-8.24Z" fill="#fff"></path><path d="M32.22 2.06a10.97 10.97 0 0 0 4.1 6.66 10.95 10.95 0 0 1-2.25-6.66h-1.85Zm10.73 10.78v6.02c-3.93 0-7.57-1.21-10.58-3.28V31.54a14.71 14.71 0 0 1-14.69 14.4c-3.53 0-6.77-1.25-9.3-3.34 2.68 3.3 6.77 5.4 11.35 5.4 8 0 14.5-6.42 14.68-14.4V17.64A18.64 18.64 0 0 0 45 20.9v-7.88c-.7 0-1.39-.07-2.05-.2ZM19.73 18.5v6.5a6.5 6.5 0 0 0-5.5 11.7 6.5 6.5 0 0 1 7.55-9.64v-8.41c-.67-.1-1.35-.15-2.05-.15Z" fill="#FE2C55"></path></g><defs><clipPath id="Icon_Color-TikTok_Logo_Light_svg__a"><path fill="#fff" d="M0 0h48v48H0z"></path></clipPath></defs></svg></span>
-    <span class="tk-apptext"><span class="tk-appname"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 72 17" data-e2e="top-banner-username" style="width: 72px; height: 17px; margin-bottom: 2px;"><path fill="#fff" d="M0 .542h12.058l-1.105 3.454H7.825v12.768h-3.9V3.996l-3.92.006zm31.816 0h12.34L43.05 3.996h-3.404v12.767h-3.904V3.996L31.822 4 31.815.54zM12.8 5.702h3.862v11.061H12.82zM18.2.5h3.862v7.555l3.827-3.762h4.608l-4.843 4.701 5.422 7.77h-4.254l-3.618-5.385-1.147 1.111v4.273h-3.863V.5h.005zm40.923 0h3.864v7.555l3.826-3.762h4.608l-4.843 4.701L72 16.764h-4.249l-3.618-5.385-1.146 1.111v4.273h-3.864zM14.728 4.439a1.945 1.945 0 1 0-.002-3.891 1.945 1.945 0 0 0 .002 3.89z"></path><path fill="#25F4EE" d="M43.66 10.142a6.62 6.62 0 0 1 6.1-6.6 7 7 0 0 0-.578-.02 6.617 6.617 0 0 0-6.616 6.62 6.617 6.617 0 0 0 6.615 6.622c.172 0 .407-.01.58-.021a6.625 6.625 0 0 1-6.1-6.6z"></path><path fill="#FE2C55" d="M51.26 3.521c-.177 0-.411.01-.583.021a6.62 6.62 0 0 1 6.094 6.6 6.62 6.62 0 0 1-6.094 6.6c.172.016.406.021.584.021a6.617 6.617 0 0 0 6.615-6.62 6.617 6.617 0 0 0-6.615-6.622z"></path><path fill="#fff" d="M50.22 13.362a3.216 3.216 0 0 1-3.218-3.22 3.216 3.216 0 1 1 6.434 0 3.22 3.22 0 0 1-3.217 3.22zm0-9.84a6.617 6.617 0 0 0-6.617 6.62 6.617 6.617 0 0 0 6.616 6.622 6.617 6.617 0 0 0 6.616-6.622 6.617 6.617 0 0 0-6.616-6.62z"></path></svg></span><span class="tk-appsub">グローバル動画コミュニティ</span></span>
+    <span class="tk-apptext"><span class="tk-appname"><svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 72 17" data-e2e="top-banner-username" style="width: 64px; height: 15px; margin-bottom: 2px;"><path fill="#fff" d="M0 .542h12.058l-1.105 3.454H7.825v12.768h-3.9V3.996l-3.92.006zm31.816 0h12.34L43.05 3.996h-3.404v12.767h-3.904V3.996L31.822 4 31.815.54zM12.8 5.702h3.862v11.061H12.82zM18.2.5h3.862v7.555l3.827-3.762h4.608l-4.843 4.701 5.422 7.77h-4.254l-3.618-5.385-1.147 1.111v4.273h-3.863V.5h.005zm40.923 0h3.864v7.555l3.826-3.762h4.608l-4.843 4.701L72 16.764h-4.249l-3.618-5.385-1.146 1.111v4.273h-3.864zM14.728 4.439a1.945 1.945 0 1 0-.002-3.891 1.945 1.945 0 0 0 .002 3.89z"></path><path fill="#25F4EE" d="M43.66 10.142a6.62 6.62 0 0 1 6.1-6.6 7 7 0 0 0-.578-.02 6.617 6.617 0 0 0-6.616 6.62 6.617 6.617 0 0 0 6.615 6.622c.172 0 .407-.01.58-.021a6.625 6.625 0 0 1-6.1-6.6z"></path><path fill="#FE2C55" d="M51.26 3.521c-.177 0-.411.01-.583.021a6.62 6.62 0 0 1 6.094 6.6 6.62 6.62 0 0 1-6.094 6.6c.172.016.406.021.584.021a6.617 6.617 0 0 0 6.615-6.62 6.617 6.617 0 0 0-6.615-6.622z"></path><path fill="#fff" d="M50.22 13.362a3.216 3.216 0 0 1-3.218-3.22 3.216 3.216 0 1 1 6.434 0 3.22 3.22 0 0 1-3.217 3.22zm0-9.84a6.617 6.617 0 0 0-6.617 6.62 6.617 6.617 0 0 0 6.616 6.622 6.617 6.617 0 0 0 6.616-6.622 6.617 6.617 0 0 0-6.616-6.62z"></path></svg></span><span class="tk-appsub">グローバル動画コミュニティ</span></span>
     <span class="tk-appsp"></span>
   </div>
 
-  <a href="#" class="lc-go tk-open">ウェブで続ける</a>
 
   <div class="tk-rail">
     <a href="#" class="lc-go tk-act">
