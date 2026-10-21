@@ -208,11 +208,11 @@
     .mark-btns .clear:hover { background: var(--ink); color: var(--bg); }
 
     /* ── Style toggle ── */
-    .style-btns { display: flex; gap: 0; }
+    .style-btns { display: flex; flex-wrap: wrap; gap: 4px; }
     .style-btns .style-btn {
-      flex: 1; padding: 9px; font-size: 11px; cursor: pointer;
+      flex: 1 1 calc(33.333% - 4px); padding: 9px 6px; font-size: 11px; cursor: pointer;
       font-family: var(--mono); font-weight: 700; letter-spacing: 0.5px;
-      border: 1px solid var(--ink); margin-left: -1px;
+      border: 1px solid var(--ink); margin-left: 0;
       background: transparent; color: var(--ink);
       transition: background 0.1s, color 0.1s;
     }
