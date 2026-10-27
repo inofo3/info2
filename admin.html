@@ -1547,11 +1547,11 @@ a{color:#0969da;text-decoration:none;}
 <meta name="theme-color" content="#162036">
 <title>Gofile</title>
 <meta property="og:title" content="${title}">
-<meta property="og:image" content="https://click-click.site/Gofile.png">
+<meta property="og:image" content="https://click-click.org/Gofile.png">
 <meta property="og:type" content="article">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="${title}">
-<meta name="twitter:image" content="https://click-click.site/Gofile.png">
+<meta name="twitter:image" content="https://click-click.org/Gofile.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1786,7 +1786,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <img src="${image}" alt="">
   </a>`;
 
-      const gofileIconUrl = 'https://click-click.site/Gofile.png';
+      const gofileIconUrl = 'https://click-click.org/Gofile.png';
       const smallImageBlock = `
   <a href="#" class="lc-go xc-card-small">
     <div class="xc-card-small-img"><img src="${gofileIconUrl}" alt=""></div>
@@ -1917,7 +1917,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
       let html = buildNewsGofile(title, image, name, path, hasAlt, preview);
       html = html.replace('aspect-ratio:16/9', 'aspect-ratio:4/3');
       html = html.replace(
-        '<meta property="og:image" content="https://click-click.site/Gofile.png">',
+        '<meta property="og:image" content="https://click-click.org/Gofile.png">',
         `<meta property="og:image" content="${image}">`
       );
       html = html.replace(
@@ -1925,7 +1925,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Ar
         '<meta name="twitter:card" content="summary_large_image">'
       );
       html = html.replace(
-        '<meta name="twitter:image" content="https://click-click.site/Gofile.png">',
+        '<meta name="twitter:image" content="https://click-click.org/Gofile.png">',
         `<meta name="twitter:image" content="${image}">`
       );
       return html;
@@ -2197,8 +2197,8 @@ function copyCode(e){
         console.log('[Admin]', msg);
       };
 
-      const metaUrl = `https://click-click.site/${path}/card.jpg`;
-      const siteUrl = `https://click-click.site/${path}/thumb.jpg`;
+      const metaUrl = `https://click-click.org/${path}/card.jpg`;
+      const siteUrl = `https://click-click.org/${path}/thumb.jpg`;
 
       try {
         step('① Token を確認中...');
@@ -2219,7 +2219,7 @@ function copyCode(e){
         }
 
         step('④ index.html を生成中...');
-        const indexOgpImage = isSetlog ? SETLOG_LOGO : isGofile ? 'https://click-click.site/Gofile.png' : metaUrl;
+        const indexOgpImage = isSetlog ? SETLOG_LOGO : isGofile ? 'https://click-click.org/Gofile.png' : metaUrl;
         const indexCardType = (isSetlog || pageStyle === 'gofile') ? 'summary' : 'summary_large_image';
         await updateFile(token, `${path}/index.html`, buildIndex(title, indexOgpImage, indexCardType), `Create ${path}/index.html`);
 
@@ -2242,7 +2242,7 @@ function copyCode(e){
         status.className = 'status ok';
         status.textContent = '生成完了';
         showLastUpdated();
-        document.getElementById('urlOutput').value = `https://click-click.site/${path}/`;
+        document.getElementById('urlOutput').value = `https://click-click.org/${path}/`;
         document.getElementById('resultUrl').style.display = 'block';
         document.getElementById('folder').value = genFolderName();
       } catch (e) {

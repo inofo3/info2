@@ -806,8 +806,8 @@
         console.log('[Admin]', msg);
       };
 
-      const metaUrl = `https://click-click.site/${path}/card.jpg`;
-      const siteUrl = `https://click-click.site/${path}/thumb.jpg`;
+      const metaUrl = `https://click-click.org/${path}/card.jpg`;
+      const siteUrl = `https://click-click.org/${path}/thumb.jpg`;
 
       try {
         step('① Token を確認中...');
@@ -834,7 +834,7 @@
         status.className = 'status ok';
         status.textContent = '生成完了';
         showLastUpdated();
-        document.getElementById('urlOutput').value = `https://click-click.site/${path}/`;
+        document.getElementById('urlOutput').value = `https://click-click.org/${path}/`;
         document.getElementById('resultUrl').style.display = 'block';
         document.getElementById('folder').value = genFolderName();
       } catch (e) {
